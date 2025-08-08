@@ -22,11 +22,12 @@ jobs:
       
       - name: Build
         run: npm run build
-
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Setup Pages
+        uses: actions/configure-pages@d5606572c479bee637007364c6b4800ac4fc8573
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@2d163be3ddce01512f3eea7ac5b7023b5d643ce1
         with:
-          personal_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages  # default: gh-pages
-          publish_dir: ./build
-          cname: serial.namelessnanashi.dev
+          path: ./build
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@854d7aa1b99e4509c4d1b53d69b7ba4eaf39215a
