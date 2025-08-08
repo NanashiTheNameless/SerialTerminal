@@ -9,10 +9,9 @@ This version: [serial.namelessnanashi.dev](https://serial.namelessnanashi.dev)
 ## Installation
 
 ```sh
-git clone https://github.com/spacehuhntech/serialterminal
+git clone https://github.com/NanashiTheNameless/serialterminal
 cd serialterminal
 npm install
-npm run
 npm start
 ```
 
