@@ -18,7 +18,9 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install dependencies
-        run: npm install
+        run: |
+          npm install
+          npx update-browserslist-db@latest -y
 
       - name: Set Version
         run: |
