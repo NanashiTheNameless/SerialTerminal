@@ -19,7 +19,7 @@ const loadSettings = () => {
     baudRate: 115200,
     lineEnding: '\\r\\n',
     echoFlag: true,
-    timeFlag: false,
+    timeFlag: true,
     ctrlFlag: true,
   }
 

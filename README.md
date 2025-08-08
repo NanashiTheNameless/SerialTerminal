@@ -13,6 +13,7 @@ git clone https://github.com/spacehuhntech/serialterminal
 cd serialterminal
 npm install
 npm run
+npm start
 ```
 
 ## License

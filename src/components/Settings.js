@@ -67,7 +67,7 @@ const Settings = (props) => {
         if(!props.openPort) setBaudRate(115200)
         setLineEnding('\\r\\n')
         setEchoFlag(true)
-        setTimeFlag(false)
+        setTimeFlag(true)
         setCtrlFlag(true)
     }
 
