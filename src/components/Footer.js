@@ -14,7 +14,8 @@ const Footer = () => {
                 <Typography
                 align='center'
                 display='block'>
-                Made with ❤️ by <Link href='https://spacehuhn.com' target='_blank' underline='hover' color='inherit'>Spacehuhn</Link>
+                Original Made with ❤️ by <Link href='https://spacehuhn.com' target='_blank' underline='hover' color='inherit'>Spacehuhn</Link>
+                THis version owned by <Link href='https://github.com/NanashiTheNameless/serialterminal' target='_blank' underline='hover' color='inherit'>NanashiTheNameless</Link>
                 </Typography>
             </Box>
 
@@ -24,7 +25,7 @@ const Footer = () => {
                 align='center'
                 display='block'
                 sx={{ color: '#ddd' }}>
-                <Link href='https://github.com/spacehuhntech/serial' target='_blank' underline='hover' color='inherit'>{version.name}</Link>
+                <Link href='https://github.com/NanashiTheNameless/serialterminal' target='_blank' underline='hover' color='inherit'>{version.name}</Link>
             </Typography>
         </Box>
     )
