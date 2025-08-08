@@ -5,7 +5,6 @@ import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import AddBoxIcon from '@mui/icons-material/AddBox'
-import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 
 const Header = () => {
     return (

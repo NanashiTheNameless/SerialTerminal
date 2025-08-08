@@ -72,7 +72,7 @@ const Home = (props) => {
                         <br />
                         <br />
                         Learn more about&nbsp;
-                        <a href='https://developer.mozilla.org/en-US/docs/Web/API/Serial#browser_compatibility' target='blank'>
+                        <a href='https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API#browser_compatibility' target='blank'>
                             browser compatibility
                         </a>
                     </Alert>
