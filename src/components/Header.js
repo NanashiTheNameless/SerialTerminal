@@ -26,23 +26,13 @@ const Header = () => {
                     variant='h6'
                     component='h1'
                     noWrap
-                    sx={{ 
+                    sx={{
                         flexGrow: 1,
                         fontFamily: 'Bungee',
                     }}
                 >
                     &nbsp;&nbsp;Serial Terminal
                 </Typography>
-
-                <Button
-                    //variant='contained'
-                    //color='success'
-                    sx={{ color: '#fff' }}
-                    href='https://huhn.me/'
-                    target='_blank'
-                    endIcon={<OpenInNewIcon />}>
-                    More Tools
-                </Button>
 
                 <Button
                     sx={{ color: '#fff' }}
