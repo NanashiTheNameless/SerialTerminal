@@ -7,42 +7,42 @@ import Button from '@mui/material/Button'
 import AddBoxIcon from '@mui/icons-material/AddBox'
 
 const Header = () => {
-    return (
-        <AppBar
-            position='static'
-            sx={{
-                background: '#2c387e',
-            }}
+  return (
+    <AppBar
+      position='static'
+      sx={{
+        background: '#2c387e'
+      }}
+    >
+      <Toolbar>
+        <img
+          src='logo768.png'
+          alt='Logo'
+          height='30px'
+        />
+
+        <Typography
+          variant='h6'
+          component='h1'
+          noWrap
+          sx={{
+            flexGrow: 1,
+            fontFamily: 'Bungee'
+          }}
         >
-            <Toolbar>
-                <img
-                    src='logo768.png'
-                    alt='Logo'
-                    height='30px'
-                />
+          &nbsp;&nbsp;Serial Terminal
+        </Typography>
 
-                <Typography
-                    variant='h6'
-                    component='h1'
-                    noWrap
-                    sx={{
-                        flexGrow: 1,
-                        fontFamily: 'Bungee',
-                    }}
-                >
-                    &nbsp;&nbsp;Serial Terminal
-                </Typography>
-
-                <Button
-                    sx={{ color: '#fff' }}
-                    target='_blank'
-                    href='#'
-                >
-                    <AddBoxIcon/>
-                </Button>
-            </Toolbar>
-        </AppBar>
-    )
+        <Button
+          sx={{ color: '#fff' }}
+          target='_blank'
+          href='#'
+        >
+          <AddBoxIcon />
+        </Button>
+      </Toolbar>
+    </AppBar>
+  )
 }
 
 export default Header

@@ -15,15 +15,15 @@ import Serial from './modules/Serial'
 import { setCookie, getCookie } from './modules/cookie.js'
 
 const loadSettings = () => {
-  let settings = {
+  const settings = {
     baudRate: 115200,
     lineEnding: '\\r\\n',
     echoFlag: true,
     timeFlag: true,
-    ctrlFlag: true,
+    ctrlFlag: true
   }
 
-  const cookieValue = getCookie('settings' || "{}")
+  const cookieValue = getCookie('settings' || '{}')
 
   try {
     const cookieJSON = JSON.parse(cookieValue)
@@ -37,11 +37,11 @@ const loadSettings = () => {
     console.error(e)
   }
 
-  //saveSettings(settings)
+  // saveSettings(settings)
   return settings
 }
 
-function App() {
+function App () {
   // Serial Module
   const [serial] = React.useState(new Serial())
 
@@ -76,8 +76,8 @@ function App() {
 
   const connect = () => {
     if (!serial.supported()) {
-      //setNoSupportOpen(true)
-      console.error(`Serial not supported`)
+      // setNoSupportOpen(true)
+      console.error('Serial not supported')
       return
     }
 
@@ -94,9 +94,9 @@ function App() {
     serial.onReceive = (value) => {
       setReceived({
         time: new Date(),
-        value: `${value}`,
+        value: `${value}`
       })
-      //console.log(value)
+      // console.log(value)
     }
 
     serial.requestPort().then(res => {
@@ -110,14 +110,14 @@ function App() {
   const disconnect = () => {
     serial.close()
     setConnected(false)
-  }*/
+  } */
 
   const handleSend = (str) => {
     const map = {
-      'None': '',
+      None: '',
       '\\r': '\r',
       '\\n': '\n',
-      '\\r\\n': '\r\n',
+      '\\r\\n': '\r\n'
     }
 
     serial.send(`${str}${map[settings.lineEnding]}`)
@@ -131,30 +131,29 @@ function App() {
     <Box sx={{
       display: 'flex',
       flexDirection: 'column',
-      minHeight: '100vh',
-    }}>
+      minHeight: '100vh'
+    }}
+    >
       {/* Header */}
       <Header />
 
       {/* Homepage or Terminal */}
-      {connected ?
-        <Terminal
-          received={received}
-          send={handleSend}
-          sendRaw={handleRawSend}
-          openSettings={() => setSettingsOpen(true)}
-          echo={settings.echoFlag}
-          time={settings.timeFlag}
-          ctrl={settings.ctrlFlag}
-          clearToast={() => setToast({ open: true, severity: 'info', value: 'History cleared 🧹' })}
-        />
-        :
-        <Home
-          connect={connect}
-          supported={serial.supported}
-          openSettings={() => setSettingsOpen(true)}
-        />
-      }
+      {connected
+        ? <Terminal
+            received={received}
+            send={handleSend}
+            sendRaw={handleRawSend}
+            openSettings={() => setSettingsOpen(true)}
+            echo={settings.echoFlag}
+            time={settings.timeFlag}
+            ctrl={settings.ctrlFlag}
+            clearToast={() => setToast({ open: true, severity: 'info', value: 'History cleared 🧹' })}
+          />
+        : <Home
+            connect={connect}
+            supported={serial.supported}
+            openSettings={() => setSettingsOpen(true)}
+          />}
 
       {/* Settings Window */}
       <Settings
@@ -183,7 +182,7 @@ function App() {
       {/* Footer */}
       <Footer />
     </Box>
-  );
+  )
 }
 
 export default App
