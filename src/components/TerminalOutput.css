@@ -6,7 +6,7 @@
   --terminal-time: #aaa;
   --terminal-user-history: #fbbc05;
   --terminal-user-input: #fff;
-  --terminal-buttons-bg: #20212499
+  --terminal-buttons-bg: #20212499;
   --terminal-buttons-fg: #fff;
   --terminal-border: #777;
 }
@@ -49,8 +49,7 @@
     padding: 0;
     margin: 0;
     display: flex;
-    overflow-x: scroll;
-    overflow-y: scroll;
+    overflow: scroll;
     flex-direction: column-reverse;
     resize: vertical;
 }
@@ -81,7 +80,7 @@
 code {
     margin: .5rem;
     padding: 0;
-    font-family: Roboto Mono, monospace;
+    font-family: "Roboto Mono", monospace;
     font-weight: 300;
     color: var(--terminal-fg);
 }

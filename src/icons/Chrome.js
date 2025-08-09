@@ -1,7 +1,7 @@
 import React from 'react'
 import SvgIcon from '@mui/material/SvgIcon'
 
-export default function ChromeIcon(props) {
+export default function ChromeIcon (props) {
   return (
     <SvgIcon {...props} viewBox='0 0 512.003 512.003'>
       <path fill='#f44336' d='M61.818 89.204c119.008-138.496 339.68-111.168 422.144 50.624-58.08.032-148.992-.032-198.24 0-35.712 0-58.784-.8-83.744 12.352-29.344 15.456-51.52 44.096-59.232 77.76L61.818 89.204z' />

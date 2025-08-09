@@ -1,6 +1,6 @@
 const version = {
-    name: 'dev',
-    domain: 'localhost',
+  name: 'dev',
+  domain: 'localhost'
 }
 
 export default version

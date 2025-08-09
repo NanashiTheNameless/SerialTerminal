@@ -18,83 +18,85 @@ import TerminalIcon from '@mui/icons-material/Terminal'
 import './TerminalOutput.css'
 
 const TerminalOutput = (props) => {
-    // User input history window
-    const [historyOpen, setHistoryOpen] = React.useState(false)
+  // User input history window
+  const [historyOpen, setHistoryOpen] = React.useState(false)
 
-    const handleClear = () => {
-        props.clearToast()
-        props.setHistory([])
-    }
+  const handleClear = () => {
+    props.clearToast()
+    props.setHistory([])
+  }
 
-    return (
-        <pre className='terminalOutput'>
+  return (
+    <pre className='terminalOutput'>
 
-            { /* Buttons */}
-            <ButtonGroup variant='text' className='terminalButtons'>
+      {/* Buttons */}
+      <ButtonGroup variant='text' className='terminalButtons'>
 
-                { /* Clear */}
-                <Button onClick={handleClear}>
-                    <HighlightOffIcon color='inherit' />
-                </Button>
+        {/* Clear */}
+        <Button onClick={handleClear}>
+          <HighlightOffIcon color='inherit' />
+        </Button>
 
-                { /* History */}
-                <Button onClick={() => setHistoryOpen(true)}>
-                    <HistoryIcon color='inherit' />
-                </Button>
+        {/* History */}
+        <Button onClick={() => setHistoryOpen(true)}>
+          <HistoryIcon color='inherit' />
+        </Button>
 
-                { /* Settings */}
-                <Button onClick={props.openSettings}>
-                    <SettingsIcon color='inherit' />
-                </Button>
-            </ButtonGroup>
+        {/* Settings */}
+        <Button onClick={props.openSettings}>
+          <SettingsIcon color='inherit' />
+        </Button>
+      </ButtonGroup>
 
-            { /* Text */}
-            <Box className='codeContainer'>
-                <code>
-                    {props.history.filter(line => (line.type === 'output' || props.echo)).map((line, i) => (
-                        <p key={i}>
-                            <span className='time'>{props.time && `${line.time.toTimeString().substring(0, 8)} `}</span>
-                            <span className={line.type}>{line.value}</span>
-                        </p>
-                    ))}
-                </code>
-            </Box>
+      {/* Text */}
+      <Box className='codeContainer'>
+        <code>
+          {props.history.filter(line => (line.type === 'output' || props.echo)).map((line, i) => (
+            <p key={i}>
+              <span className='time'>{props.time && `${line.time.toTimeString().substring(0, 8)} `}</span>
+              <span className={line.type}>{line.value}</span>
+            </p>
+          ))}
+        </code>
+      </Box>
 
-            { /* History Popup */}
-            <Dialog
-                open={historyOpen}
-                onClose={() => setHistoryOpen(false)}
+      {/* History Popup */}
+      <Dialog
+        open={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+      >
+        <DialogTitle>
+          History
+        </DialogTitle>
+        <List sx={{ minWidth: '10em' }}>
+          {props.history.filter(line => line.type === 'userInput').map((line, i) => (
+            <ListItem
+              button key={i} onClick={() => {
+                props.setInput(line.value)
+                setHistoryOpen(false)
+              }}
             >
-                <DialogTitle>
-                    History
-                </DialogTitle>
-                <List sx={{ minWidth: '10em' }}>
-                    {props.history.filter(line => line.type === 'userInput').map((line, i) => (
-                        <ListItem button key={i} onClick={() => {
-                            props.setInput(line.value)
-                            setHistoryOpen(false)
-                        }}>
-                            <ListItemIcon>
-                                <TerminalIcon />
-                            </ListItemIcon>
-                            <ListItemText primary={line.value} />
-                        </ListItem>
-                    ))}
-                </List>
-            </Dialog>
+              <ListItemIcon>
+                <TerminalIcon />
+              </ListItemIcon>
+              <ListItemText primary={line.value} />
+            </ListItem>
+          ))}
+        </List>
+      </Dialog>
 
-        </pre>
-    )
+    </pre>
+  )
 }
 
 TerminalOutput.propTypes = {
-    history: PropTypes.array,
-    setHistory: PropTypes.func,
-    setInput: PropTypes.func,
-    openSettings: PropTypes.func,
-    echo: PropTypes.bool,
-    time: PropTypes.bool,
-    clearToast: PropTypes.func,
+  history: PropTypes.array,
+  setHistory: PropTypes.func,
+  setInput: PropTypes.func,
+  openSettings: PropTypes.func,
+  echo: PropTypes.bool,
+  time: PropTypes.bool,
+  clearToast: PropTypes.func
 }
 
 export default TerminalOutput

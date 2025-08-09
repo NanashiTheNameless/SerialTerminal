@@ -1,7 +1,7 @@
 import React from 'react'
 import SvgIcon from '@mui/material/SvgIcon'
 
-export default function MapIcon(props) {
+export default function MapIcon (props) {
   return (
     <SvgIcon {...props} viewBox='0 0 1265 1092'>
       <path d='M579 527a72 72 0 11-1 144 72 72 0 011-144m0 161a89 89 0 10-1-178 89 89 0 001 178' />

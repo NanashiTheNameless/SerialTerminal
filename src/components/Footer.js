@@ -16,6 +16,7 @@ const Footer = () => {
           target='_blank'
           underline='hover'
           color='inherit'
+          rel='noreferrer'
         >
           {version.name}
         </Link>
@@ -29,6 +30,7 @@ const Footer = () => {
             target='_blank'
             underline='hover'
             color='inherit'
+            rel='noreferrer'
           >
             NanashiTheNameless
           </Link>
@@ -50,7 +52,13 @@ const Footer = () => {
           }}
         >
           (Original Made by{' '}
-          <Link href='https://spacehuhn.com' target='_blank' underline='hover' color='inherit'>
+          <Link
+            href='https://spacehuhn.com'
+            target='_blank'
+            underline='hover'
+            color='inherit'
+            rel='noreferrer'
+          >
             Spacehuhn
           </Link>
           )
