@@ -16,7 +16,7 @@ const Header = () => {
     >
       <Toolbar>
         <img
-          src='logo768.png'
+          src='logoSerial.svg'
           alt='Logo'
           height='30px'
         />
