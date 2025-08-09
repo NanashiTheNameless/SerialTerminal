@@ -11,8 +11,7 @@ This version: [serial.namelessnanashi.dev](https://serial.namelessnanashi.dev)
 ```sh
 git clone https://github.com/NanashiTheNameless/SerialTerminal
 cd SerialTerminal
-npm install
-npm start
+bash localTest.sh
 ```
 
 ## License
