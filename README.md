@@ -6,11 +6,11 @@ Original: Have a look [terminal.spacehuhn.com](https://terminal.spacehuhn.com)
 
 This version: [serial.namelessnanashi.dev](https://serial.namelessnanashi.dev)
 
-## Installation
+## Local testng/running
 
 ```sh
-git clone https://github.com/NanashiTheNameless/serialterminal
-cd serialterminal
+git clone https://github.com/NanashiTheNameless/SerialTerminal
+cd SerialTerminal
 npm install
 npm start
 ```
