@@ -47,7 +47,7 @@ const Home = (props) => {
             <Alert severity='info' align='left'>
               1. Click on CONNECT!<br />
               2. Plug in your device & select the port!<br />
-              3. Enjoy the Serial Terminal!<br />
+              3. Enjoy having an easy Serial Terminal!<br />
             </Alert>
             </Box>
 
@@ -72,7 +72,7 @@ const Home = (props) => {
             Learn more about&nbsp;
             <a href='https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API#browser_compatibility' target='blank'>
               browser compatibility
-            </a>
+            </a>.
             </Alert>}
       </Grid>
 
