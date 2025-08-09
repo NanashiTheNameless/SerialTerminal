@@ -21,7 +21,7 @@ const ErrorMessage = (props) => {
         </DialogContentText>
 
         <Typography sx={{ mt: 2 }}>
-          Looks like something went wrong 😢<br />
+          Looks like something went wrong!<br />
           We recommend using the latest version of&nbsp;
           <a href='https://www.google.com/chrome/' target='blank'>
             <ChromeIcon fontSize='inherit' /> <b>Chrome</b>

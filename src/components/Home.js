@@ -45,14 +45,14 @@ const Home = (props) => {
             </Box>
 
             <Alert severity='info' align='left'>
-              1. Click on CONNECT<br />
-              2. Plug in your device & select the port<br />
-              3. Enjoy the Serial Terminal 😊<br />
+              1. Click on CONNECT!<br />
+              2. Plug in your device & select the port!<br />
+              3. Enjoy the Serial Terminal!<br />
             </Alert>
             </Box>
 
           : <Alert severity='warning'>
-            <AlertTitle>Your browser doesn&apos;t support Web Serial 😭</AlertTitle>
+            <AlertTitle>Your browser doesn&apos;t support Web Serial!</AlertTitle>
             Try using&nbsp;
             <a href='https://www.google.com/chrome/' target='blank'>
               <ChromeIcon fontSize='inherit' /> <b>Chrome</b>
