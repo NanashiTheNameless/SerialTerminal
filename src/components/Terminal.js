@@ -10,7 +10,7 @@ const Terminal = (props) => {
     // User input from input field
     const [input, setInput] = React.useState('')
 
-    // Currently receieved string
+    // Currently received string
     const received = React.useRef('')
 
     // List of received lines
