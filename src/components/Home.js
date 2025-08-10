@@ -45,7 +45,7 @@ const Home = (props) => {
             </Box>
 
             <Alert severity='info' align='left'>
-              1. Click on CONNECT!<br />
+              1. Click CONNECT!<br />
               2. Plug in your device & select the port!<br />
               3. Enjoy having an easy Serial Terminal!<br />
             </Alert>
