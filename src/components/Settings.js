@@ -68,7 +68,7 @@ const Settings = (props) => {
     setLineEnding('\\r\\n')
     setEchoFlag(true)
     setTimeFlag(true)
-    setCtrlFlag(true)
+    setCtrlFlag(false)
   }
 
   const save = () => {
