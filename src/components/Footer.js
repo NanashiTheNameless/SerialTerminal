@@ -53,7 +53,7 @@ const Footer = () => {
         >
           (Original was made by{' '}
           <Link
-            href='https://spacehuhn.com'
+            href='https://github.com/SpacehuhnTech/serialterminal'
             target='_blank'
             underline='hover'
             color='inherit'
