@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@8edcb1bdb4e267140fa742c62e395cd74f332709
 
       - name: Install dependencies
         run: |
@@ -25,7 +25,7 @@ jobs:
       - name: Set Version
         run: |
           echo ${GITHUB_SHA::8}
-          sed -i 's/dev/dev '"${GITHUB_SHA::8}"'/' src/version.js
+          sed -i 's/dev/GIT-PROD '"${GITHUB_SHA::8}"'/' src/version.js
           sed -i 's/localhost/serial.namelessnanashi.dev/' src/version.js
 
       - name: Build
