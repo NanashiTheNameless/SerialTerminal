@@ -83,12 +83,12 @@ function App () {
 
     serial.onSuccess = () => {
       setConnected(true)
-      setToast({ open: true, severity: 'success', value: 'Connected 🚀' })
+      setToast({ open: true, severity: 'success', value: 'Connected!' })
     }
 
     serial.onFail = () => {
       setConnected(false)
-      setToast({ open: true, severity: 'error', value: 'Lost connection 🙀' })
+      setToast({ open: true, severity: 'error', value: 'Lost connection!' })
     }
 
     serial.onReceive = (value) => {
@@ -147,7 +147,7 @@ function App () {
             echo={settings.echoFlag}
             time={settings.timeFlag}
             ctrl={settings.ctrlFlag}
-            clearToast={() => setToast({ open: true, severity: 'info', value: 'History cleared 🧹' })}
+            clearToast={() => setToast({ open: true, severity: 'info', value: 'History cleared!' })}
           />
         : <Home
             connect={connect}
@@ -162,7 +162,7 @@ function App () {
         settings={settings}
         save={saveSettings}
         openPort={connected}
-        saveToast={() => setToast({ open: true, severity: 'success', value: 'Settings saved ✨' })}
+        saveToast={() => setToast({ open: true, severity: 'success', value: 'Settings saved!' })}
       />
 
       {/* (Dis)connected Toast */}
