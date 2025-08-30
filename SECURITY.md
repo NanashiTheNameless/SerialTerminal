@@ -4,7 +4,7 @@
 
 | Version                | Supported          |
 | -----------------------| ------------------ |
-| Master Branch          | :white_check_mark: |
+| Main Branch            | :white_check_mark: |
 | Other Branch(es)       | :x:                |
 | External forks         | :x:                |
 | Previous versions      | :x:                |
