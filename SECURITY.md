@@ -2,12 +2,12 @@
 
 ## Supported Versions
 
-| Version                | Supported          |
-| -----------------------| ------------------ |
-| Main Branch            | :white_check_mark: |
-| Other Branch(es)       | :x:                |
-| External forks         | :x:                |
-| Previous versions      | :x:                |
+| Version           | Supported          |
+|-------------------|--------------------|
+| Main Branch       | :white_check_mark: |
+| Other Branch(es)  | :x:                |
+| External forks    | :x:                |
+| Previous versions | :x:                |
 
 ## Reporting a Vulnerability
 
