@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-| Version          | Supported         |
+| Version           | Supported          |
 |-------------------|--------------------|
 | Main Branch       | :white_check_mark: |
 | Upstream repo     | :x:                |
