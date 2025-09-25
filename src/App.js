@@ -37,7 +37,6 @@ const loadSettings = () => {
     console.error(e)
   }
 
-  // saveSettings(settings)
   return settings
 }
 
@@ -76,7 +75,6 @@ function App () {
 
   const connect = () => {
     if (!serial.supported()) {
-      // setNoSupportOpen(true)
       console.error('Serial not supported')
       return
     }
@@ -106,11 +104,6 @@ function App () {
       }
     })
   }
-  /*
-  const disconnect = () => {
-    serial.close()
-    setConnected(false)
-  } */
 
   const handleSend = (str) => {
     const map = {
