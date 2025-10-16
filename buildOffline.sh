@@ -6,6 +6,8 @@ npm install
 
 npm run build
 
+cp LICENSE build/LICENSE
+
 sed -i -E 's/(href|src)="\/([^/])/\1=".\/\2/g' build/index.html
 
 sed -i -E "s/name:\s*\"dev\"/name:\"Offline Capable Static Build ${sha}\"/g" build/static/js/main.*.js
