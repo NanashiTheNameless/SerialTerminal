@@ -1,4 +1,5 @@
 name: Publish
+
 on:
   workflow_dispatch:
   push:
@@ -15,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@8edcb1bdb4e267140fa742c62e395cd74f332709
+        uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493
 
       - name: Install dependencies
         run: |
@@ -24,18 +25,110 @@ jobs:
 
       - name: Set Version
         run: |
-          echo ${GITHUB_SHA::8}
-          sed -i 's/dev/Production '"${GITHUB_SHA::8}"'/' src/version.js
+          sha8="${GITHUB_SHA::8}"
+          echo "$sha8"
+          sed -i 's/dev/Production '"${sha8}"'/' src/version.js
           sed -i 's/localhost/serial.namelessnanashi.dev/' src/version.js
 
       - name: Build
         run: npm run build
+
       - name: Setup Pages
         uses: actions/configure-pages@d5606572c479bee637007364c6b4800ac4fc8573
+
       - name: Upload Pages Artifact
-        uses: actions/upload-pages-artifact@2d163be3ddce01512f3eea7ac5b7023b5d643ce1
+        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b
         with:
           path: ./build
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@854d7aa1b99e4509c4d1b53d69b7ba4eaf39215a
+
+  offline-build:
+    needs: Publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493
+
+      - name: Use Node.js
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install deps
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Prepare offline HTML/JS (make paths relative, set name with SHA)
+        shell: bash
+        run: |
+          sha8="${GITHUB_SHA::8}"
+          sed -i -E 's/(href|src)="\/([^/])/\1=".\/\2/g' build/index.html
+          sed -i -E "s/name:\s*\"dev\"/name:\"Offline Capable Static Build ${sha8}\"/g" build/static/js/main.*.js || true
+          mv build "SerialTerminalOffline-${sha8}"
+
+      - name: Zip offline bundle
+        shell: bash
+        run: |
+          sha8="${GITHUB_SHA::8}"
+          zip -r "SerialTerminalOffline-${sha8}.zip" "SerialTerminalOffline-${sha8}"
+
+      - name: Upload artifact (CI artifact)
+        uses: actions/upload-artifact@2848b2cda0e5190984587ec6bb1f36730ca78d50
+        with:
+          name: SerialTerminalOffline-${{ github.sha[0:8] }}.zip
+          path: SerialTerminalOffline-${{ github.sha[0:8] }}.zip
+          if-no-files-found: error
+
+      - name: Create tag Offline-${{ github.sha[0:8] }}
+        uses: NanashiTheNameless/action-create-tag@152c0bfa99b22c1e0f37d9912da4e18a83d01d9c
+        with:
+          tag: Offline-${{ github.sha[0:8] }}
+          message: Offline build for ${{ github.sha }}
+
+      - name: Compute release metadata
+        id: meta
+        shell: bash
+        run: |
+          sha_full="${GITHUB_SHA}"
+          sha8="${GITHUB_SHA::8}"
+          prev_tag="$(git tag --list 'Offline-*' --sort=-creatordate | grep -v "Offline-${sha8}" | head -n1 || true)"
+          if [ -z "$prev_tag" ]; then
+            # Fallback to previous commit short SHA if no prior Offline-* tag exists
+            prev8="$(git rev-parse --short=8 HEAD^ 2>/dev/null || echo "${sha8}")"
+            prev_tag="Offline-${prev8}"
+          fi
+          {
+            echo "sha_full=${sha_full}"
+            echo "sha8=${sha8}"
+            echo "prev_tag=${prev_tag}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create Release and upload assets
+        uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090
+        if: always()
+        with:
+          tag_name: Offline-${{ steps.meta.outputs.sha8 }}
+          name: Offline-${{ steps.meta.outputs.sha8 }}
+          body: |
+            # Offline Capable Static Build based on https://github.com/NanashiTheNameless/SerialTerminal/commit/${{ steps.meta.outputs.sha_full }}
+
+            **Full Changelog**: https://github.com/NanashiTheNameless/SerialTerminal/compare/${{ steps.meta.outputs.prev_tag }}...Offline-${{ steps.meta.outputs.sha8 }}
+
+            ## To use:
+
+            1. Download the [release .zip](<https://github.com/NanashiTheNameless/SerialTerminal/releases/download/Offline-${{ steps.meta.outputs.sha8 }}/SerialTerminalOffline-${{ steps.meta.outputs.sha8 }}.zip>) somewhere memorable.
+            2. Extract the [release .zip](<https://github.com/NanashiTheNameless/SerialTerminal/releases/download/Offline-${{ steps.meta.outputs.sha8 }}/SerialTerminalOffline-${{ steps.meta.outputs.sha8 }}.zip>) somewhere memorable.
+            3. Open index.html in a supported browser.
+          files: |
+            LICENSE
+            SerialTerminalOffline-${{ steps.meta.outputs.sha8 }}.zip
+          fail_on_unmatched_files: true
