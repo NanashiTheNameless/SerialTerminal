@@ -67,32 +67,8 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Prepare offline HTML/JS (make paths relative, set name with SHA)
-        shell: bash
-        run: |
-          sha8="${GITHUB_SHA::8}"
-          sed -i -E 's/(href|src)="\/([^/])/\1=".\/\2/g' build/index.html
-          sed -i -E "s/name:\s*\"dev\"/name:\"Offline Capable Static Build ${sha8}\"/g" build/static/js/main.*.js || true
-          mv build "SerialTerminalOffline-${sha8}"
-
-      - name: Zip offline bundle
-        shell: bash
-        run: |
-          sha8="${GITHUB_SHA::8}"
-          zip -r "SerialTerminalOffline-${sha8}.zip" "SerialTerminalOffline-${sha8}"
-
-      - name: Upload artifact (CI artifact)
-        uses: actions/upload-artifact@2848b2cda0e5190984587ec6bb1f36730ca78d50
-        with:
-          name: SerialTerminalOffline-${{ github.sha[0:8] }}.zip
-          path: SerialTerminalOffline-${{ github.sha[0:8] }}.zip
-          if-no-files-found: error
-
-      - name: Create tag Offline-${{ github.sha[0:8] }}
-        uses: NanashiTheNameless/action-create-tag@152c0bfa99b22c1e0f37d9912da4e18a83d01d9c
-        with:
-          tag: Offline-${{ github.sha[0:8] }}
-          message: Offline build for ${{ github.sha }}
+      - name: Export SHA8
+        run: echo "SHA8=${GITHUB_SHA::8}" >> "$GITHUB_ENV"
 
       - name: Compute release metadata
         id: meta
@@ -111,6 +87,32 @@ jobs:
             echo "sha8=${sha8}"
             echo "prev_tag=${prev_tag}"
           } >> "$GITHUB_OUTPUT"
+
+      - name: Prepare offline HTML/JS (make paths relative, set name with SHA)
+        shell: bash
+        run: |
+
+          sed -i -E 's/(href|src)="\/([^/])/\1=".\/\2/g' build/index.html
+          sed -i -E "s/name:\s*\"dev\"/name:\"Offline Capable Static Build ${{ steps.meta.outputs.sha8 }}\"/g" build/static/js/main.*.js || true
+          mv build "SerialTerminalOffline-${{ steps.meta.outputs.sha8 }}"
+
+      - name: Zip offline bundle
+        shell: bash
+        run: |
+          zip -r "SerialTerminalOffline-${{ steps.meta.outputs.sha8 }}.zip" "SerialTerminalOffline-${{ steps.meta.outputs.sha8 }}"
+
+      - name: Upload artifact (CI artifact)
+        uses: actions/upload-artifact@2848b2cda0e5190984587ec6bb1f36730ca78d50
+        with:
+          name: SerialTerminalOffline-${{ steps.meta.outputs.sha8 }}.zip
+          path: SerialTerminalOffline-${{ steps.meta.outputs.sha8 }}.zip
+          if-no-files-found: error
+
+      - name: Create tag Offline-${{ steps.meta.outputs.sha8 }}
+        uses: NanashiTheNameless/action-create-tag@152c0bfa99b22c1e0f37d9912da4e18a83d01d9c
+        with:
+          tag: Offline-${{ steps.meta.outputs.sha8 }}
+          message: Offline build for ${{ steps.meta.outputs.sha8 }}
 
       - name: Create Release and upload assets
         uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090
