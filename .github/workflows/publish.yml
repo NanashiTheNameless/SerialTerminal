@@ -74,16 +74,11 @@ jobs:
         id: meta
         shell: bash
         run: |
-          sha_full="${GITHUB_SHA}"
           sha8="${GITHUB_SHA::8}"
           prev_tag="$(git tag --list 'Offline-*' --sort=-creatordate | grep -v "Offline-${sha8}" | head -n1 || true)"
-          if [ -z "$prev_tag" ]; then
-            # Fallback to previous commit short SHA if no prior Offline-* tag exists
-            prev8="$(git rev-parse --short=8 HEAD^ 2>/dev/null || echo "${sha8}")"
-            prev_tag="Offline-${prev8}"
-          fi
+          echo "sha8=${sha8}"
+          echo "prev_tag=${prev_tag}"
           {
-            echo "sha_full=${sha_full}"
             echo "sha8=${sha8}"
             echo "prev_tag=${prev_tag}"
           } >> "$GITHUB_OUTPUT"
