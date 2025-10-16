@@ -2,11 +2,13 @@
 
 A nice looking serial terminal in the web. Open-Source, free, and easy to use.
 
-Original: Have a look [terminal.spacehuhn.com](https://terminal.spacehuhn.com)
+This version: [serial.namelessnanashi.dev](<https://serial.namelessnanashi.dev>)
 
-This version: [serial.namelessnanashi.dev](https://serial.namelessnanashi.dev)
+Static Offline Builds are available under [Releases](<https://github.com/NanashiTheNameless/SerialTerminal/releases/latest>).
 
-## Local testng/running
+###### The original: [SpacehuhnTech/serialterminal](<https://github.com/SpacehuhnTech/serialterminal>)
+
+## Local testing/running
 
 ```sh
 git clone https://github.com/NanashiTheNameless/SerialTerminal
@@ -14,6 +16,14 @@ cd SerialTerminal
 bash localTest.sh
 ```
 
+## Local Offline Building
+
+```sh
+git clone https://github.com/NanashiTheNameless/SerialTerminal
+cd SerialTerminal
+bash buildOffline.sh
+```
+
 ## License
 
-This software is licensed under the MIT License. See the [license file](LICENSE) for details.
+This software is licensed under the MIT License. See the [license file](<LICENSE>) for details.

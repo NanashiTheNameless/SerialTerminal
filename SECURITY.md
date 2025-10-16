@@ -12,8 +12,8 @@
 
 ## Reporting a Vulnerability
 
-***Please note: As this is a free tool which offers no income for me I am not offering a Bug-Bounnty of any kind at this time.***
+***Please note: As this is a free tool which offers no income for me I am not offering a Bug-Bounty of any kind at this time.***
 
 Please open an [Issue](<https://github.com/NanashiTheNameless/SerialTerminal/issues>) or start a [PR](<https://github.com/NanashiTheNameless/SerialTerminal/pulls>) if you have identified any issues!
 
-If you wish to disclose any vunerabilities you have found privately you may use [The Security Tab](<https://github.com/NanashiTheNameless/SerialTerminal/security>).
+If you wish to disclose any vulnerabilities you have found privately you may use [The Security Tab](<https://github.com/NanashiTheNameless/SerialTerminal/security>).
