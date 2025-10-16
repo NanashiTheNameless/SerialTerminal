@@ -74,14 +74,23 @@ jobs:
         id: meta
         shell: bash
         run: |
+          set -euo pipefail
+          git fetch --tags --force --prune || true
+          sha_full="${GITHUB_SHA}"
           sha8="${GITHUB_SHA::8}"
-          prev_tag="$(git tag --list 'Offline-*' --sort=-creatordate | grep -v "Offline-${sha8}" | head -n1 || true)"
-          echo "sha8=${sha8}"
-          echo "prev_tag=${prev_tag}"
-          {
-            echo "sha8=${sha8}"
-            echo "prev_tag=${prev_tag}"
-          } >> "$GITHUB_OUTPUT"
+          prev_tag="$(
+            git for-each-ref --format='%(refname:short)' --sort=-creatordate 'refs/tags/Offline-*' \
+            | grep -v -F "Offline-${sha8}" \
+            | head -n1 || true
+          )"
+          if [[ -z "${prev_tag}" ]]; then
+            prev8="$(git rev-parse --short=8 HEAD^ 2>/dev/null || echo "${sha8}")"
+            prev_tag="Offline-${prev8}"
+          fi
+          echo "sha_full=${sha_full}" >> "$GITHUB_OUTPUT"
+          echo "sha8=${sha8}" >> "$GITHUB_OUTPUT"
+          echo "prev_tag=${prev_tag}" >> "$GITHUB_OUTPUT"
+          echo "::notice title=Release meta::sha8=${sha8}, prev_tag=${prev_tag}"
 
       - name: Prepare offline HTML/JS (make paths relative, set name with SHA)
         shell: bash
