@@ -20,7 +20,7 @@ const loadSettings = () => {
     lineEnding: '\\r\\n',
     echoFlag: true,
     timeFlag: true,
-    ctrlFlag: false
+    ctrlFlag: true
   }
 
   const cookieValue = getCookie('settings' || '{}')
