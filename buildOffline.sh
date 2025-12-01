@@ -8,6 +8,8 @@ yarn build
 
 cp -f LICENSE build/LICENSE
 
+cp -f README.md build/README.md
+
 sed -i -E 's/(href|src)="\/([^/])/\1=".\/\2/g' build/index.html
 
 sed -i -E 's/ crossorigin//g' build/index.html
