@@ -28,9 +28,9 @@ jobs:
 
       - name: Set Version
         run: |
-          sha8="${GITHUB_SHA::8}"
-          echo "$sha8"
-          sed -i 's/dev/Production '"${sha8}"'/' src/version.js
+          sha7="${GITHUB_SHA::7}"
+          echo "$sha7"
+          sed -i 's/dev/Production '"${sha7}"'/' src/version.js
           sed -i 's/localhost/serial.namelessnanashi.dev/' src/version.js
 
       - name: Build
@@ -79,20 +79,20 @@ jobs:
           set -euo pipefail
           git fetch --tags --force --prune || true
           sha_full="${GITHUB_SHA}"
-          sha8="${GITHUB_SHA::8}"
+          sha7="${GITHUB_SHA::7}"
           prev_tag="$(
             git for-each-ref --format='%(refname:short)' --sort=-creatordate 'refs/tags/Offline-*' \
-            | grep -v -F "Offline-${sha8}" \
+            | grep -v -F "Offline-${sha7}" \
             | head -n1 || true
           )"
           if [[ -z "${prev_tag}" ]]; then
-            prev8="$(git rev-parse --short=8 HEAD^ 2>/dev/null || echo "${sha8}")"
-            prev_tag="Offline-${prev8}"
+            prev7="$(git rev-parse --short=7 HEAD^ 2>/dev/null || echo "${sha7}")"
+            prev_tag="Offline-${prev7}"
           fi
           echo "sha_full=${sha_full}" >> "$GITHUB_OUTPUT"
-          echo "sha8=${sha8}" >> "$GITHUB_OUTPUT"
+          echo "sha7=${sha7}" >> "$GITHUB_OUTPUT"
           echo "prev_tag=${prev_tag}" >> "$GITHUB_OUTPUT"
-          echo "::notice title=Release meta::sha8=${sha8}, prev_tag=${prev_tag}"
+          echo "::notice title=Release meta::sha7=${sha7}, prev_tag=${prev_tag}"
 
       - name: Prepare offline HTML/JS (make paths relative, set name with SHA)
         shell: bash
@@ -102,44 +102,44 @@ jobs:
           sed -i -E 's/ crossorigin//g' build/index.html
           sed -i -E 's/<script type="module"/<script defer/g' build/index.html
           sed -i -E "s/[\"']\\/([a-zA-Z])/\".\\/\\1/g" build/assets/index-*.js
-          sed -i -E "s/name:\\s*\"dev\"/name:\"Offline Capable Static Build ${{ steps.meta.outputs.sha8 }}\"/g" build/assets/index-*.js
-          mv build "SerialTerminalOffline-${{ steps.meta.outputs.sha8 }}"
+          sed -i -E "s/name:\\s*\"dev\"/name:\"Offline Capable Static Build ${{ steps.meta.outputs.sha7 }}\"/g" build/assets/index-*.js
+          mv build "SerialTerminalOffline-${{ steps.meta.outputs.sha7 }}"
 
       - name: Zip offline bundle
         shell: bash
         run: |
-          zip -r "SerialTerminalOffline-${{ steps.meta.outputs.sha8 }}.zip" "SerialTerminalOffline-${{ steps.meta.outputs.sha8 }}"
+          zip -r "SerialTerminalOffline-${{ steps.meta.outputs.sha7 }}.zip" "SerialTerminalOffline-${{ steps.meta.outputs.sha7 }}"
 
       - name: Upload artifact (CI artifact)
         uses: actions/upload-artifact@2848b2cda0e5190984587ec6bb1f36730ca78d50
         with:
-          name: SerialTerminalOffline-${{ steps.meta.outputs.sha8 }}.zip
-          path: SerialTerminalOffline-${{ steps.meta.outputs.sha8 }}.zip
+          name: SerialTerminalOffline-${{ steps.meta.outputs.sha7 }}.zip
+          path: SerialTerminalOffline-${{ steps.meta.outputs.sha7 }}.zip
           if-no-files-found: error
 
-      - name: Create tag Offline-${{ steps.meta.outputs.sha8 }}
+      - name: Create tag Offline-${{ steps.meta.outputs.sha7 }}
         uses: NanashiTheNameless/action-create-tag@152c0bfa99b22c1e0f37d9912da4e18a83d01d9c
         with:
-          tag: Offline-${{ steps.meta.outputs.sha8 }}
-          message: Offline build for ${{ steps.meta.outputs.sha8 }}
+          tag: Offline-${{ steps.meta.outputs.sha7 }}
+          message: Offline build for ${{ steps.meta.outputs.sha7 }}
 
       - name: Create Release and upload assets
         uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090
         if: always()
         with:
-          tag_name: Offline-${{ steps.meta.outputs.sha8 }}
-          name: Offline-${{ steps.meta.outputs.sha8 }}
+          tag_name: Offline-${{ steps.meta.outputs.sha7 }}
+          name: Offline-${{ steps.meta.outputs.sha7 }}
           body: |
             # Offline Capable Static Build based on https://github.com/NanashiTheNameless/SerialTerminal/commit/${{ steps.meta.outputs.sha_full }}
 
-            **Full Changelog**: https://github.com/NanashiTheNameless/SerialTerminal/compare/${{ steps.meta.outputs.prev_tag }}...Offline-${{ steps.meta.outputs.sha8 }}
+            **Full Changelog**: https://github.com/NanashiTheNameless/SerialTerminal/compare/${{ steps.meta.outputs.prev_tag }}...Offline-${{ steps.meta.outputs.sha7 }}
 
             ## To use:
 
-            1. Download the [release .zip](<https://github.com/NanashiTheNameless/SerialTerminal/releases/download/Offline-${{ steps.meta.outputs.sha8 }}/SerialTerminalOffline-${{ steps.meta.outputs.sha8 }}.zip>) somewhere memorable.
-            2. Extract the [release .zip](<https://github.com/NanashiTheNameless/SerialTerminal/releases/download/Offline-${{ steps.meta.outputs.sha8 }}/SerialTerminalOffline-${{ steps.meta.outputs.sha8 }}.zip>) somewhere memorable.
+            1. Download the [release .zip](<https://github.com/NanashiTheNameless/SerialTerminal/releases/download/Offline-${{ steps.meta.outputs.sha7 }}/SerialTerminalOffline-${{ steps.meta.outputs.sha7 }}.zip>) somewhere memorable.
+            2. Extract the [release .zip](<https://github.com/NanashiTheNameless/SerialTerminal/releases/download/Offline-${{ steps.meta.outputs.sha7 }}/SerialTerminalOffline-${{ steps.meta.outputs.sha7 }}.zip>) somewhere memorable.
             3. Open index.html in a supported browser.
           files: |
             LICENSE
-            SerialTerminalOffline-${{ steps.meta.outputs.sha8 }}.zip
+            SerialTerminalOffline-${{ steps.meta.outputs.sha7 }}.zip
           fail_on_unmatched_files: true

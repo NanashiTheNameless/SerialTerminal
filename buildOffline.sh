@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-sha="$(git rev-parse --short=8 HEAD)"
+sha7="$(git rev-parse --short=7 HEAD)"
 
 yarn install
 
@@ -16,8 +16,8 @@ sed -i -E 's/<script type="module"/<script defer/g' build/index.html
 
 sed -i -E "s/[\"']\\/([a-zA-Z])/\".\\/\\1/g" build/assets/index-*.js
 
-sed -i -E "s/name:\\s*\"dev\"/name:\"Offline Capable Static Build ${sha}\"/g" build/assets/index-*.js
+sed -i -E "s/name:\\s*\"dev\"/name:\"Offline Capable Static Build ${sha7}\"/g" build/assets/index-*.js
 
-mv build SerialTerminalOffline-"${sha}"
+mv build SerialTerminalOffline-"${sha7}"
 
-zip -r "SerialTerminalOffline-${sha}.zip" "SerialTerminalOffline-${sha}"
+zip -r "SerialTerminalOffline-${sha7}.zip" "SerialTerminalOffline-${sha7}"
