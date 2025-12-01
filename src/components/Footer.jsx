@@ -24,7 +24,7 @@ const Footer = () => {
 
       <Box sx={{ mx: 'auto', mt: 0 }}>
         <Typography align='center' display='block' sx={{ mb: 0.25 }}>
-          This version is owned by{' '}
+          This version is owned and maintained by{' '}
           <Link
             href='https://github.com/NanashiTheNameless/SerialTerminal'
             target='_blank'
@@ -51,7 +51,7 @@ const Footer = () => {
             letterSpacing: 0
           }}
         >
-          (Original was made by{' '}
+          (The original was made by{' '}
           <Link
             href='https://github.com/SpacehuhnTech/serialterminal'
             target='_blank'

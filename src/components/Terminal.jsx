@@ -70,7 +70,7 @@ const Terminal = (props) => {
   }
 
   return (
-    <Grid container spacing={1} sx={{ p: 0.75 }} onKeyDown={handleKeyDown}>
+    <Grid container spacing={1} sx={{ p: 0.75, flexGrow: 1, minHeight: 0, overflow: 'hidden' }} onKeyDown={handleKeyDown}>
       {/* Terminal Window */}
       <Grid item xs={12}>
         <TerminalOutput

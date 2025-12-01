@@ -13,7 +13,13 @@ root.render(
         body: {
           margin: 0,
           backgroundColor: 'var(--terminal-bg)',
-          color: 'var(--terminal-fg)'
+          color: 'var(--terminal-fg)',
+          overflow: 'hidden'
+        },
+
+        'html, body, #root': {
+          height: '100%',
+          overflow: 'hidden'
         },
 
         '.MuiAppBar-root, .MuiPaper-root.MuiAppBar-root': {
