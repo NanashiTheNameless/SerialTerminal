@@ -14,12 +14,38 @@ const Footer = () => {
         <Link
           href='https://github.com/NanashiTheNameless/SerialTerminal'
           target='_blank'
-          underline='hover'
+          underline='always'
           color='inherit'
           rel='noreferrer'
+          sx={{ fontWeight: 'bold' }}
         >
           {version.name}
         </Link>
+      </Typography>
+
+      <Typography
+        align='center'
+        display='block'
+        variant='caption'
+        sx={{
+          color: '#ddd',
+          mt: 0.5,
+          mb: 0,
+          fontSize: '0.75rem'
+        }}
+      >
+        Download an offline capable version from the{' '}
+        <Link
+          href='https://github.com/NanashiTheNameless/SerialTerminal/releases/latest'
+          target='_blank'
+          underline='always'
+          color='inherit'
+          rel='noreferrer'
+          sx={{ fontWeight: 'bold' }}
+        >
+          latest release on GitHub
+        </Link>
+        .
       </Typography>
 
       <Box sx={{ mx: 'auto', mt: 0 }}>
@@ -28,9 +54,10 @@ const Footer = () => {
           <Link
             href='https://github.com/NanashiTheNameless/SerialTerminal'
             target='_blank'
-            underline='hover'
+            underline='always'
             color='inherit'
             rel='noreferrer'
+            sx={{ fontWeight: 'bold' }}
           >
             NanashiTheNameless
           </Link>
@@ -55,9 +82,10 @@ const Footer = () => {
           <Link
             href='https://github.com/SpacehuhnTech/serialterminal'
             target='_blank'
-            underline='hover'
+            underline='always'
             color='inherit'
             rel='noreferrer'
+            sx={{ fontWeight: 'bold' }}
           >
             Spacehuhn
           </Link>

@@ -27,7 +27,8 @@ const Header = () => {
           noWrap
           sx={{
             flexGrow: 1,
-            fontFamily: 'Bungee'
+            fontFamily: '"0xProto"',
+            fontWeight: 700
           }}
         >
           &nbsp;&nbsp;Serial Terminal

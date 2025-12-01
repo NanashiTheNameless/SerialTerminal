@@ -14,7 +14,8 @@ root.render(
           margin: 0,
           backgroundColor: 'var(--terminal-bg)',
           color: 'var(--terminal-fg)',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          fontFamily: '"0xProto", sans-serif'
         },
 
         'html, body, #root': {
@@ -44,8 +45,28 @@ root.render(
           backgroundColor: 'var(--terminal-fg) !important'
         },
 
-        '.MuiInputLabel-root, .MuiOutlinedInput-root, .MuiDialog-paper, .MuiDialogContentText-root, .MuiSelect-root, .MuiFilledInput-root': {
-          color: 'var(--terminal-fg) !important'
+        '.MuiInputLabel-root, .MuiDialog-paper, .MuiDialogContentText-root': {
+          color: 'var(--terminal-fg) !important',
+          fontFamily: '"0xProto", sans-serif !important'
+        },
+
+        '.MuiOutlinedInput-root, .MuiSelect-root, .MuiFilledInput-root, .MuiInputBase-root, .MuiInputBase-input': {
+          color: 'var(--terminal-fg) !important',
+          fontFamily: '"0xProto", monospace !important',
+          fontVariantLigatures: 'normal',
+          fontFeatureSettings: '"liga" 1, "calt" 1'
+        },
+
+        '.MuiDialogTitle-root, .MuiDialogContentText-root, .MuiFormControlLabel-label, .MuiMenuItem-root, .MuiButton-root': {
+          fontFamily: '"0xProto", sans-serif !important'
+        },
+
+        '.MuiTypography-root, .MuiLink-root, .MuiBox-root, .MuiButtonBase-root': {
+          fontFamily: '"0xProto", sans-serif !important'
+        },
+
+        '.MuiAlert-root, .MuiPaper-root': {
+          fontFamily: '"0xProto", sans-serif !important'
         },
 
         '.MuiOutlinedInput-root, .MuiDialog-paper, .MuiFilledInput-root': {

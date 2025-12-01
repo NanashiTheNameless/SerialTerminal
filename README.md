@@ -27,3 +27,9 @@ bash buildOffline.sh
 ## License
 
 This software is licensed under the MIT License. See the [license file](<LICENSE>) for details.
+
+### Font License
+
+This project uses the amazing [0xProto](<https://github.com/0xType/0xProto>) font family, which is licensed under the [SIL Open Font License, Version 1.1](public/fonts/0xProto/LICENSE).
+
+Copyright (c) 2024, 0xType Project Authors (<https://github.com/0xType>)
