@@ -49,8 +49,7 @@
     padding: 0;
     margin: 0;
     display: flex;
-    overflow-y: scroll;
-    overflow-x: auto;
+    overflow: auto scroll;
     flex-direction: column-reverse;
     resize: vertical;
 }
