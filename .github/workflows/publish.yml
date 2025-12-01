@@ -18,10 +18,13 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493
 
+      - name: Enable Corepack
+        run: corepack enable
+
       - name: Install dependencies
         run: |
-          npm install
-          npx update-browserslist-db@latest -y
+          yarn install
+          yarn dlx update-browserslist-db@latest -y
 
       - name: Set Version
         run: |
@@ -31,7 +34,7 @@ jobs:
           sed -i 's/localhost/serial.namelessnanashi.dev/' src/version.js
 
       - name: Build
-        run: npm run build
+        run: yarn build
 
       - name: Setup Pages
         uses: actions/configure-pages@d5606572c479bee637007364c6b4800ac4fc8573
@@ -55,17 +58,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493
 
+      - name: Enable Corepack
+        run: corepack enable
+
       - name: Use Node.js
         uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903
         with:
           node-version: 20
-          cache: npm
 
       - name: Install deps
-        run: npm install
+        run: yarn install
 
       - name: Build
-        run: npm run build
+        run: yarn build
 
       - name: Compute release metadata
         id: meta

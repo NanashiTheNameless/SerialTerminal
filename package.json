@@ -1,7 +1,10 @@
 {
-  "name": "serial",
+  "name": "serialterminal",
   "version": "0.1.0",
   "private": true,
+  "resolutions": {
+    "express": "^4.22.0"
+  },
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
@@ -38,5 +41,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "packageManager": "yarn@4.12.0"
 }

@@ -2,9 +2,9 @@
 
 sha="$(git rev-parse --short=8 HEAD)"
 
-npm install
+yarn install
 
-npm run build
+yarn build
 
 cp LICENSE build/LICENSE
 
