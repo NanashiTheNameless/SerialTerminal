@@ -18,23 +18,23 @@ export default defineConfig({
         inlineDynamicImports: true,
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]',
-      },
-    },
+        assetFileNames: 'assets/[name]-[hash].[ext]'
+      }
+    }
   },
   resolve: {
     alias: {
-      '/src': resolve(__dirname, 'src'),
-    },
+      '/src': resolve(__dirname, 'src')
+    }
   },
   server: {
     port: 3000,
     open: true,
     fs: {
-      allow: [resolve(__dirname)],
-    },
+      allow: [resolve(__dirname)]
+    }
   },
   preview: {
-    port: 3000,
-  },
+    port: 3000
+  }
 })
