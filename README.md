@@ -1,4 +1,4 @@
-# Web Serial Terminal [![Ask DeepWiki](https://deepwiki.com/badge.svg)](<https://deepwiki.com/NanashiTheNameless/SerialTerminal>)
+# Web Serial Terminal [![Ask DeepWiki](<https://deepwiki.com/badge.svg>)](<https://deepwiki.com/NanashiTheNameless/SerialTerminal>)
 
 A nice looking serial terminal in the web. Open-Source, free, and easy to use.
 
