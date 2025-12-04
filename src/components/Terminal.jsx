@@ -6,6 +6,7 @@ import Grid from '@mui/material/Grid'
 import TerminalOutput from './TerminalOutput'
 import TerminalInput from './TerminalInput'
 
+// Main terminal interface for serial communication
 const Terminal = (props) => {
   // User input from input field
   const [input, setInput] = React.useState('')

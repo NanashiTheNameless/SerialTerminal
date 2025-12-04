@@ -1,4 +1,6 @@
+// Web Serial API interface for device communication
 export default class Serial {
+  // Callback hooks for connection lifecycle and data events
   onSuccess = () => { }
   onFail = () => { }
   onReceive = () => { }
@@ -18,6 +20,7 @@ export default class Serial {
     this.baudRate = 115200
   }
 
+  // Check if browser supports Web Serial API
   supported () {
     return ('serial' in navigator)
   }

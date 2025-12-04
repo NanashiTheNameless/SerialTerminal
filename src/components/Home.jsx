@@ -18,6 +18,7 @@ const gridCSS = {
   minHeight: 0
 }
 
+// Landing page displayed when not connected to a device
 const Home = (props) => {
   return (
     <Grid

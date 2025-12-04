@@ -1,3 +1,6 @@
+// Browser cookie utilities for persisting user preferences
+
+// Store a cookie with 365-day expiration
 function setCookie (cname, cvalue) {
   const days = 365
   const d = new Date()
@@ -6,6 +9,7 @@ function setCookie (cname, cvalue) {
   document.cookie = `${cname}=${cvalue};expires=${expires};path=/;SameSite=Strict;`
 }
 
+// Retrieve a cookie value by name
 function getCookie (cname) {
   const name = `${cname}=`
   const decodedCookie = decodeURIComponent(document.cookie)

@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography'
 
 import version from '../version.js'
 
+// Application footer with version and attribution information
 const Footer = () => {
   return (
     <Box sx={{ marginTop: 'auto' }}>

@@ -12,6 +12,7 @@ const useFocus = () => {
   return [htmlElRef, setFocus]
 }
 
+// Input field and send button for terminal commands
 const TerminalInput = (props) => {
   const [inputFocus, setInputFocus] = useFocus()
 

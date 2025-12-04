@@ -1,9 +1,11 @@
 import React from 'react'
 
+// Material-UI components
 import Box from '@mui/material/Box'
 import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
 
+// Page components
 import Header from './components/Header'
 import Footer from './components/Footer'
 import Home from './components/Home'
@@ -11,9 +13,11 @@ import Terminal from './components/Terminal'
 import Settings from './components/Settings'
 import ErrorMessage from './components/ErrorMessage'
 
+// Modules
 import Serial from './modules/Serial'
 import { setCookie, getCookie } from './modules/cookie.js'
 
+// Load persisted settings from browser cookies with defaults
 const loadSettings = () => {
   const settings = {
     baudRate: 115200,

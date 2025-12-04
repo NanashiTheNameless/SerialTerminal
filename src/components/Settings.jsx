@@ -37,6 +37,7 @@ const formElementCSS = {
   minWidth: '10em'
 }
 
+// Settings dialog for configuring serial connection parameters
 const Settings = (props) => {
   const [baudRate, setBaudRate] = React.useState(props.settings.baudRate)
   const [lineEnding, setLineEnding] = React.useState(props.settings.lineEnding)

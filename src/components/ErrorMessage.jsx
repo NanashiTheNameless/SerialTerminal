@@ -10,6 +10,7 @@ import DialogTitle from '@mui/material/DialogTitle'
 import Typography from '@mui/material/Typography'
 import UngoogledChromiumIcon from '../icons/UngoogledChromium'
 
+// Error dialog for displaying connection failures
 const ErrorMessage = (props) => {
   return (
     <Dialog open={props.open} onClose={props.close}>

@@ -17,6 +17,7 @@ import TerminalIcon from '@mui/icons-material/Terminal'
 
 import './TerminalOutput.css'
 
+// Display area for terminal output and command history
 const TerminalOutput = (props) => {
   // User input history window
   const [historyOpen, setHistoryOpen] = React.useState(false)
