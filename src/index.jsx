@@ -69,6 +69,15 @@ root.render(
           fontFamily: '"0xProto", sans-serif !important'
         },
 
+        '.MuiList-root, .MuiPopover-root .MuiPaper-root, .MuiMenu-paper': {
+          backgroundColor: 'var(--terminal-bg) !important',
+          color: 'var(--terminal-fg) !important'
+        },
+
+        '.MuiMenuItem-root:hover': {
+          backgroundColor: 'var(--terminal-border) !important'
+        },
+
         '.MuiOutlinedInput-root, .MuiDialog-paper, .MuiFilledInput-root': {
           backgroundColor: 'var(--terminal-bg) !important'
         },
