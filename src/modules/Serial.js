@@ -25,28 +25,12 @@ export default class Serial {
   async requestPort () {
     await this.close()
 
-    /*
-        navigator.serial.addEventListener('connect', (e) => {
-            this.port = e.port || e.target
-            this.openPort()
-        })
-
-        navigator.serial.addEventListener('disconnect', () => {
-            console.warn(`[SERIAL] Disconnected!`)
-            this.onFail()
-        })
-        */
-
-    // Filter on devices with the Arduino Uno USB Vendor/Product IDs
     const filters = [
-      // { usbVendorId: 0x2341, usbProductId: 0x0043 },
-      // { usbVendorId: 0x2341, usbProductId: 0x0001 }
+      // No filters applied
     ]
 
-    // Prompt user to select a serial port
     try {
       this.port = await navigator.serial.requestPort({ filters })
-      // await port.open({ baudRate: 115200 })
     } catch (e) {
       console.error(e)
       return `${e}`
@@ -92,14 +76,11 @@ export default class Serial {
         while (true && this.open) {
           const { value, done } = await this.reader.read()
           if (done) {
-            // |reader| has been canceled.
             break
           }
           if (value) this.onReceive(value)
         }
       } catch (error) {
-        // Handle |error|...
-        // console.error(error)
         this.onFail()
       } finally {
         await this.close()
@@ -115,14 +96,6 @@ export default class Serial {
 
     writer.write(encoder.encode(value))
     writer.releaseLock()
-    /* sendMessage(value, this.outputStream)
-
-        const textEncoder = new window.TextEncoderStream()
-        textEncoder.readable.pipeTo(this.outputStream)
-        const writer = textEncoder.writable.getWriter()
-
-        await writer.write(value)
-        writer.releaseLock() */
   }
 
   async sendByte (value) {

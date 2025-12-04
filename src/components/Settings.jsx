@@ -85,7 +85,7 @@ const Settings = (props) => {
           Serial Connection
         </DialogContentText>
 
-        <FormControl variant='filled' fullWidth sx={formElementCSS}>
+        <FormControl fullWidth sx={formElementCSS}>
           <InputLabel>Baud Rate {props.openPort && '(Requires Reconnect)'}</InputLabel>
           <Select
             value={baudRate}
@@ -99,7 +99,7 @@ const Settings = (props) => {
           </Select>
         </FormControl>
 
-        <FormControl variant='filled' fullWidth sx={formElementCSS}>
+        <FormControl fullWidth sx={formElementCSS}>
           <InputLabel>Line Ending</InputLabel>
           <Select
             value={lineEnding}

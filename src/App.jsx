@@ -102,7 +102,6 @@ function App () {
         time: new Date(),
         value: `${value}`
       })
-      // console.log(value)
     }
 
     serial.requestPort().then(res => {
