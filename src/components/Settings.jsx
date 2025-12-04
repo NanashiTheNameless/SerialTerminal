@@ -15,13 +15,18 @@ import FormGroup from '@mui/material/FormGroup'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Checkbox from '@mui/material/Checkbox'
 
+// Standard baud rates for serial communication
 const baudrates = [
-  50, 75, 110, 134, 150, 200,
-  300, 600, 1200, 1800, 2400, 4800,
-  74880, 9600, 19200, 28800, 38400,
-  57600, 76800, 100000, 115200, 230400,
-  250000, 460800, 500000, 576000,
-  748800, 921600, 1000000, 2000000
+  // Legacy rates (< 1200)
+  50, 75, 110, 134, 150, 200, 300, 600,
+  // Low speed (1200-9600)
+  1200, 1800, 2400, 4800, 7200, 9600,
+  // Medium speed (14400-76800)
+  14400, 19200, 28800, 31250, 38400, 56000, 57600, 72000, 74880, 76800,
+  // High speed (100000-921600)
+  100000, 115200, 125000, 128000, 153600, 230400, 250000, 256000, 307200, 460800, 500000, 576000, 614400, 748800, 921600,
+  // Very high speed (1M+)
+  1000000, 1500000, 2000000, 3000000, 4000000
 ];
 
 
