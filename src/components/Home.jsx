@@ -10,6 +10,7 @@ import AlertTitle from '@mui/material/AlertTitle'
 import ChromeIcon from '../icons/Chrome'
 import EdgeIcon from '../icons/Edge'
 import OperaIcon from '../icons/Opera'
+import UngoogledChromiumIcon from '../icons/UngoogledChromium'
 import SettingsIcon from '@mui/icons-material/Settings'
 
 const gridCSS = {
@@ -52,8 +53,12 @@ const Home = (props) => {
             </Box>
 
           : <Alert severity='warning'>
-            <AlertTitle>Your browser doesn&apos;t support Web Serial!</AlertTitle>
+            <AlertTitle>Your browser doesn&apos;t support the WebSerial API!</AlertTitle>
             Try using&nbsp;
+            <a href='https://github.com/ungoogled-software/ungoogled-chromium?tab=readme-ov-file#automated-or-maintained-builds' target='blank'>
+              <UngoogledChromiumIcon fontSize='inherit' /> <b>ungoogled chromium</b>
+            </a>
+            ,&nbsp;
             <a href='https://www.google.com/chrome/' target='blank'>
               <ChromeIcon fontSize='inherit' /> <b>Chrome</b>
             </a>
@@ -64,10 +69,7 @@ const Home = (props) => {
             , or&nbsp;
             <a href='https://www.opera.com/' target='blank'>
               <OperaIcon fontSize='inherit' /> <b>Opera</b>
-            </a>
-            <br />
-            (IOS & Android browsers are not supported)
-            <br />
+            </a>.
             <br />
             Learn more about&nbsp;
             <a href='https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API#browser_compatibility' target='blank'>

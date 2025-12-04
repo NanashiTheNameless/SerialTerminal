@@ -8,7 +8,7 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 import Typography from '@mui/material/Typography'
-import ChromeIcon from '../icons/Chrome'
+import UngoogledChromiumIcon from '../icons/UngoogledChromium'
 
 const ErrorMessage = (props) => {
   return (
@@ -23,8 +23,8 @@ const ErrorMessage = (props) => {
         <Typography sx={{ mt: 2 }}>
           Looks like something went wrong!<br />
           We recommend using the latest version of&nbsp;
-          <a href='https://www.google.com/chrome/' target='blank'>
-            <ChromeIcon fontSize='inherit' /> <b>Chrome</b>
+          <a href='https://github.com/ungoogled-software/ungoogled-chromium?tab=readme-ov-file#automated-or-maintained-builds' target='blank'>
+            <UngoogledChromiumIcon fontSize='inherit' /> <b>ungoogled chromium</b>
           </a> for desktop.
         </Typography>
       </DialogContent>

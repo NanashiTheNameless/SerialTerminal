@@ -87,9 +87,21 @@ code {
     font-feature-settings: "liga" 1, "calt" 1;
 }
 
+code > p {
+    margin: 5px;
+    padding: 0;
+}
+
+code > p:has(span.userInput) {
+    border-bottom: 1px solid var(--terminal-user-history);
+    padding-bottom: 0.25em;
+}
+
 span.time {
     font-weight: 300;
     color: var(--terminal-time);
+    display: inline;
+    margin-right: 0.5em;
 }
 
 span.output {
@@ -99,7 +111,6 @@ span.output {
 span.userInput {
     color: var(--terminal-user-history);
     font-weight: 700;
-    display: inline-block;
-    width: 100%;
-    border-bottom: 1px solid;
+    display: inline;
+    border-bottom: none;
 }

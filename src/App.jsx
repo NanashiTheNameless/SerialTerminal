@@ -63,6 +63,14 @@ function App () {
   // Settings
   const [settings, setSettings] = React.useState(loadSettings())
 
+  // Mobile detection
+  const [isMobile, setIsMobile] = React.useState(false)
+
+  React.useEffect(() => {
+    const ua = navigator.userAgent || navigator.vendor || (window.opera ? window.opera.toString() : '')
+    setIsMobile(/android|iphone|ipad|ipod|mobile|tablet/i.test(ua))
+  }, [])
+
   const saveSettings = (newSettings) => {
     serial.setBaudRate(newSettings.baudRate)
     setSettings(newSettings)
@@ -132,22 +140,45 @@ function App () {
       <Header />
 
       {/* Homepage or Terminal */}
-      {connected
-        ? <Terminal
-            received={received}
-            send={handleSend}
-            sendRaw={handleRawSend}
-            openSettings={() => setSettingsOpen(true)}
-            echo={settings.echoFlag}
-            time={settings.timeFlag}
-            ctrl={settings.ctrlFlag}
-            clearToast={() => setToast({ open: true, severity: 'info', value: 'History cleared!' })}
-          />
-        : <Home
-            connect={connect}
-            supported={serial.supported}
-            openSettings={() => setSettingsOpen(true)}
-          />}
+      {isMobile
+        ? <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2 }}>
+            <Alert severity='warning' sx={{ maxWidth: 575 }}>
+              <Box component='div' sx={{ fontWeight: 600, mb: 0.5 }}>
+                This tool is not supported on mobile devices.
+              </Box>
+              <Box component='div' sx={{ mb: 0.5 }}>
+                This is a technical limitation of the{' '}
+                <a href='https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API' target='blank'>
+                  WebSerial API
+                </a>.
+              </Box>
+              <Box component='div' sx={{ mb: 0.5 }}>
+                Please use a desktop browser that supports the WebSerial API.
+              </Box>
+              <Box component='div'>
+                Learn more about{' '}
+                <a href='https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API#browser_compatibility' target='blank'>
+                  browser compatibility
+                </a>.
+              </Box>
+            </Alert>
+          </Box>
+        : connected
+            ? <Terminal
+                received={received}
+                send={handleSend}
+                sendRaw={handleRawSend}
+                openSettings={() => setSettingsOpen(true)}
+                echo={settings.echoFlag}
+                time={settings.timeFlag}
+                ctrl={settings.ctrlFlag}
+                clearToast={() => setToast({ open: true, severity: 'info', value: 'History cleared!' })}
+              />
+            : <Home
+                connect={connect}
+                supported={serial.supported}
+                openSettings={() => setSettingsOpen(true)}
+              />}
 
       {/* Settings Window */}
       <Settings
