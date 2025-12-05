@@ -1,0 +1,4 @@
+ignore:
+  - package:
+      name: stdlib
+      type: go-module

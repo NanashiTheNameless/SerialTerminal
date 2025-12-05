@@ -89,9 +89,11 @@ jobs:
             prev7="$(git rev-parse --short=7 HEAD^ 2>/dev/null || echo "${sha7}")"
             prev_tag="Offline-${prev7}"
           fi
-          echo "sha_full=${sha_full}" >> "$GITHUB_OUTPUT"
-          echo "sha7=${sha7}" >> "$GITHUB_OUTPUT"
-          echo "prev_tag=${prev_tag}" >> "$GITHUB_OUTPUT"
+          {
+            echo "sha_full=${sha_full}"
+            echo "sha7=${sha7}"
+            echo "prev_tag=${prev_tag}"
+          } >> "$GITHUB_OUTPUT"
           echo "::notice title=Release meta::sha7=${sha7}, prev_tag=${prev_tag}"
 
       - name: Prepare offline HTML/JS (make paths relative, set name with SHA)

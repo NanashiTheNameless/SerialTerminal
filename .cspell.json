@@ -6,11 +6,32 @@
     "**/.pnpm-lock.json",
     ".vscode",
     "megalinter",
+    "megalinter-reports",
     "package-lock.json",
     "report"
   ],
   "language": "en",
   "noConfigSearch": true,
-  "words": ["megalinter", "oxsecurity"],
+  "words": [
+    "browserslist",
+    "creatordate",
+    "Kremser",
+    "megalinter",
+    "Namelesss",
+    "namelessnanashi",
+    "Nanashi",
+    "oxsecurity",
+    "pipefail",
+    "Serail",
+    "serialterminal",
+    "Shellcheck",
+    "shellcheck",
+    "softprops",
+    "Spacehuhn",
+    "stefanzweifel",
+    "stdlib",
+    "venv",
+    "vite"
+  ],
   "version": "0.2"
 }

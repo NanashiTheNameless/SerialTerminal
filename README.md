@@ -6,7 +6,7 @@ This version: [serial.namelessnanashi.dev](<https://serial.namelessnanashi.dev>)
 
 Static Offline Builds are available under [Releases](<https://github.com/NanashiTheNameless/SerialTerminal/releases/latest>).
 
-###### The original is: [SpacehuhnTech/serialterminal](<https://github.com/SpacehuhnTech/serialterminal>)
+## The original is: [SpacehuhnTech/serialterminal](<https://github.com/SpacehuhnTech/serialterminal>)
 
 ## Local testing/running
 

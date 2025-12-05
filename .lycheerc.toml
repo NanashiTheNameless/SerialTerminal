@@ -1,0 +1,20 @@
+# Lychee link checker configuration
+# Exclude URLs that contain template variables or are expected to be invalid during static checks
+
+# Exclude patterns for URLs with variables
+exclude = [
+  # GitHub workflow template variables
+  '.*\$\{.*\}.*',
+  '.*\$\%7B.*\%7D.*',
+  # URLs ending with just a dollar sign (template variables)
+  '.*\/\$$',
+  # Relative paths that lychee incorrectly tries to validate
+  '^\/',
+]
+
+# Exclude files/paths from being checked
+exclude_path = [
+  'node_modules',
+  'megalinter-reports',
+  '.git',
+]
