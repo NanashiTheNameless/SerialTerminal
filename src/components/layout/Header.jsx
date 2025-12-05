@@ -45,6 +45,7 @@ const Header = ({ isConnected = false, onDisconnect }) => {
               sx={{ color: '#fff', mr: 1 }}
             >
               <CancelIcon />
+              <p class="button-label">Disconnect</p>
             </Button>
           </Tooltip>
         )}
@@ -56,6 +57,7 @@ const Header = ({ isConnected = false, onDisconnect }) => {
             href='#'
           >
             <AddCircleIcon />
+            <p class="button-label">New terminal</p>
           </Button>
         </Tooltip>
       </Toolbar>
