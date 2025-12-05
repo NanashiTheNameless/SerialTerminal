@@ -25,10 +25,12 @@ Static Offline Builds are available under [Releases](<https://github.com/Nanashi
 
 This tool requires the [Web Serial API](<https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API>), which is supported in:
 
+- Ungoogled Chromium 89+
 - Chrome/Chromium 89+
 - Edge 89+
 - Opera 75+
-- Ungoogled Chromium
+
+### not supported on:
 - Firefox (not yet supported)
 - Safari (not supported)
 - Mobile browsers (not supported due to API limitations)
