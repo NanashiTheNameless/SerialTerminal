@@ -49,13 +49,15 @@ const Header = ({ isConnected = false, onDisconnect }) => {
           </Tooltip>
         )}
 
-        <Button
-          sx={{ color: '#fff' }}
-          target='_blank'
-          href='#'
-        >
-          <AddCircleIcon />
-        </Button>
+        <Tooltip title='Launch another terminal window'>
+          <Button
+            sx={{ color: '#fff' }}
+            target='_blank'
+            href='#'
+          >
+            <AddCircleIcon />
+          </Button>
+        </Tooltip>
       </Toolbar>
     </AppBar>
   )
