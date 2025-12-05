@@ -53,7 +53,7 @@ This tool requires the [Web Serial API](<https://developer.mozilla.org/en-US/doc
 ```sh
 git clone https://github.com/NanashiTheNameless/SerialTerminal
 cd SerialTerminal
-./localRun.sh
+./localTest.sh
 ```
 
 The application will open at `http://localhost:3000`
