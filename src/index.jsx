@@ -103,10 +103,6 @@ root.render(
         '.MuiFilledInput-input.Mui-disabled, .MuiSelect-select.Mui-disabled, .MuiInputBase-input.Mui-disabled, .MuiFilledInput-root.Mui-disabled .MuiFilledInput-input': {
           WebkitTextFillColor: 'var(--terminal-muted) !important',
           color: 'var(--terminal-muted) !important'
-        },
-
-        '.button-label': {
-          paddingLeft: '0.5rem'
         }
       }}
     />
