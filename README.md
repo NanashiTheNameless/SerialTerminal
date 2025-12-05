@@ -30,7 +30,7 @@ This tool requires the [Web Serial API](<https://developer.mozilla.org/en-US/doc
 - Edge 89+
 - Opera 75+
 
-### Not supported on:
+### Not supported on
 - Firefox (not yet supported)
 - Safari (not supported)
 - Mobile browsers (not supported due to API limitations)
