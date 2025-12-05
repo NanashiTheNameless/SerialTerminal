@@ -22,7 +22,7 @@ import { useLocalStorage } from './hooks/useLocalStorage'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 
 // Constants
-import { DEFAULT_SETTINGS, LINE_ENDING_VALUES, TOAST_DURATION } from './constants'
+import { DEFAULT_SETTINGS, TOAST_DURATION } from './constants'
 
 function App () {
   // Serial Module
@@ -51,7 +51,7 @@ function App () {
   const [settings, setSettings] = useLocalStorage(
     'settings',
     DEFAULT_SETTINGS,
-    (error) => {
+    () => {
       setToast({
         open: true,
         severity: 'warning',
@@ -101,12 +101,9 @@ function App () {
     setToast({ ...toast, open: false })
   }
 
-  const connect = () => {
-    if (!serial.supported()) {
-      console.error('Serial not supported')
-      return
-    }
-
+  // Setup serial callbacks when component mounts
+  React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/immutability -- Serial callbacks are designed to be assigned
     serial.onSuccess = () => {
       setConnected(true)
       setToast({ open: true, severity: 'success', value: 'Connected!' })
@@ -122,6 +119,13 @@ function App () {
         time: new Date(),
         value: `${value}`
       })
+    }
+  }, [serial])
+
+  const connect = () => {
+    if (!serial.supported()) {
+      console.error('Serial not supported')
+      return
     }
 
     serial.requestPort().then(res => {
@@ -141,6 +145,12 @@ function App () {
     serial.sendByte(byte)
   }
 
+  const handleDisconnect = () => {
+    serial.close()
+    setConnected(false)
+    setToast({ open: true, severity: 'info', value: 'Disconnected' })
+  }
+
   return (
     <ErrorBoundary>
       <Box sx={{
@@ -151,7 +161,7 @@ function App () {
       }}
       >
         {/* Header */}
-        <Header />
+        <Header isConnected={connected} onDisconnect={handleDisconnect} />
 
         {/* Homepage or Terminal */}
         {isMobile

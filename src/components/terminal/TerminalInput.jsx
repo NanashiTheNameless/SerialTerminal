@@ -7,7 +7,9 @@ import Button from '@mui/material/Button'
 
 const useFocus = () => {
   const htmlElRef = React.useRef(null)
-  const setFocus = () => { htmlElRef.current && htmlElRef.current.focus() }
+  const setFocus = React.useCallback(() => {
+    htmlElRef.current && htmlElRef.current.focus()
+  }, [])
 
   return [htmlElRef, setFocus]
 }
@@ -18,7 +20,7 @@ const TerminalInput = (props) => {
 
   React.useEffect(() => {
     setInputFocus()
-  }, [props.input])
+  }, [props.input, setInputFocus])
 
   return (
     <Grid container spacing={0}>

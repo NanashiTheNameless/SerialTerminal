@@ -1,0 +1,25 @@
+# Set default line ending behavior
+* text=auto
+
+# Force CRLF for all text files
+*.js text eol=crlf
+*.jsx text eol=crlf
+*.json text eol=crlf
+*.yml text eol=crlf
+*.yaml text eol=crlf
+*.md text eol=crlf
+*.css text eol=crlf
+*.html text eol=crlf
+*.sh text eol=crlf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
