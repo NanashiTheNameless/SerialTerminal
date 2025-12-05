@@ -17,40 +17,48 @@ import TerminalIcon from '@mui/icons-material/Terminal'
 
 import './TerminalOutput.css'
 
-// Display area for terminal output and command history
-const TerminalOutput = (props) => {
+/**
+ * Display area for terminal output and command history
+ * @param {Object} props - Component props
+ * @param {Array} props.history - Array of terminal history items
+ * @param {Function} props.setHistory - Function to update history
+ * @param {Function} props.setInput - Function to set input field value
+ * @param {Function} props.openSettings - Function to open settings dialog
+ * @param {boolean} props.echo - Whether to echo user input
+ * @param {boolean} props.time - Whether to show timestamps
+ */
+const TerminalOutput = React.memo((props) => {
   // User input history window
   const [historyOpen, setHistoryOpen] = React.useState(false)
 
   const handleClear = () => {
-    props.clearToast()
     props.setHistory([])
   }
 
   return (
-    <pre className='terminalOutput'>
+    <pre className='terminalOutput' aria-label='Terminal output'>
 
       {/* Buttons */}
-      <ButtonGroup variant='text' className='terminalButtons'>
+      <ButtonGroup variant='text' className='terminalButtons' aria-label='Terminal controls'>
 
         {/* Clear */}
-        <Button onClick={handleClear}>
+        <Button onClick={handleClear} aria-label='Clear terminal history'>
           <HighlightOffIcon color='inherit' />
         </Button>
 
         {/* History */}
-        <Button onClick={() => setHistoryOpen(true)}>
+        <Button onClick={() => setHistoryOpen(true)} aria-label='Open command history'>
           <HistoryIcon color='inherit' />
         </Button>
 
         {/* Settings */}
-        <Button onClick={props.openSettings}>
+        <Button onClick={props.openSettings} aria-label='Open settings'>
           <SettingsIcon color='inherit' />
         </Button>
       </ButtonGroup>
 
       {/* Text */}
-      <Box className='codeContainer'>
+      <Box className='codeContainer' aria-live='polite'>
         <code>
           {props.history.filter(line => (line.type === 'output' || props.echo)).map((line, i) => (
             <p key={i}>
@@ -65,8 +73,9 @@ const TerminalOutput = (props) => {
       <Dialog
         open={historyOpen}
         onClose={() => setHistoryOpen(false)}
+        aria-labelledby='history-dialog-title'
       >
-        <DialogTitle>
+        <DialogTitle id='history-dialog-title'>
           History
         </DialogTitle>
         <List sx={{ minWidth: '10em' }}>
@@ -88,16 +97,17 @@ const TerminalOutput = (props) => {
 
     </pre>
   )
-}
+})
+
+TerminalOutput.displayName = 'TerminalOutput'
 
 TerminalOutput.propTypes = {
-  history: PropTypes.array,
-  setHistory: PropTypes.func,
-  setInput: PropTypes.func,
-  openSettings: PropTypes.func,
+  history: PropTypes.array.isRequired,
+  setHistory: PropTypes.func.isRequired,
+  setInput: PropTypes.func.isRequired,
+  openSettings: PropTypes.func.isRequired,
   echo: PropTypes.bool,
-  time: PropTypes.bool,
-  clearToast: PropTypes.func
+  time: PropTypes.bool
 }
 
 export default TerminalOutput

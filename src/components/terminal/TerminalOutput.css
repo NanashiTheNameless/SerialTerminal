@@ -11,6 +11,14 @@
   --terminal-border: #777;
 }
 
+.MuiGrid-root {
+    padding: 6px;
+    padding-top: 0 !important;
+    padding-right: 6px;
+    padding-bottom: 0 !important;
+    
+}
+
 .terminalOutput {
     position: relative;
     height: calc(100vh - 200px);
@@ -22,7 +30,7 @@
 .terminalButtons {
     position: absolute;
     right: 0;
-    top: 0;
+    top: 2vh;
     margin: 0;
     padding: 0;
     background: var(--terminal-buttons-bg);

@@ -1,13 +1,14 @@
-import React from 'react'
+import React, { forwardRef, useImperativeHandle } from 'react'
 import PropTypes from 'prop-types'
 
 import Grid from '@mui/material/Grid'
 
 import TerminalOutput from './TerminalOutput'
 import TerminalInput from './TerminalInput'
+import { CTRL_C, CTRL_D, MAX_HISTORY_LENGTH } from '../../constants'
 
 // Main terminal interface for serial communication
-const Terminal = (props) => {
+const Terminal = forwardRef((props, ref) => {
   // User input from input field
   const [input, setInput] = React.useState('')
 
@@ -16,6 +17,14 @@ const Terminal = (props) => {
 
   // List of received lines
   const [history, setHistory] = React.useState([])
+
+  // Expose clearHistory method to parent
+  useImperativeHandle(ref, () => ({
+    clearHistory: () => {
+      setHistory([])
+      received.current = ''
+    }
+  }))
 
   React.useEffect(
     () => {
@@ -36,7 +45,15 @@ const Terminal = (props) => {
           })
         })
       }
-      setHistory((current) => current.concat(newLines))
+      
+      // Apply history length limit
+      setHistory((current) => {
+        const combined = current.concat(newLines)
+        if (combined.length > MAX_HISTORY_LENGTH) {
+          return combined.slice(-MAX_HISTORY_LENGTH)
+        }
+        return combined
+      })
       received.current = newReceived
     },
     [props.received]
@@ -45,14 +62,21 @@ const Terminal = (props) => {
   const handleSend = () => {
     props.send(input)
 
-    setHistory([
-      ...history,
-      {
-        type: 'userInput',
-        value: input,
-        time: new Date()
+    setHistory((current) => {
+      const newHistory = [
+        ...current,
+        {
+          type: 'userInput',
+          value: input,
+          time: new Date()
+        }
+      ]
+      // Apply history length limit
+      if (newHistory.length > MAX_HISTORY_LENGTH) {
+        return newHistory.slice(-MAX_HISTORY_LENGTH)
       }
-    ])
+      return newHistory
+    })
     setInput('')
   }
 
@@ -62,10 +86,10 @@ const Terminal = (props) => {
 
       if ((e.ctrlKey || e.metaKey) && charCode === 'C') {
         e.preventDefault()
-        props.sendRaw(3)
+        props.sendRaw(CTRL_C.charCodeAt(0))
       } else if ((e.ctrlKey || e.metaKey) && charCode === 'D') {
         e.preventDefault()
-        props.sendRaw(4)
+        props.sendRaw(CTRL_D.charCodeAt(0))
       }
     }
   }
@@ -81,7 +105,6 @@ const Terminal = (props) => {
           openSettings={props.openSettings}
           echo={props.echo}
           time={props.time}
-          clearToast={props.clearToast}
         />
       </Grid>
 
@@ -95,7 +118,9 @@ const Terminal = (props) => {
       </Grid>
     </Grid>
   )
-}
+})
+
+Terminal.displayName = 'Terminal'
 
 Terminal.propTypes = {
   received: PropTypes.object,
@@ -104,8 +129,7 @@ Terminal.propTypes = {
   openSettings: PropTypes.func,
   echo: PropTypes.bool,
   time: PropTypes.bool,
-  ctrl: PropTypes.bool,
-  clearToast: PropTypes.func
+  ctrl: PropTypes.bool
 }
 
 export default Terminal

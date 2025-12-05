@@ -8,7 +8,7 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 import Typography from '@mui/material/Typography'
-import UngoogledChromiumIcon from '../icons/UngoogledChromium'
+import UngoogledChromiumIcon from '../../icons/UngoogledChromium'
 
 // Error dialog for displaying connection failures
 const ErrorMessage = (props) => {

@@ -1,4 +1,9 @@
-// Web Serial API interface for device communication
+/**
+ * Web Serial API interface for device communication
+ * Manages serial port connections, data transmission, and reception
+ */
+import { DEFAULT_SETTINGS } from '../constants.js'
+
 export default class Serial {
   // Callback hooks for connection lifecycle and data events
   onSuccess = () => { }
@@ -17,44 +22,65 @@ export default class Serial {
     this.outputStream = undefined
     this.inputStream = undefined
 
-    this.baudRate = 115200
+    this.baudRate = DEFAULT_SETTINGS.baudRate
+
+    // Buffer for accumulating data chunks before calling onReceive
+    this.receiveBuffer = ''
+    this.receiveTimeout = null
   }
 
-  // Check if browser supports Web Serial API
+  /**
+   * Check if browser supports Web Serial API
+   * @returns {boolean} True if Web Serial API is supported
+   */
   supported () {
     return ('serial' in navigator)
   }
 
+  /**
+   * Request user to select a serial port
+   * @returns {Promise<string>} Empty string on success, error message on failure
+   */
   async requestPort () {
     await this.close()
 
     const filters = [
-      // No filters applied
+      // No filters applied - user can select any available port
     ]
 
     try {
       this.port = await navigator.serial.requestPort({ filters })
     } catch (e) {
-      console.error(e)
-      return `${e}`
+      console.error('[SERIAL] Port selection failed:', e)
+      return `Port selection failed: ${e.message || e}`
     }
 
     return this.openPort()
   }
 
+  /**
+   * Open the selected serial port with configured baud rate
+   * @returns {Promise<string>} Empty string on success, error message on failure
+   */
   async openPort () {
+    if (!this.port) {
+      const error = 'No port selected'
+      console.error('[SERIAL]', error)
+      return error
+    }
+
     try {
       await this.port.open({ baudRate: this.baudRate })
     } catch (e) {
-      console.error(e)
+      console.error('[SERIAL] Failed to open port:', e)
       this.onFail()
-      return `${e}`
+      return `Failed to open port: ${e.message || e}`
     }
 
-    console.log('[SERIAL] Connected')
+    console.log('[SERIAL] Connected at', this.baudRate, 'baud')
 
     this.port.addEventListener('disconnect', () => {
-      console.warn('[SERIAL] Disconnected!')
+      console.warn('[SERIAL] Device disconnected')
       this.onFail()
     })
 
@@ -69,61 +95,167 @@ export default class Serial {
     return ''
   }
 
+  /**
+   * Add data to receive buffer and schedule delivery
+   * @param {string} data - Data to buffer
+   * @private
+   */
+  _bufferReceive (data) {
+    this.receiveBuffer += data
+
+    // Clear existing timeout
+    if (this.receiveTimeout) {
+      clearTimeout(this.receiveTimeout)
+    }
+
+    // Schedule delivery after a delay to batch chunks
+    // Use a longer timeout to allow more data to accumulate
+    this.receiveTimeout = setTimeout(() => {
+      if (this.receiveBuffer.length > 0) {
+        this.onReceive(this.receiveBuffer)
+        this.receiveBuffer = ''
+      }
+      this.receiveTimeout = null
+    }, 50)
+  }
+
+  /**
+   * Continuously read data from the serial port
+   * Automatically handles reconnection and cleanup
+   */
   async read () {
-    while (this.port.readable && this.open) {
-      this.textDecoder = new window.TextDecoderStream()
-      this.readableStreamClosed = this.port.readable.pipeTo(this.textDecoder.writable)
-      this.reader = this.textDecoder.readable.getReader()
+    this.textDecoder = new window.TextDecoderStream()
+    this.readableStreamClosed = this.port.readable.pipeTo(this.textDecoder.writable)
+    this.reader = this.textDecoder.readable.getReader()
+
+    try {
+      while (this.open) {
+        const { value, done } = await this.reader.read()
+        if (done) {
+          console.log('[SERIAL] Read stream completed')
+          break
+        }
+        // Buffer the data instead of calling onReceive directly
+        if (value && value.length > 0) {
+          this._bufferReceive(value)
+        }
+      }
+    } catch (error) {
+      console.error('[SERIAL] Read error:', error)
+      this.onFail()
+    } finally {
+      // Flush any remaining buffered data
+      if (this.receiveBuffer.length > 0) {
+        this.onReceive(this.receiveBuffer)
+        this.receiveBuffer = ''
+      }
+      if (this.receiveTimeout) {
+        clearTimeout(this.receiveTimeout)
+        this.receiveTimeout = null
+      }
 
       try {
-        while (true && this.open) {
-          const { value, done } = await this.reader.read()
-          if (done) {
-            break
-          }
-          if (value) this.onReceive(value)
-        }
+        await this.reader.cancel()
       } catch (error) {
-        this.onFail()
-      } finally {
-        await this.close()
+        console.warn('[SERIAL] Reader cancel error (ignored):', error)
       }
+      try {
+        await this.readableStreamClosed
+      } catch (error) {
+        console.warn('[SERIAL] Stream close error (ignored):', error)
+      }
+      this.open = false
     }
   }
 
+  /**
+   * Send a text string to the serial port
+   * @param {string} value - Text to send
+   */
   async send (value) {
-    console.log(`Send: ${value}`)
+    if (!this.open || !this.outputStream) {
+      console.error('[SERIAL] Cannot send: port not open')
+      return
+    }
 
-    const encoder = new TextEncoder()
-    const writer = this.outputStream.getWriter()
+    console.log(`[SERIAL] Send: ${value}`)
 
-    writer.write(encoder.encode(value))
-    writer.releaseLock()
+    try {
+      const encoder = new TextEncoder()
+      const writer = this.outputStream.getWriter()
+
+      await writer.write(encoder.encode(value))
+      writer.releaseLock()
+    } catch (error) {
+      console.error('[SERIAL] Send failed:', error)
+    }
   }
 
+  /**
+   * Send a single byte to the serial port
+   * @param {number} value - Byte value (0-255) to send
+   */
   async sendByte (value) {
-    const writer = this.outputStream.getWriter()
+    if (!this.open || !this.outputStream) {
+      console.error('[SERIAL] Cannot send byte: port not open')
+      return
+    }
 
-    const data = new Uint8Array([value])
-    await writer.write(data)
+    try {
+      const writer = this.outputStream.getWriter()
 
-    writer.releaseLock()
+      const data = new Uint8Array([value])
+      await writer.write(data)
+
+      writer.releaseLock()
+      console.log(`[SERIAL] Sent byte: 0x${value.toString(16).padStart(2, '0')}`)
+    } catch (error) {
+      console.error('[SERIAL] Send byte failed:', error)
+    }
   }
 
+  /**
+   * Close the serial port and clean up resources
+   */
   async close () {
     if (this.open) {
       this.open = false
 
-      await this.reader.cancel().catch(() => { /* Ignore the error */ })
-      await this.readableStreamClosed.catch(() => { /* Ignore the error */ })
+      try {
+        if (this.reader) {
+          await this.reader.cancel()
+        }
+      } catch (error) {
+        console.warn('[SERIAL] Reader cancel error (ignored):', error)
+      }
 
-      await this.port.close()
+      try {
+        if (this.readableStreamClosed) {
+          await this.readableStreamClosed
+        }
+      } catch (error) {
+        console.warn('[SERIAL] Stream close error (ignored):', error)
+      }
 
-      console.log('[SERIAL] Closed')
+      try {
+        if (this.port) {
+          await this.port.close()
+        }
+      } catch (error) {
+        console.error('[SERIAL] Port close error:', error)
+      }
+
+      console.log('[SERIAL] Connection closed')
     }
   }
 
+  /**
+   * Set the baud rate for future connections
+   * Note: Requires reconnection to take effect
+   * @param {number} newBaudRate - New baud rate value
+   */
   setBaudRate (newBaudRate) {
     this.baudRate = newBaudRate
+    console.log('[SERIAL] Baud rate set to', newBaudRate, '(requires reconnect)')
   }
 }
