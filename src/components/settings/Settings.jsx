@@ -70,8 +70,8 @@ const Settings = React.memo((props) => {
   }
 
   return (
-    <Dialog 
-      open={props.open} 
+    <Dialog
+      open={props.open}
       onClose={props.close}
       disableScrollLock
     >

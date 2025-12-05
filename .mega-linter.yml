@@ -24,12 +24,5 @@ DISABLE_LINTERS:
   - JAVASCRIPT_ES # Disable MegaLinter's bundled ESLint v8, use local v9 instead
 
 SHOW_ELAPSED_TIME: true
-
-# ESLint v9+ flat config support - use local installation
-JAVASCRIPT_ES_FILE_EXTENSIONS:
-  - .js
-  - .jsx
-JAVASCRIPT_ES_CLI_LINT_MODE: list_of_files
-JAVASCRIPT_ES_FILTER_REGEX_EXCLUDE: (node_modules|dist|build)
 # Uncomment if you want MegaLinter to detect errors but not block CI to pass
 # DISABLE_ERRORS: true
