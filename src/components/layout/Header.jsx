@@ -9,6 +9,8 @@ import Tooltip from '@mui/material/Tooltip'
 import AddCircleIcon from '@mui/icons-material/AddCircle'
 import CancelIcon from '@mui/icons-material/Cancel'
 
+import './Header.css'
+
 // Application header bar
 const Header = ({ isConnected = false, onDisconnect }) => {
   return (
