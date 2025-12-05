@@ -8,6 +8,7 @@ import Button from '@mui/material/Button'
 import Tooltip from '@mui/material/Tooltip'
 import AddCircleIcon from '@mui/icons-material/AddCircle'
 import CancelIcon from '@mui/icons-material/Cancel'
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder'
 
 import './Header.css'
 
@@ -60,6 +61,17 @@ const Header = ({ isConnected = false, onDisconnect }) => {
           >
             <AddCircleIcon />
             <p className="button-label">New terminal</p>
+          </Button>
+        </Tooltip>
+
+        <Tooltip title='Support this project on GitHub Sponsors'>
+          <Button
+            sx={{ color: '#fff', ml: 1 }}
+            target='_blank'
+            href='https://github.com/sponsors/NanashiTheNameless?o=esb'
+          >
+            <FavoriteBorderIcon />
+            <p className="button-label">Support</p>
           </Button>
         </Tooltip>
       </Toolbar>
