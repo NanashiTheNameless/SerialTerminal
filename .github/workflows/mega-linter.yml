@@ -104,11 +104,11 @@ jobs:
       - name: Commit MegaLinter fixes (if any)
         if: steps.ml.outputs.has_updated_sources == 1
         run: |
+          sudo chown -Rc $UID .
           git config --global user.name "megalinter-bot"
           git config --global user.email "129584137+megalinter-bot@users.noreply.github.com"
-          sudo chown -Rc $UID . || true
           git add -A
-          git commit -m "[MegaLinter] Save automatic fixes" || echo "No changes to commit"
+          git diff --cached --quiet || git commit -m "[MegaLinter] Save automatic fixes"
 
       # Upload MegaLinter artifacts
       - name: Archive production artifacts
