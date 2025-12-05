@@ -104,8 +104,9 @@ jobs:
       - name: Commit MegaLinter fixes (if any)
         if: steps.ml.outputs.has_updated_sources == 1
         run: |
-          git config user.name "megalinter-bot"
-          git config user.email "129584137+megalinter-bot@users.noreply.github.com"
+          git config --global user.name "megalinter-bot"
+          git config --global user.email "129584137+megalinter-bot@users.noreply.github.com"
+          sudo chown -Rc $UID . || true
           git add -A
           git commit -m "[MegaLinter] Save automatic fixes" || echo "No changes to commit"
 
