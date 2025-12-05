@@ -46,7 +46,7 @@ This tool requires the [Web Serial API](<https://developer.mozilla.org/en-US/doc
 ### Prerequisites
 
 - Node.js 18+ and Yarn 4+
-- A Chromium-based browser
+- A browser with WebSerial support
 
 ### Local testing/running
 
