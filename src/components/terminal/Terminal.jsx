@@ -6,6 +6,7 @@ import Grid from '@mui/material/Grid'
 import TerminalOutput from './TerminalOutput'
 import TerminalInput from './TerminalInput'
 import { CTRL_C, CTRL_D, MAX_HISTORY_LENGTH } from '../../constants'
+import { quickHotkeysPropType } from './propTypes'
 
 // Helper to get character code from control character string
 const getControlCode = (ctrlChar) => ctrlChar.charCodeAt(0)
@@ -202,18 +203,7 @@ Terminal.propTypes = {
   controlAliases: PropTypes.array,
   commandKeybinds: PropTypes.array,
   parseANSIOutput: PropTypes.bool,
-  quickHotkeys: PropTypes.shape({
-    focus: PropTypes.string,
-    history: PropTypes.string,
-    download: PropTypes.string,
-    clear: PropTypes.string,
-    settings: PropTypes.string,
-    focusShift: PropTypes.bool,
-    historyShift: PropTypes.bool,
-    downloadShift: PropTypes.bool,
-    clearShift: PropTypes.bool,
-    settingsShift: PropTypes.bool
-  })
+  quickHotkeys: quickHotkeysPropType
 }
 
 export default Terminal

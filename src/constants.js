@@ -77,7 +77,7 @@ export const DEFAULT_SETTINGS = {
   detectCtrlC: true,
   detectCtrlD: true,
   settingsShortcut: true,
-  clearShortcut: false,
+  clearShortcut: true,
   downloadFormat: 'ask',
   settingsShortcutKey: KEYBOARD_SHORTCUTS.OPEN_SETTINGS.key,
   clearShortcutKey: KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.key,

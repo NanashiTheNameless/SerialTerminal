@@ -69,7 +69,7 @@
     font-variant-ligatures: normal;
     font-feature-settings: "liga" 1, "calt" 1;
     white-space: pre-wrap;
-    word-break: break-word;
+    word-break: normal;
     overflow-wrap: anywhere;
     hyphens: auto;
     line-height: 1.4;

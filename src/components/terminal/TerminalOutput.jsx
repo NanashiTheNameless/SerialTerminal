@@ -25,6 +25,7 @@ import TerminalIcon from '@mui/icons-material/Terminal'
 import { parseANSI, stripANSI } from '../../utils/ansiParser'
 import { DEFAULT_SETTINGS } from '../../constants'
 import './TerminalOutput.css'
+import { quickHotkeysPropType } from './propTypes'
 
 const TerminalOutput = React.memo((props) => {
   // User input history window
@@ -326,19 +327,7 @@ TerminalOutput.propTypes = {
   time: PropTypes.bool,
   parseANSIOutput: PropTypes.bool,
   focusInput: PropTypes.func,
-  quickHotkeys: PropTypes.shape({
-    enabled: PropTypes.bool,
-    focus: PropTypes.string,
-    history: PropTypes.string,
-    download: PropTypes.string,
-    clear: PropTypes.string,
-    settings: PropTypes.string,
-    focusShift: PropTypes.bool,
-    historyShift: PropTypes.bool,
-    downloadShift: PropTypes.bool,
-    clearShift: PropTypes.bool,
-    settingsShift: PropTypes.bool
-  })
+  quickHotkeys: quickHotkeysPropType
 }
 
 export default TerminalOutput
