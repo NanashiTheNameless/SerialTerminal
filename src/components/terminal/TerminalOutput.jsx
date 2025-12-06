@@ -9,6 +9,9 @@ import HighlightOffIcon from '@mui/icons-material/HighlightOff'
 import SettingsIcon from '@mui/icons-material/Settings'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
+import DialogContent from '@mui/material/DialogContent'
+import DialogContentText from '@mui/material/DialogContentText'
+import DialogActions from '@mui/material/DialogActions'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemText from '@mui/material/ListItemText'
@@ -31,10 +34,6 @@ const TerminalOutput = React.memo((props) => {
   // User input history window
   const [historyOpen, setHistoryOpen] = React.useState(false)
 
-  const handleClear = () => {
-    props.setHistory([])
-  }
-
   return (
     <pre className='terminalOutput' aria-label='Terminal output'>
 
@@ -42,7 +41,7 @@ const TerminalOutput = React.memo((props) => {
       <ButtonGroup variant='text' className='terminalButtons' aria-label='Terminal controls'>
 
         {/* Clear */}
-        <Button onClick={handleClear} aria-label='Clear terminal history'>
+        <Button onClick={props.onClearRequest} aria-label='Clear terminal history'>
           <HighlightOffIcon color='inherit' />
         </Button>
 
@@ -68,6 +67,28 @@ const TerminalOutput = React.memo((props) => {
           ))}
         </code>
       </Box>
+
+      {/* Clear Confirmation Dialog */}
+      <Dialog
+        open={props.clearConfirmOpen}
+        onClose={props.onClearCancel}
+        aria-labelledby='clear-dialog-title'
+      >
+        <DialogTitle id='clear-dialog-title'>
+          Clear Terminal History?
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            This will clear all terminal output. Press Ctrl+L again to confirm, or click Confirm below.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={props.onClearCancel}>Cancel</Button>
+          <Button onClick={props.onClearConfirm} color='primary' autoFocus>
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* History Popup */}
       <Dialog
@@ -106,6 +127,10 @@ TerminalOutput.propTypes = {
   setHistory: PropTypes.func.isRequired,
   setInput: PropTypes.func.isRequired,
   openSettings: PropTypes.func.isRequired,
+  clearConfirmOpen: PropTypes.bool,
+  onClearRequest: PropTypes.func,
+  onClearConfirm: PropTypes.func,
+  onClearCancel: PropTypes.func,
   echo: PropTypes.bool,
   time: PropTypes.bool
 }

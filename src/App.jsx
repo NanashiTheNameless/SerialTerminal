@@ -68,6 +68,9 @@ function App () {
     setIsMobile(/android|iphone|ipad|ipod|mobile|tablet/i.test(ua))
   }, [])
 
+  // Clear confirmation dialog state
+  const [clearConfirmOpen, setClearConfirmOpen] = React.useState(false)
+
   // Keyboard shortcuts
   useKeyboardShortcuts([
     {
@@ -83,9 +86,18 @@ function App () {
       key: 'l',
       ctrl: true,
       callback: () => {
-        if (settings.clearShortcut === true && terminalRef.current) {
-          terminalRef.current.clearHistory()
-          setToast({ open: true, severity: 'info', value: 'History cleared!' })
+        if (settings.clearShortcut === true) {
+          if (clearConfirmOpen) {
+            // Second press - confirm clear
+            if (terminalRef.current) {
+              terminalRef.current.clearHistory()
+              setToast({ open: true, severity: 'success', value: 'History cleared!' })
+            }
+            setClearConfirmOpen(false)
+          } else {
+            // First press - show confirmation
+            setClearConfirmOpen(true)
+          }
         }
       }
     }
@@ -194,6 +206,17 @@ function App () {
                   send={handleSend}
                   sendRaw={handleRawSend}
                   openSettings={() => setSettingsOpen(true)}
+                  showToast={(message, severity = 'info') => setToast({ open: true, severity, value: message })}
+                  clearConfirmOpen={clearConfirmOpen}
+                  onClearRequest={() => setClearConfirmOpen(true)}
+                  onClearConfirm={() => {
+                    if (terminalRef.current) {
+                      terminalRef.current.clearHistory()
+                      setToast({ open: true, severity: 'success', value: 'History cleared!' })
+                    }
+                    setClearConfirmOpen(false)
+                  }}
+                  onClearCancel={() => setClearConfirmOpen(false)}
                   echo={settings.localEcho !== false}
                   time={settings.timestamp !== false}
                   ctrl={settings.detectCtrl !== false}

@@ -103,6 +103,10 @@ const Terminal = forwardRef((props, ref) => {
           setHistory={setHistory}
           setInput={setInput}
           openSettings={props.openSettings}
+          clearConfirmOpen={props.clearConfirmOpen}
+          onClearRequest={props.onClearRequest}
+          onClearConfirm={props.onClearConfirm}
+          onClearCancel={props.onClearCancel}
           echo={props.echo}
           time={props.time}
         />
@@ -127,6 +131,11 @@ Terminal.propTypes = {
   send: PropTypes.func,
   sendRaw: PropTypes.func,
   openSettings: PropTypes.func,
+  showToast: PropTypes.func,
+  clearConfirmOpen: PropTypes.bool,
+  onClearRequest: PropTypes.func,
+  onClearConfirm: PropTypes.func,
+  onClearCancel: PropTypes.func,
   echo: PropTypes.bool,
   time: PropTypes.bool,
   ctrl: PropTypes.bool
