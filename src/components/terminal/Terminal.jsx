@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle } from 'react'
+import React, { forwardRef, useImperativeHandle, useRef } from 'react'
 import PropTypes from 'prop-types'
 
 import Grid from '@mui/material/Grid'
@@ -12,6 +12,9 @@ const getControlCode = (ctrlChar) => ctrlChar.charCodeAt(0)
 const Terminal = forwardRef((props, ref) => {
   // User input from input field
   const [input, setInput] = React.useState('')
+
+  // Ref to the input component to allow keyboard focus shortcuts
+  const inputRef = useRef(null)
 
   // Currently received string
   const received = React.useRef('')
@@ -152,6 +155,7 @@ const Terminal = forwardRef((props, ref) => {
           history={history}
           setHistory={setHistory}
           setInput={setInput}
+          focusInput={() => inputRef.current?.focusInput?.()}
           openSettings={props.openSettings}
           clearConfirmOpen={props.clearConfirmOpen}
           onClearRequest={props.onClearRequest}
@@ -161,12 +165,14 @@ const Terminal = forwardRef((props, ref) => {
           echo={props.echo}
           time={props.time}
           parseANSIOutput={props.parseANSIOutput}
+          quickHotkeys={props.quickHotkeys}
         />
       </Grid>
 
       {/* Input Field & Send Button */}
       <Grid item xs={12} sx={{ flexShrink: 0 }}>
         <TerminalInput
+          ref={inputRef}
           input={input}
           setInput={setInput}
           send={handleSend}
@@ -195,7 +201,19 @@ Terminal.propTypes = {
   ctrlD: PropTypes.bool,
   controlAliases: PropTypes.array,
   commandKeybinds: PropTypes.array,
-  parseANSIOutput: PropTypes.bool
+  parseANSIOutput: PropTypes.bool,
+  quickHotkeys: PropTypes.shape({
+    focus: PropTypes.string,
+    history: PropTypes.string,
+    download: PropTypes.string,
+    clear: PropTypes.string,
+    settings: PropTypes.string,
+    focusShift: PropTypes.bool,
+    historyShift: PropTypes.bool,
+    downloadShift: PropTypes.bool,
+    clearShift: PropTypes.bool,
+    settingsShift: PropTypes.bool
+  })
 }
 
 export default Terminal

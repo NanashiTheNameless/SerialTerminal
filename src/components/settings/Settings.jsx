@@ -25,13 +25,15 @@ import AddIcon from '@mui/icons-material/Add'
 
 import { BAUD_RATES, LINE_ENDING_VALUES, LINE_ENDING_LABELS, DOWNLOAD_FORMATS, DOWNLOAD_FORMAT_LABELS, DEFAULT_SETTINGS, KEYBOARD_SHORTCUTS } from '../../constants'
 
+const UNSET_CHAR = '�'
+
 const formElementCSS = {
   marginTop: 1,
   minWidth: '10em'
 }
 
 // Reusable KeybindDisplay component for showing Ctrl+Key combinations
-const KeybindDisplay = ({ ctrlKey, shift, label }) => (
+const KeybindDisplay = ({ ctrlKey, shift, label, modifierLabel = 'Ctrl' }) => (
   <Box sx={{
     display: 'inline-flex',
     alignItems: 'center',
@@ -46,25 +48,31 @@ const KeybindDisplay = ({ ctrlKey, shift, label }) => (
     fontSize: '0.95rem',
     color: '#fff'
   }}>
-    <span>Ctrl</span>
+    <span>{modifierLabel}</span>
     {shift && <span>Shift</span>}
-    <span>{(ctrlKey || label || '').toUpperCase()}</span>
+    <span>{(ctrlKey || label || UNSET_CHAR).toUpperCase()}</span>
   </Box>
 )
 
 KeybindDisplay.propTypes = {
   ctrlKey: PropTypes.string,
   shift: PropTypes.bool,
-  label: PropTypes.string
+  label: PropTypes.string,
+  modifierLabel: PropTypes.string
 }
 
 // Reusable KeyCapture component for capturing key presses
-const KeyCapture = ({ captureTarget, currentTarget, onClick, ctrlKey, shift, label }) => (
+const KeyCapture = ({ captureTarget, currentTarget, onClick, ctrlKey, shift, label, modifierLabel = 'Ctrl' }) => (
   <Box
     role='button'
     tabIndex={0}
     onClick={onClick}
-    onFocus={onClick}
+    onKeyDown={(e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        onClick()
+      }
+    }}
     sx={{
       display: 'flex',
       alignItems: 'center',
@@ -92,9 +100,9 @@ const KeyCapture = ({ captureTarget, currentTarget, onClick, ctrlKey, shift, lab
       fontSize: '1rem',
       color: '#fff'
     }}>
-      <span>Ctrl</span>
+      <span>{modifierLabel}</span>
       {shift && <span>Shift</span>}
-      <span>{ctrlKey ? ctrlKey.toUpperCase() : (label ? label.toUpperCase() : '?')}</span>
+      <span>{ctrlKey ? ctrlKey.toUpperCase() : (label ? label.toUpperCase() : UNSET_CHAR)}</span>
     </Box>
     <Typography variant='body2' sx={{ color: '#ffffffcc' }}>
       {captureTarget === currentTarget ? 'Press a key (Esc to cancel)' : 'Click then press a key'}
@@ -108,7 +116,8 @@ KeyCapture.propTypes = {
   onClick: PropTypes.func.isRequired,
   ctrlKey: PropTypes.string,
   shift: PropTypes.bool,
-  label: PropTypes.string
+  label: PropTypes.string,
+  modifierLabel: PropTypes.string
 }
 
 // Reusable KeybindListItem component for displaying keybind entries
@@ -167,6 +176,7 @@ const KeybindInputForm = ({ captureTarget, currentTarget, onCaptureClick, ctrlKe
       value={textValue}
       onChange={onTextChange}
       helperText={textHelperText}
+      FormHelperTextProps={{ sx: { color: '#ffffffb3', mt: 0.25 } }}
       sx={{
         marginTop: 0.75,
         minWidth: '10em',
@@ -262,6 +272,7 @@ const Settings = React.memo((props) => {
   const [advanced, setAdvanced] = React.useState(props.settings.advanced === true)
   const [captureTarget, setCaptureTarget] = React.useState(null)
   const [parseANSIOutput, setParseANSIOutput] = React.useState(props.settings.parseANSIOutput !== false)
+  const [enableQuickHotkeys, setEnableQuickHotkeys] = React.useState(props.settings.enableQuickHotkeys !== false)
   const [controlAliases, setControlAliases] = React.useState(props.settings.customControlAliases || [])
   const [aliasKey, setAliasKey] = React.useState('')
   const [aliasShift, setAliasShift] = React.useState(false)
@@ -272,10 +283,25 @@ const Settings = React.memo((props) => {
   const [keybindKey, setKeybindKey] = React.useState('')
   const [keybindShift, setKeybindShift] = React.useState(false)
   const [keybindText, setKeybindText] = React.useState('')
+  const [quickFocusKey, setQuickFocusKey] = React.useState((props.settings.quickFocusKey || 'i').toLowerCase())
+  const [quickHistoryKey, setQuickHistoryKey] = React.useState((props.settings.quickHistoryKey || 'h').toLowerCase())
+  const [quickDownloadKey, setQuickDownloadKey] = React.useState((props.settings.quickDownloadKey || 'd').toLowerCase())
+  const [quickClearKey, setQuickClearKey] = React.useState((props.settings.quickClearKey || 'c').toLowerCase())
+  const [quickSettingsKey, setQuickSettingsKey] = React.useState((props.settings.quickSettingsKey || 's').toLowerCase())
+  const [quickFocusShift, setQuickFocusShift] = React.useState(props.settings.quickFocusShift === true)
+  const [quickHistoryShift, setQuickHistoryShift] = React.useState(props.settings.quickHistoryShift === true)
+  const [quickDownloadShift, setQuickDownloadShift] = React.useState(props.settings.quickDownloadShift === true)
+  const [quickClearShift, setQuickClearShift] = React.useState(props.settings.quickClearShift === true)
+  const [quickSettingsShift, setQuickSettingsShift] = React.useState(props.settings.quickSettingsShift === true)
 
   const formatLabel = (key, shift, fallbackKey) => {
     const finalKey = (key || fallbackKey || '').toUpperCase()
     return `Ctrl${shift ? '+Shift' : ''}+${finalKey}`
+  }
+
+  const formatAltLabel = (key, shift) => {
+    const finalKey = (key || UNSET_CHAR).toUpperCase()
+    return `Alt${shift ? '+Shift' : ''}+${finalKey}`
   }
 
   // Parse escape sequences like \x04, \n, etc.
@@ -314,9 +340,19 @@ const Settings = React.memo((props) => {
   const aliasKeyValid = aliasKey.trim().length === 1
   const aliasCodeParsed = parseEscapeSequence(aliasCode.trim(), true)
   const aliasCodeValid = aliasCodeParsed !== null
+  const aliasHelperText = aliasCode
+    ? (aliasCodeValid
+        ? (aliasCodeParsed.type === 'code'
+            ? `= byte ${aliasCodeParsed.value}`
+            : `= text "${aliasCodeParsed.value}"`)
+        : 'Invalid code')
+    : ''
 
   const keybindKeyValid = keybindKey.trim().length === 1
   const keybindTextValid = keybindText.trim().length > 0
+
+  const normalizeHotkey = (val) => (val || '').trim().toLowerCase().slice(0, 1)
+  const hotkeyValid = (val) => val && val.trim().length === 1
 
   const addAlias = () => {
     if (!aliasKeyValid || !aliasCodeValid) return
@@ -406,6 +442,7 @@ const Settings = React.memo((props) => {
     setDownloadFormat(props.settings.downloadFormat || 'ask')
     setParseANSIOutput(props.settings.parseANSIOutput !== false)
     setAdvanced(props.settings.advanced === true)
+    setEnableQuickHotkeys(props.settings.enableQuickHotkeys !== false)
     setControlAliases(props.settings.customControlAliases || [])
     setAliasKey('')
     setAliasShift(false)
@@ -414,6 +451,16 @@ const Settings = React.memo((props) => {
     setKeybindKey('')
     setKeybindShift(false)
     setKeybindText('')
+    setQuickFocusKey(normalizeHotkey(props.settings.quickFocusKey || 'i'))
+    setQuickHistoryKey(normalizeHotkey(props.settings.quickHistoryKey || 'h'))
+    setQuickDownloadKey(normalizeHotkey(props.settings.quickDownloadKey || 'd'))
+    setQuickClearKey(normalizeHotkey(props.settings.quickClearKey || 'c'))
+    setQuickSettingsKey(normalizeHotkey(props.settings.quickSettingsKey || 's'))
+    setQuickFocusShift(props.settings.quickFocusShift === true)
+    setQuickHistoryShift(props.settings.quickHistoryShift === true)
+    setQuickDownloadShift(props.settings.quickDownloadShift === true)
+    setQuickClearShift(props.settings.quickClearShift === true)
+    setQuickSettingsShift(props.settings.quickSettingsShift === true)
 
     props.close()
   }
@@ -451,6 +498,26 @@ const Settings = React.memo((props) => {
           setKeybindKey(normalized)
           setKeybindShift(shiftHeld)
         }
+        if (captureTarget === 'quickFocus') {
+          setQuickFocusKey(normalized)
+          setQuickFocusShift(shiftHeld)
+        }
+        if (captureTarget === 'quickHistory') {
+          setQuickHistoryKey(normalized)
+          setQuickHistoryShift(shiftHeld)
+        }
+        if (captureTarget === 'quickDownload') {
+          setQuickDownloadKey(normalized)
+          setQuickDownloadShift(shiftHeld)
+        }
+        if (captureTarget === 'quickClear') {
+          setQuickClearKey(normalized)
+          setQuickClearShift(shiftHeld)
+        }
+        if (captureTarget === 'quickSettings') {
+          setQuickSettingsKey(normalized)
+          setQuickSettingsShift(shiftHeld)
+        }
         setCaptureTarget(null)
       }
     }
@@ -484,6 +551,7 @@ const Settings = React.memo((props) => {
     setDownloadFormat(DEFAULT_SETTINGS.downloadFormat)
     setParseANSIOutput(DEFAULT_SETTINGS.parseANSIOutput)
     setAdvanced(DEFAULT_SETTINGS.advanced)
+    setEnableQuickHotkeys(DEFAULT_SETTINGS.enableQuickHotkeys)
     setControlAliases(DEFAULT_SETTINGS.customControlAliases)
     setAliasKey('')
     setAliasShift(false)
@@ -492,6 +560,16 @@ const Settings = React.memo((props) => {
     setKeybindKey('')
     setKeybindShift(false)
     setKeybindText('')
+    setQuickFocusKey(DEFAULT_SETTINGS.quickFocusKey)
+    setQuickHistoryKey(DEFAULT_SETTINGS.quickHistoryKey)
+    setQuickDownloadKey(DEFAULT_SETTINGS.quickDownloadKey)
+    setQuickClearKey(DEFAULT_SETTINGS.quickClearKey)
+    setQuickSettingsKey(DEFAULT_SETTINGS.quickSettingsKey)
+    setQuickFocusShift(DEFAULT_SETTINGS.quickFocusShift)
+    setQuickHistoryShift(DEFAULT_SETTINGS.quickHistoryShift)
+    setQuickDownloadShift(DEFAULT_SETTINGS.quickDownloadShift)
+    setQuickClearShift(DEFAULT_SETTINGS.quickClearShift)
+    setQuickSettingsShift(DEFAULT_SETTINGS.quickSettingsShift)
   }
 
   const save = () => {
@@ -501,6 +579,14 @@ const Settings = React.memo((props) => {
         settingsShortcutShift === clearShortcutShift) {
       alert('Open Settings and Clear Terminal cannot use the same keybind!')
       return
+    }
+
+    if (enableQuickHotkeys) {
+      const hotkeys = [quickFocusKey, quickHistoryKey, quickDownloadKey, quickClearKey, quickSettingsKey]
+      if (hotkeys.some(k => !hotkeyValid(k))) {
+        alert('All terminal hotkeys must be a single character (letters or symbols).')
+        return
+      }
     }
 
     const normalizedSettingsKey = (settingsShortcutKey || KEYBOARD_SHORTCUTS.OPEN_SETTINGS.key).toLowerCase()
@@ -523,7 +609,18 @@ const Settings = React.memo((props) => {
       customControlAliases: controlAliases,
       commandKeybinds: commandKeybinds,
       parseANSIOutput,
-      advanced
+      advanced,
+      enableQuickHotkeys,
+      quickFocusKey: normalizeHotkey(quickFocusKey || 'i'),
+      quickHistoryKey: normalizeHotkey(quickHistoryKey || 'h'),
+      quickDownloadKey: normalizeHotkey(quickDownloadKey || 'd'),
+      quickClearKey: normalizeHotkey(quickClearKey || 'c'),
+      quickSettingsKey: normalizeHotkey(quickSettingsKey || 's'),
+      quickFocusShift,
+      quickHistoryShift,
+      quickDownloadShift,
+      quickClearShift,
+      quickSettingsShift
     })
 
     props.close()
@@ -644,6 +741,18 @@ const Settings = React.memo((props) => {
           <FormControlLabel
             control={
               <Checkbox
+                checked={enableQuickHotkeys}
+                onChange={(e) => setEnableQuickHotkeys(e.target.checked)}
+                sx={{ color: '#ffffffb3', '&.Mui-checked': { color: '#fff' } }}
+              />
+            } label='Enable terminal quick hotkeys (Alt + key)'
+          />
+        </FormGroup>
+
+        <FormGroup>
+          <FormControlLabel
+            control={
+              <Checkbox
                 checked={detectCtrlC}
                 onChange={(e) => setDetectCtrlC(e.target.checked)}
                 sx={{ color: '#ffffffb3', '&.Mui-checked': { color: '#fff' } }}
@@ -719,6 +828,62 @@ const Settings = React.memo((props) => {
             />
           </FormGroup>
 
+          {enableQuickHotkeys && (
+            <>
+              <DialogContentText sx={{ mt: 2 }}>
+                Terminal Hotkeys (Alt + key)
+              </DialogContentText>
+
+              <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 2, mt: 1 }}>
+                <KeyCapture
+                  captureTarget={captureTarget}
+                  currentTarget='quickFocus'
+                  onClick={() => setCaptureTarget('quickFocus')}
+                  ctrlKey={quickFocusKey}
+                  shift={quickFocusShift}
+                  label={formatAltLabel(quickFocusKey, quickFocusShift)}
+                  modifierLabel='Alt'
+                />
+                <KeyCapture
+                  captureTarget={captureTarget}
+                  currentTarget='quickHistory'
+                  onClick={() => setCaptureTarget('quickHistory')}
+                  ctrlKey={quickHistoryKey}
+                  shift={quickHistoryShift}
+                  label={formatAltLabel(quickHistoryKey, quickHistoryShift)}
+                  modifierLabel='Alt'
+                />
+                <KeyCapture
+                  captureTarget={captureTarget}
+                  currentTarget='quickDownload'
+                  onClick={() => setCaptureTarget('quickDownload')}
+                  ctrlKey={quickDownloadKey}
+                  shift={quickDownloadShift}
+                  label={formatAltLabel(quickDownloadKey, quickDownloadShift)}
+                  modifierLabel='Alt'
+                />
+                <KeyCapture
+                  captureTarget={captureTarget}
+                  currentTarget='quickClear'
+                  onClick={() => setCaptureTarget('quickClear')}
+                  ctrlKey={quickClearKey}
+                  shift={quickClearShift}
+                  label={formatAltLabel(quickClearKey, quickClearShift)}
+                  modifierLabel='Alt'
+                />
+                <KeyCapture
+                  captureTarget={captureTarget}
+                  currentTarget='quickSettings'
+                  onClick={() => setCaptureTarget('quickSettings')}
+                  ctrlKey={quickSettingsKey}
+                  shift={quickSettingsShift}
+                  label={formatAltLabel(quickSettingsKey, quickSettingsShift)}
+                  modifierLabel='Alt'
+                />
+              </Box>
+            </>
+          )}
+
           <DialogContentText sx={{ mt: 2 }}>
             Rebindings
           </DialogContentText>
@@ -773,7 +938,9 @@ const Settings = React.memo((props) => {
             onItemDelete={removeAlias}
             renderContent={(entry) => (
               <Typography variant='body2' sx={{ color: '#ffffffcc' }}>
-                sends code {entry.code}
+                {entry.type === 'code'
+                  ? `sends code ${entry.value}`
+                  : `sends text "${entry.value}"`}
               </Typography>
             )}
           />
@@ -788,7 +955,7 @@ const Settings = React.memo((props) => {
             onTextChange={(e) => setAliasCode(e.target.value)}
             textPlaceholder='Control Code'
             textError={aliasCode.length > 0 && !aliasCodeValid}
-            textHelperText={aliasCode && aliasCodeValid ? `= byte ${aliasCodeParsed}` : ''}
+            textHelperText={aliasHelperText}
             onSubmit={addAlias}
             submitDisabled={!aliasKeyValid || !aliasCodeValid}
             submitLabel={aliasEditIndex !== null ? 'Update' : 'Add'}

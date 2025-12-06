@@ -23,6 +23,7 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 import TerminalIcon from '@mui/icons-material/Terminal'
 
 import { parseANSI, stripANSI } from '../../utils/ansiParser'
+import { DEFAULT_SETTINGS } from '../../constants'
 import './TerminalOutput.css'
 
 const TerminalOutput = React.memo((props) => {
@@ -31,6 +32,7 @@ const TerminalOutput = React.memo((props) => {
   // Format selection dialog
   const [formatDialogOpen, setFormatDialogOpen] = React.useState(false)
   const [selectedFormat, setSelectedFormat] = React.useState('txt')
+  const containerRef = React.useRef(null)
 
   const handleDownload = () => {
     if (!props.history || props.history.length === 0) return
@@ -121,8 +123,66 @@ const TerminalOutput = React.memo((props) => {
     setFormatDialogOpen(false)
   }
 
+  // Keep view pinned to most recent output
+  React.useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    el.scrollTop = el.scrollHeight
+  }, [props.history.length])
+
+  // Keyboard shortcuts for accessibility inside the log
+  React.useEffect(() => {
+    const hotkeys = props.quickHotkeys || {}
+    if (hotkeys.enabled === false) return
+
+    const focusKey = (hotkeys.focus || DEFAULT_SETTINGS.quickFocusKey).toLowerCase()
+    const historyKey = (hotkeys.history || DEFAULT_SETTINGS.quickHistoryKey).toLowerCase()
+    const downloadKey = (hotkeys.download || DEFAULT_SETTINGS.quickDownloadKey).toLowerCase()
+    const clearKey = (hotkeys.clear || DEFAULT_SETTINGS.quickClearKey).toLowerCase()
+    const settingsKey = (hotkeys.settings || DEFAULT_SETTINGS.quickSettingsKey).toLowerCase()
+    const focusShift = hotkeys.focusShift === true || DEFAULT_SETTINGS.quickFocusShift === true
+    const historyShift = hotkeys.historyShift === true || DEFAULT_SETTINGS.quickHistoryShift === true
+    const downloadShift = hotkeys.downloadShift === true || DEFAULT_SETTINGS.quickDownloadShift === true
+    const clearShift = hotkeys.clearShift === true || DEFAULT_SETTINGS.quickClearShift === true
+    const settingsShift = hotkeys.settingsShift === true || DEFAULT_SETTINGS.quickSettingsShift === true
+
+    const handler = (e) => {
+      if (e.altKey && !e.ctrlKey && !e.metaKey) {
+        const key = e.key?.toLowerCase()
+        if (key === focusKey && (!!focusShift === e.shiftKey)) {
+          e.preventDefault()
+          props.focusInput?.()
+          return
+        }
+        if (key === historyKey && (!!historyShift === e.shiftKey)) {
+          e.preventDefault()
+          setHistoryOpen(true)
+          return
+        }
+        if (key === downloadKey && (!!downloadShift === e.shiftKey)) {
+          e.preventDefault()
+          handleDownload()
+          return
+        }
+        if (key === clearKey && (!!clearShift === e.shiftKey)) {
+          e.preventDefault()
+          props.onClearRequest?.()
+          return
+        }
+        if (key === settingsKey && (!!settingsShift === e.shiftKey)) {
+          e.preventDefault()
+          props.openSettings?.()
+          return
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [props.quickHotkeys, props.focusInput, props.onClearRequest, props.openSettings, handleDownload])
+
   return (
-    <pre className='terminalOutput' aria-label='Terminal output'>
+    <section className='terminalOutput' aria-label='Terminal output'>
 
       {/* Buttons */}
       <ButtonGroup variant='text' className='terminalButtons' aria-label='Terminal controls'>
@@ -149,22 +209,22 @@ const TerminalOutput = React.memo((props) => {
       </ButtonGroup>
 
       {/* Text */}
-      <Box className='codeContainer' aria-live='polite'>
-        <code>
-          {props.history.filter(line => (line.type === 'output' || props.echo)).map((line, i) => {
-            const segments = props.parseANSIOutput ? parseANSI(line.value) : [{ text: line.value, style: {} }]
-            return (
-              <p key={i}>
-                <span className='time'>{props.time && `${line.time.toTimeString().substring(0, 8)} `}</span>
-                <span className={line.type}>
-                  {segments.map((segment, idx) => (
-                    <span key={idx} style={segment.style}>{segment.text}</span>
-                  ))}
-                </span>
-              </p>
-            )
-          })}
-        </code>
+      <Box className='codeContainer' aria-live='polite' role='log' ref={containerRef}>
+        {props.history.filter(line => (line.type === 'output' || props.echo)).map((line, i) => {
+          const segments = props.parseANSIOutput ? parseANSI(line.value) : [{ text: line.value, style: {} }]
+          return (
+            <div key={i} className={`codeLine ${line.type}`}>
+              {props.time && (
+                <span className='time'>{line.time.toTimeString().substring(0, 8)}</span>
+              )}
+              <span className={`value ${line.type}`}>
+                {segments.map((segment, idx) => (
+                  <span key={idx} style={segment.style}>{segment.text}</span>
+                ))}
+              </span>
+            </div>
+          )
+        })}
       </Box>
 
       {/* Clear Confirmation Dialog */}
@@ -246,7 +306,7 @@ const TerminalOutput = React.memo((props) => {
         </DialogActions>
       </Dialog>
 
-    </pre>
+    </section>
   )
 })
 
@@ -264,7 +324,21 @@ TerminalOutput.propTypes = {
   downloadFormat: PropTypes.string,
   echo: PropTypes.bool,
   time: PropTypes.bool,
-  parseANSIOutput: PropTypes.bool
+  parseANSIOutput: PropTypes.bool,
+  focusInput: PropTypes.func,
+  quickHotkeys: PropTypes.shape({
+    enabled: PropTypes.bool,
+    focus: PropTypes.string,
+    history: PropTypes.string,
+    download: PropTypes.string,
+    clear: PropTypes.string,
+    settings: PropTypes.string,
+    focusShift: PropTypes.bool,
+    historyShift: PropTypes.bool,
+    downloadShift: PropTypes.bool,
+    clearShift: PropTypes.bool,
+    settingsShift: PropTypes.bool
+  })
 }
 
 export default TerminalOutput

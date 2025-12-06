@@ -79,6 +79,19 @@ function App () {
   const detectCtrlD = settings.detectCtrlD !== undefined ? settings.detectCtrlD !== false : (settings.detectCtrl !== false)
   const customControlAliases = settings.customControlAliases || []
   const commandKeybinds = settings.commandKeybinds || []
+  const quickHotkeys = {
+    enabled: settings.enableQuickHotkeys !== false,
+    focus: settings.quickFocusKey || DEFAULT_SETTINGS.quickFocusKey,
+    history: settings.quickHistoryKey || DEFAULT_SETTINGS.quickHistoryKey,
+    download: settings.quickDownloadKey || DEFAULT_SETTINGS.quickDownloadKey,
+    clear: settings.quickClearKey || DEFAULT_SETTINGS.quickClearKey,
+    settings: settings.quickSettingsKey || DEFAULT_SETTINGS.quickSettingsKey,
+    focusShift: settings.quickFocusShift === true,
+    historyShift: settings.quickHistoryShift === true,
+    downloadShift: settings.quickDownloadShift === true,
+    clearShift: settings.quickClearShift === true,
+    settingsShift: settings.quickSettingsShift === true
+  }
 
   // Keyboard shortcuts
   useKeyboardShortcuts([
@@ -236,6 +249,7 @@ function App () {
                   controlAliases={customControlAliases}
                   commandKeybinds={commandKeybinds}
                   parseANSIOutput={settings.parseANSIOutput !== false}
+                  quickHotkeys={quickHotkeys}
                 />
               : <Home
                   connect={connect}

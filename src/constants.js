@@ -86,7 +86,18 @@ export const DEFAULT_SETTINGS = {
   customControlAliases: [],
   commandKeybinds: [],
   parseANSIOutput: true,
-  advanced: false
+  advanced: false,
+  enableQuickHotkeys: true,
+  quickFocusKey: 'i',
+  quickFocusShift: false,
+  quickHistoryKey: 'h',
+  quickHistoryShift: false,
+  quickDownloadKey: 'd',
+  quickDownloadShift: false,
+  quickClearKey: 'c',
+  quickClearShift: false,
+  quickSettingsKey: 's',
+  quickSettingsShift: false
 }
 
 // UI constants

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { forwardRef, useImperativeHandle } from 'react'
 import PropTypes from 'prop-types'
 
 import Grid from '@mui/material/Grid'
@@ -15,12 +15,17 @@ const useFocus = () => {
 }
 
 // Input field and send button for terminal commands
-const TerminalInput = (props) => {
+const TerminalInput = forwardRef((props, ref) => {
   const [inputFocus, setInputFocus] = useFocus()
 
   React.useEffect(() => {
     setInputFocus()
   }, [props.input, setInputFocus])
+
+  // Expose focus method to parent so hotkeys can re-focus input
+  useImperativeHandle(ref, () => ({
+    focusInput: () => setInputFocus()
+  }))
 
   return (
     <Grid container spacing={0} sx={{ width: '100%' }}>
@@ -67,7 +72,7 @@ const TerminalInput = (props) => {
       </Grid>
     </Grid>
   )
-}
+})
 
 TerminalInput.propTypes = {
   input: PropTypes.string,
