@@ -49,7 +49,7 @@ function App () {
 
   // Settings with localStorage persistence
   const [settings, setSettings] = useLocalStorage(
-    'settings',
+    'setting:',
     DEFAULT_SETTINGS,
     () => {
       setToast({

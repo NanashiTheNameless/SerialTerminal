@@ -151,6 +151,98 @@ KeybindListItem.propTypes = {
   children: PropTypes.node
 }
 
+// Reusable KeybindInputForm component for adding/editing keybinds
+const KeybindInputForm = ({ captureTarget, currentTarget, onCaptureClick, ctrlKey, shift, textValue, onTextChange, textPlaceholder, textError, textHelperText, onSubmit, submitDisabled, submitLabel }) => (
+  <Box sx={{ display: 'flex', gap: 1, mt: 2, alignItems: 'center', flexWrap: 'nowrap', width: '100%' }}>
+    <KeyCapture
+      captureTarget={captureTarget}
+      currentTarget={currentTarget}
+      onClick={onCaptureClick}
+      ctrlKey={ctrlKey}
+      shift={shift}
+    />
+    <TextField
+      placeholder={textPlaceholder}
+      variant='outlined'
+      value={textValue}
+      onChange={onTextChange}
+      helperText={textHelperText}
+      sx={{
+        marginTop: 0.75,
+        minWidth: '10em',
+        width: 'auto',
+        '& .MuiOutlinedInput-root': { height: '56px' }
+      }}
+      size='small'
+      error={textError}
+    />
+    <Button
+      variant='outlined'
+      startIcon={<AddIcon />}
+      onClick={onSubmit}
+      disabled={submitDisabled}
+      sx={{
+        marginTop: 0.75,
+        height: '56px',
+        color: '#fff',
+        borderColor: '#fff',
+        '&:hover': { borderColor: '#fff', backgroundColor: 'rgba(255, 255, 255, 0.08)' },
+        '&.Mui-disabled': { color: 'rgba(255, 255, 255, 0.38)', borderColor: 'rgba(255, 255, 255, 0.12)' }
+      }}
+    >
+      {submitLabel}
+    </Button>
+  </Box>
+)
+
+KeybindInputForm.propTypes = {
+  captureTarget: PropTypes.string,
+  currentTarget: PropTypes.string.isRequired,
+  onCaptureClick: PropTypes.func.isRequired,
+  ctrlKey: PropTypes.string,
+  shift: PropTypes.bool,
+  textValue: PropTypes.string.isRequired,
+  onTextChange: PropTypes.func.isRequired,
+  textPlaceholder: PropTypes.string.isRequired,
+  textError: PropTypes.bool,
+  textHelperText: PropTypes.string,
+  onSubmit: PropTypes.func.isRequired,
+  submitDisabled: PropTypes.bool,
+  submitLabel: PropTypes.string.isRequired
+}
+
+// Reusable KeybindList component for displaying list of keybinds
+const KeybindList = ({ items, emptyMessage, renderContent, onItemClick, onItemDelete, selectedIndex }) => (
+  <Box sx={{ mt: 1.5, display: 'flex', flexDirection: 'column', gap: 1 }}>
+    {items.length === 0 && (
+      <Typography variant='body2' sx={{ color: '#ffffff80' }}>
+        {emptyMessage}
+      </Typography>
+    )}
+    {items.map((entry, index) => (
+      <KeybindListItem
+        key={`${entry.key}-${index}`}
+        entry={entry}
+        index={index}
+        isSelected={selectedIndex === index}
+        onClick={() => onItemClick(entry, index)}
+        onDelete={() => onItemDelete(index)}
+      >
+        {renderContent(entry)}
+      </KeybindListItem>
+    ))}
+  </Box>
+)
+
+KeybindList.propTypes = {
+  items: PropTypes.array.isRequired,
+  emptyMessage: PropTypes.string.isRequired,
+  renderContent: PropTypes.func.isRequired,
+  onItemClick: PropTypes.func.isRequired,
+  onItemDelete: PropTypes.func.isRequired,
+  selectedIndex: PropTypes.number
+}
+
 // Settings dialog for configuring serial connection parameters
 const Settings = React.memo((props) => {
   const [baudRate, setBaudRate] = React.useState(props.settings.baudRate)
@@ -667,74 +759,40 @@ const Settings = React.memo((props) => {
             <strong>Formats:</strong> Hex (\x04), decimal (4), escapes (\n, \r, \t, \0), or ANSI ([97m, ESC[2J)
           </Typography>
 
-          <Box sx={{ mt: 1.5, display: 'flex', flexDirection: 'column', gap: 1 }}>
-            {controlAliases.length === 0 && (
-              <Typography variant='body2' sx={{ color: '#ffffff80' }}>
-                No aliases yet.
+          <KeybindList
+            items={controlAliases}
+            emptyMessage='No aliases yet.'
+            selectedIndex={aliasEditIndex}
+            onItemClick={(entry, index) => {
+              setAliasEditIndex(index)
+              setAliasKey(entry.key)
+              setAliasShift(entry.shift)
+              setAliasCode(entry.type === 'code' ? String(entry.value) : (entry.type === 'text' ? entry.value : ''))
+              setCaptureTarget(null)
+            }}
+            onItemDelete={removeAlias}
+            renderContent={(entry) => (
+              <Typography variant='body2' sx={{ color: '#ffffffcc' }}>
+                sends code {entry.code}
               </Typography>
             )}
-            {controlAliases.map((entry, index) => (
-              <KeybindListItem
-                key={`${entry.key}-${index}`}
-                entry={entry}
-                index={index}
-                isSelected={aliasEditIndex === index}
-                onClick={() => {
-                  setAliasKey(entry.key)
-                  setAliasShift(entry.shift)
-                  setAliasCode(entry.type === 'code' ? String(entry.value) : (entry.type === 'text' ? entry.value : ''))
-                  setCaptureTarget(null)
-                  setAliasEditIndex(index)
-                }}
-                onDelete={() => removeAlias(index)}
-              >
-                <Typography variant='body2' sx={{ color: '#ffffffcc' }}>
-                  sends code {entry.code}
-                </Typography>
-              </KeybindListItem>
-            ))}
-          </Box>
+          />
 
-          <Box sx={{ display: 'flex', gap: 1, mt: 2, alignItems: 'center', flexWrap: 'nowrap', width: '100%' }}>
-            <KeyCapture
-              captureTarget={captureTarget}
-              currentTarget='alias'
-              onClick={() => setCaptureTarget('alias')}
-              ctrlKey={aliasKey}
-              shift={aliasShift}
-            />
-            <TextField
-              placeholder='Control Code'
-              variant='outlined'
-              value={aliasCode}
-              onChange={(e) => setAliasCode(e.target.value)}
-              helperText={aliasCode && aliasCodeValid ? `= byte ${aliasCodeParsed}` : ''}
-              sx={{
-                marginTop: 0.75,
-                minWidth: '10em',
-                width: 'auto',
-                '& .MuiOutlinedInput-root': { height: '56px' }
-              }}
-              size='small'
-              error={aliasCode.length > 0 && !aliasCodeValid}
-            />
-            <Button
-              variant='outlined'
-              startIcon={<AddIcon />}
-              onClick={addAlias}
-              disabled={!aliasKeyValid || !aliasCodeValid}
-              sx={{
-                marginTop: 0.75,
-                height: '56px',
-                color: '#fff',
-                borderColor: '#fff',
-                '&:hover': { borderColor: '#fff', backgroundColor: 'rgba(255, 255, 255, 0.08)' },
-                '&.Mui-disabled': { color: 'rgba(255, 255, 255, 0.38)', borderColor: 'rgba(255, 255, 255, 0.12)' }
-              }}
-            >
-              {aliasEditIndex !== null ? 'Update' : 'Add'}
-            </Button>
-          </Box>
+          <KeybindInputForm
+            captureTarget={captureTarget}
+            currentTarget='alias'
+            onCaptureClick={() => setCaptureTarget('alias')}
+            ctrlKey={aliasKey}
+            shift={aliasShift}
+            textValue={aliasCode}
+            onTextChange={(e) => setAliasCode(e.target.value)}
+            textPlaceholder='Control Code'
+            textError={aliasCode.length > 0 && !aliasCodeValid}
+            textHelperText={aliasCode && aliasCodeValid ? `= byte ${aliasCodeParsed}` : ''}
+            onSubmit={addAlias}
+            submitDisabled={!aliasKeyValid || !aliasCodeValid}
+            submitLabel={aliasEditIndex !== null ? 'Update' : 'Add'}
+          />
 
           <Divider sx={{ my: 3 }} />
 
@@ -745,72 +803,39 @@ const Settings = React.memo((props) => {
             Map Ctrl/⌘ + key to send any text string.
           </Typography>
 
-          <Box sx={{ mt: 1.5, display: 'flex', flexDirection: 'column', gap: 1 }}>
-            {commandKeybinds.length === 0 && (
-              <Typography variant='body2' sx={{ color: '#ffffff80' }}>
-                No keybinds yet.
+          <KeybindList
+            items={commandKeybinds}
+            emptyMessage='No keybinds yet.'
+            selectedIndex={keybindEditIndex}
+            onItemClick={(entry, index) => {
+              setKeybindEditIndex(index)
+              setKeybindKey(entry.key)
+              setKeybindShift(entry.shift)
+              setKeybindText(entry.text)
+            }}
+            onItemDelete={removeKeybind}
+            renderContent={(entry) => (
+              <Typography variant='body2' sx={{ color: '#ffffffcc', maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                sends &quot;{entry.text}&quot;
               </Typography>
             )}
-            {commandKeybinds.map((entry, index) => (
-              <KeybindListItem
-                key={`${entry.key}-${index}`}
-                entry={entry}
-                index={index}
-                isSelected={keybindEditIndex === index}
-                onClick={() => {
-                  setKeybindEditIndex(index)
-                  setKeybindKey(entry.key)
-                  setKeybindShift(entry.shift)
-                  setKeybindText(entry.text)
-                }}
-                onDelete={() => removeKeybind(index)}
-              >
-                <Typography variant='body2' sx={{ color: '#ffffffcc', maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  sends &quot;{entry.text}&quot;
-                </Typography>
-              </KeybindListItem>
-            ))}
-          </Box>
+          />
 
-          <Box sx={{ display: 'flex', gap: 1, mt: 2, alignItems: 'center', flexWrap: 'nowrap', width: '100%' }}>
-            <KeyCapture
-              captureTarget={captureTarget}
-              currentTarget='keybind'
-              onClick={() => setCaptureTarget('keybind')}
-              ctrlKey={keybindKey}
-              shift={keybindShift}
-            />
-            <TextField
-              placeholder='Text'
-              variant='outlined'
-              value={keybindText}
-              onChange={(e) => setKeybindText(e.target.value)}
-              sx={{
-                marginTop: 0.75,
-                minWidth: '10em',
-                width: 'auto',
-                '& .MuiOutlinedInput-root': { height: '56px' }
-              }}
-              size='small'
-              error={keybindText.length > 0 && !keybindTextValid}
-            />
-            <Button
-              variant='outlined'
-              startIcon={<AddIcon />}
-              onClick={addKeybind}
-              disabled={!keybindKeyValid || !keybindTextValid}
-              sx={{
-                marginTop: 0.75,
-                height: '56px',
-                color: '#fff',
-                borderColor: '#fff',
-                '&:hover': { borderColor: '#fff', backgroundColor: 'rgba(255, 255, 255, 0.08)' },
-                '&.Mui-disabled': { color: 'rgba(255, 255, 255, 0.38)', borderColor: 'rgba(255, 255, 255, 0.12)' }
-              }}
-            >
-              {keybindEditIndex !== null ? 'Update' : 'Add'}
-            </Button>
-          </Box>
+          <KeybindInputForm
+            captureTarget={captureTarget}
+            currentTarget='keybind'
+            onCaptureClick={() => setCaptureTarget('keybind')}
+            ctrlKey={keybindKey}
+            shift={keybindShift}
+            textValue={keybindText}
+            onTextChange={(e) => setKeybindText(e.target.value)}
+            textPlaceholder='Text'
+            textError={keybindText.length > 0 && !keybindTextValid}
+            textHelperText=''
+            onSubmit={addKeybind}
+            submitDisabled={!keybindKeyValid || !keybindTextValid}
+            submitLabel={keybindEditIndex !== null ? 'Update' : 'Add'}
+          />
 
         </Collapse>
 
