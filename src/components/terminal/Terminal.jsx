@@ -7,7 +7,8 @@ import TerminalOutput from './TerminalOutput'
 import TerminalInput from './TerminalInput'
 import { CTRL_C, CTRL_D, MAX_HISTORY_LENGTH } from '../../constants'
 
-// Main terminal interface for serial communication
+// Helper to get character code from control character string
+const getControlCode = (ctrlChar) => ctrlChar.charCodeAt(0)
 const Terminal = forwardRef((props, ref) => {
   // User input from input field
   const [input, setInput] = React.useState('')
@@ -80,47 +81,66 @@ const Terminal = forwardRef((props, ref) => {
     setInput('')
   }
 
+  // Helper to find a keybind match
+  const findKeybindMatch = (keybinds, charCode, hasShift) => {
+    return keybinds?.find(kb => kb?.key && kb.key.toLowerCase() === charCode.toLowerCase() && kb.shift === hasShift)
+  }
+
   const handleKeyDown = (e) => {
-    const charCode = String.fromCharCode(e.which).toUpperCase()
+    // Only process Ctrl/Cmd+key combinations
+    if (!(e.ctrlKey || e.metaKey)) return
 
-    if (props.ctrlC && (e.ctrlKey || e.metaKey) && charCode === 'C') {
+    // Use e.key for reliable character identification (works for / and other special chars)
+    // e.key is the actual character, e.which doesn't work well for special keys
+    const charCode = e.key?.length === 1 ? e.key : ''
+    const hasShift = e.shiftKey
+
+    if (!charCode) return
+
+    // Check Ctrl+C
+    if (props.ctrlC && charCode.toUpperCase() === 'C' && !hasShift) {
       e.preventDefault()
-      props.sendRaw(CTRL_C.charCodeAt(0))
+      props.sendRaw(getControlCode(CTRL_C))
+      return
     }
 
-    if (props.ctrlD && (e.ctrlKey || e.metaKey) && charCode === 'D') {
+    // Check Ctrl+D
+    if (props.ctrlD && charCode.toUpperCase() === 'D' && !hasShift) {
       e.preventDefault()
-      props.sendRaw(CTRL_D.charCodeAt(0))
+      props.sendRaw(getControlCode(CTRL_D))
+      return
     }
 
-    if (props.controlAliases && (e.ctrlKey || e.metaKey)) {
-      const match = props.controlAliases.find(alias => alias && alias.key && alias.key.toUpperCase() === charCode)
-      if (match && typeof match.code === 'number') {
-        e.preventDefault()
-        props.sendRaw(match.code)
+    // Check control aliases (normalize to lowercase for comparison)
+    const aliasMatch = findKeybindMatch(props.controlAliases, charCode, false)
+    if (aliasMatch) {
+      e.preventDefault()
+      // Handle both raw codes and text sequences
+      if (aliasMatch.type === 'code' && typeof aliasMatch.value === 'number') {
+        props.sendRaw(aliasMatch.value)
+      } else if (aliasMatch.type === 'text' && typeof aliasMatch.value === 'string') {
+        props.send(aliasMatch.value)
       }
+      return
     }
 
-    if (props.commandKeybinds && (e.ctrlKey || e.metaKey)) {
-      const match = props.commandKeybinds.find(keybind => keybind && keybind.key && keybind.key.toUpperCase() === charCode && keybind.shift === (e.shiftKey))
-      if (match && typeof match.text === 'string') {
-        e.preventDefault()
-        props.send(match.text)
-        setHistory((current) => {
-          const newHistory = [
-            ...current,
-            {
-              type: 'userInput',
-              value: match.text,
-              time: new Date()
-            }
-          ]
-          if (newHistory.length > MAX_HISTORY_LENGTH) {
-            return newHistory.slice(-MAX_HISTORY_LENGTH)
+    // Check command keybinds
+    const commandMatch = findKeybindMatch(props.commandKeybinds, charCode, hasShift)
+    if (commandMatch && typeof commandMatch.text === 'string') {
+      e.preventDefault()
+      props.send(commandMatch.text)
+      setHistory((current) => {
+        const newHistory = [
+          ...current,
+          {
+            type: 'userInput',
+            value: commandMatch.text,
+            time: new Date()
           }
-          return newHistory
-        })
-      }
+        ]
+        return newHistory.length > MAX_HISTORY_LENGTH ? newHistory.slice(-MAX_HISTORY_LENGTH) : newHistory
+      })
+      return
     }
   }
 
@@ -140,6 +160,7 @@ const Terminal = forwardRef((props, ref) => {
           downloadFormat={props.downloadFormat}
           echo={props.echo}
           time={props.time}
+          parseANSIOutput={props.parseANSIOutput}
         />
       </Grid>
 
@@ -173,7 +194,8 @@ Terminal.propTypes = {
   ctrlC: PropTypes.bool,
   ctrlD: PropTypes.bool,
   controlAliases: PropTypes.array,
-  commandKeybinds: PropTypes.array
+  commandKeybinds: PropTypes.array,
+  parseANSIOutput: PropTypes.bool
 }
 
 export default Terminal

@@ -22,6 +22,7 @@ import Radio from '@mui/material/Radio'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import TerminalIcon from '@mui/icons-material/Terminal'
 
+import { parseANSI, stripANSI } from '../../utils/ansiParser'
 import './TerminalOutput.css'
 
 const TerminalOutput = React.memo((props) => {
@@ -54,7 +55,8 @@ const TerminalOutput = React.memo((props) => {
         content = props.history.map(line => {
           const time = props.time ? `${line.time.toTimeString().substring(0, 8)} ` : ''
           const prefix = line.type === 'userInput' ? '> ' : '< '
-          return `${time}${prefix}${line.value}`
+          const cleanValue = stripANSI(line.value)
+          return `${time}${prefix}${cleanValue}`
         }).join('\n')
         filename += '.txt'
         mimeType = 'text/plain'
@@ -63,7 +65,8 @@ const TerminalOutput = React.memo((props) => {
       case 'csv':
         content = 'Timestamp,Type,Value\n' + props.history.map(line => {
           const time = line.time.toISOString()
-          const value = `"${line.value.replace(/"/g, '""')}"`
+          const cleanValue = stripANSI(line.value)
+          const value = `"${cleanValue.replace(/"/g, '""')}"`
           return `${time},${line.type},${value}`
         }).join('\n')
         filename += '.csv'
@@ -86,10 +89,11 @@ const TerminalOutput = React.memo((props) => {
         content += '## Session Log\n\n'
         props.history.forEach(line => {
           const time = props.time ? `${line.time.toTimeString().substring(0, 8)} ` : ''
+          const cleanValue = stripANSI(line.value)
           if (line.type === 'userInput') {
-            content += `**${time}Input:**\n\`\`\`\n${line.value}\n\`\`\`\n\n`
+            content += `**${time}Input:**\n\`\`\`\n${cleanValue}\n\`\`\`\n\n`
           } else {
-            content += `${time}Output:\n\`\`\`\n${line.value}\n\`\`\`\n\n`
+            content += `${time}Output:\n\`\`\`\n${cleanValue}\n\`\`\`\n\n`
           }
         })
         filename += '.md'
@@ -97,7 +101,7 @@ const TerminalOutput = React.memo((props) => {
         break
 
       default:
-        content = props.history.map(line => line.value).join('\n')
+        content = props.history.map(line => stripANSI(line.value)).join('\n')
         filename += '.txt'
     }
 
@@ -147,12 +151,19 @@ const TerminalOutput = React.memo((props) => {
       {/* Text */}
       <Box className='codeContainer' aria-live='polite'>
         <code>
-          {props.history.filter(line => (line.type === 'output' || props.echo)).map((line, i) => (
-            <p key={i}>
-              <span className='time'>{props.time && `${line.time.toTimeString().substring(0, 8)} `}</span>
-              <span className={line.type}>{line.value}</span>
-            </p>
-          ))}
+          {props.history.filter(line => (line.type === 'output' || props.echo)).map((line, i) => {
+            const segments = props.parseANSIOutput ? parseANSI(line.value) : [{ text: line.value, style: {} }]
+            return (
+              <p key={i}>
+                <span className='time'>{props.time && `${line.time.toTimeString().substring(0, 8)} `}</span>
+                <span className={line.type}>
+                  {segments.map((segment, idx) => (
+                    <span key={idx} style={segment.style}>{segment.text}</span>
+                  ))}
+                </span>
+              </p>
+            )
+          })}
         </code>
       </Box>
 
@@ -252,7 +263,8 @@ TerminalOutput.propTypes = {
   onClearCancel: PropTypes.func,
   downloadFormat: PropTypes.string,
   echo: PropTypes.bool,
-  time: PropTypes.bool
+  time: PropTypes.bool,
+  parseANSIOutput: PropTypes.bool
 }
 
 export default TerminalOutput

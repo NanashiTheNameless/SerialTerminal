@@ -235,6 +235,7 @@ function App () {
                   ctrlD={detectCtrlD}
                   controlAliases={customControlAliases}
                   commandKeybinds={commandKeybinds}
+                  parseANSIOutput={settings.parseANSIOutput !== false}
                 />
               : <Home
                   connect={connect}

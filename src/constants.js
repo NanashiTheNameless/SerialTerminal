@@ -84,7 +84,9 @@ export const DEFAULT_SETTINGS = {
   settingsShortcutShift: false,
   clearShortcutShift: false,
   customControlAliases: [],
-  commandKeybinds: []
+  commandKeybinds: [],
+  parseANSIOutput: true,
+  advanced: false
 }
 
 // UI constants

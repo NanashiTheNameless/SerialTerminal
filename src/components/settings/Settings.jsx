@@ -46,12 +46,15 @@ const Settings = React.memo((props) => {
   const [settingsShortcutShift, setSettingsShortcutShift] = React.useState(props.settings.settingsShortcutShift === true)
   const [clearShortcutShift, setClearShortcutShift] = React.useState(props.settings.clearShortcutShift === true)
   const [downloadFormat, setDownloadFormat] = React.useState(props.settings.downloadFormat || 'ask')
+  const [advanced, setAdvanced] = React.useState(props.settings.advanced === true)
   const [captureTarget, setCaptureTarget] = React.useState(null)
-  const [advanced, setAdvanced] = React.useState(false)
+  const [parseANSIOutput, setParseANSIOutput] = React.useState(props.settings.parseANSIOutput !== false)
   const [controlAliases, setControlAliases] = React.useState(props.settings.customControlAliases || [])
   const [aliasKey, setAliasKey] = React.useState('')
   const [aliasShift, setAliasShift] = React.useState(false)
   const [aliasCode, setAliasCode] = React.useState('')
+  const [aliasEditIndex, setAliasEditIndex] = React.useState(null)
+  const [keybindEditIndex, setKeybindEditIndex] = React.useState(null)
   const [commandKeybinds, setCommandKeybinds] = React.useState(props.settings.commandKeybinds || [])
   const [keybindKey, setKeybindKey] = React.useState('')
   const [keybindShift, setKeybindShift] = React.useState(false)
@@ -62,9 +65,42 @@ const Settings = React.memo((props) => {
     return `Ctrl${shift ? '+Shift' : ''}+${finalKey}`
   }
 
+  // Parse escape sequences like \x04, \n, etc.
+  const parseEscapeSequence = (str, enableANSI = true) => {
+    if (!str) return null
+    const hexMatch = str.match(/^\\x([0-9a-fA-F]{1,2})$/)
+    if (hexMatch) {
+      return { type: 'code', value: parseInt(hexMatch[1], 16) }
+    }
+    // Handle common escape sequences
+    const escapeMap = {
+      '\\n': 10,    // newline
+      '\\r': 13,    // carriage return
+      '\\t': 9,     // tab
+      '\\0': 0,     // null
+      '\\\\': 92   // backslash
+    }
+    if (escapeMap[str] !== undefined) {
+      return { type: 'code', value: escapeMap[str] }
+    }
+    // Check for ANSI sequence patterns (only if enabled)
+    if (enableANSI) {
+      const ansiMatch = str.match(/^(?:\\033|\[)?(.*?)([a-zA-Z])$/)
+      if (ansiMatch && (ansiMatch[0].includes('[') || ansiMatch[0].startsWith('\\'))) {
+        return { type: 'text', value: `\x1b[${ansiMatch[1]}${ansiMatch[2]}` }
+      }
+      if (str.startsWith('ESC')) {
+        return { type: 'text', value: `\x1b${str.substring(3)}` }
+      }
+    }
+    // Try direct number
+    const num = Number(str)
+    return Number.isInteger(num) && num >= 0 && num <= 255 ? { type: 'code', value: num } : null
+  }
+
   const aliasKeyValid = aliasKey.trim().length === 1
-  const aliasCodeNumber = Number(aliasCode)
-  const aliasCodeValid = Number.isInteger(aliasCodeNumber) && aliasCodeNumber >= 0 && aliasCodeNumber <= 255
+  const aliasCodeParsed = parseEscapeSequence(aliasCode.trim(), true)
+  const aliasCodeValid = aliasCodeParsed !== null
 
   const keybindKeyValid = keybindKey.trim().length === 1
   const keybindTextValid = keybindText.trim().length > 0
@@ -72,13 +108,26 @@ const Settings = React.memo((props) => {
   const addAlias = () => {
     if (!aliasKeyValid || !aliasCodeValid) return
     const normalizedKey = aliasKey.trim().toLowerCase()
-    const exists = controlAliases.some((entry) => entry.key === normalizedKey && entry.shift === aliasShift)
-    if (exists) {
-      const shiftLabel = aliasShift ? 'Ctrl+Shift+' : 'Ctrl+'
-      alert(`${shiftLabel}${normalizedKey.toUpperCase()} is already mapped. Delete the existing alias first.`)
-      return
+
+    if (aliasEditIndex !== null) {
+      // Update existing alias
+      setControlAliases((prev) => {
+        const updated = [...prev]
+        updated[aliasEditIndex] = { key: normalizedKey, shift: aliasShift, ...aliasCodeParsed }
+        return updated
+      })
+      setAliasEditIndex(null)
+    } else {
+      // Add new alias
+      const exists = controlAliases.some((entry) => entry.key === normalizedKey && entry.shift === aliasShift)
+      if (exists) {
+        const shiftLabel = aliasShift ? 'Ctrl+Shift+' : 'Ctrl+'
+        alert(`${shiftLabel}${normalizedKey.toUpperCase()} is already mapped. Delete the existing alias first.`)
+        return
+      }
+      // Store the parsed result (either code or text)
+      setControlAliases((prev) => [...prev, { key: normalizedKey, shift: aliasShift, ...aliasCodeParsed }])
     }
-    setControlAliases((prev) => [...prev, { key: normalizedKey, shift: aliasShift, code: aliasCodeNumber }])
     setAliasKey('')
     setAliasShift(false)
     setAliasCode('')
@@ -86,18 +135,33 @@ const Settings = React.memo((props) => {
 
   const removeAlias = (index) => {
     setControlAliases((prev) => prev.filter((_, i) => i !== index))
+    if (aliasEditIndex === index) {
+      setAliasEditIndex(null)
+      setAliasKey('')
+      setAliasShift(false)
+      setAliasCode('')
+    }
   }
 
   const addKeybind = () => {
     if (!keybindKeyValid || !keybindTextValid) return
     const normalizedKey = keybindKey.trim().toLowerCase()
-    const exists = commandKeybinds.some((entry) => entry.key === normalizedKey && entry.shift === keybindShift)
-    if (exists) {
-      const shiftLabel = keybindShift ? 'Ctrl+Shift+' : 'Ctrl+'
-      alert(`${shiftLabel}${normalizedKey.toUpperCase()} is already mapped. Delete the existing keybind first.`)
-      return
+    if (keybindEditIndex !== null) {
+      // Update mode
+      setCommandKeybinds((prev) =>
+        prev.map((entry, i) => (i === keybindEditIndex ? { key: normalizedKey, shift: keybindShift, text: keybindText.trim() } : entry))
+      )
+      setKeybindEditIndex(null)
+    } else {
+      // Add mode
+      const exists = commandKeybinds.some((entry) => entry.key === normalizedKey && entry.shift === keybindShift)
+      if (exists) {
+        const shiftLabel = keybindShift ? 'Ctrl+Shift+' : 'Ctrl+'
+        alert(`${shiftLabel}${normalizedKey.toUpperCase()} is already mapped. Delete the existing keybind first.`)
+        return
+      }
+      setCommandKeybinds((prev) => [...prev, { key: normalizedKey, shift: keybindShift, text: keybindText.trim() }])
     }
-    setCommandKeybinds((prev) => [...prev, { key: normalizedKey, shift: keybindShift, text: keybindText.trim() }])
     setKeybindKey('')
     setKeybindShift(false)
     setKeybindText('')
@@ -105,6 +169,12 @@ const Settings = React.memo((props) => {
 
   const removeKeybind = (index) => {
     setCommandKeybinds((prev) => prev.filter((_, i) => i !== index))
+    if (keybindEditIndex === index) {
+      setKeybindEditIndex(null)
+      setKeybindKey('')
+      setKeybindShift(false)
+      setKeybindText('')
+    }
   }
 
   const cancel = () => {
@@ -121,6 +191,8 @@ const Settings = React.memo((props) => {
     setSettingsShortcutShift(props.settings.settingsShortcutShift === true)
     setClearShortcutShift(props.settings.clearShortcutShift === true)
     setDownloadFormat(props.settings.downloadFormat || 'ask')
+    setParseANSIOutput(props.settings.parseANSIOutput !== false)
+    setAdvanced(props.settings.advanced === true)
     setControlAliases(props.settings.customControlAliases || [])
     setAliasKey('')
     setAliasShift(false)
@@ -129,7 +201,6 @@ const Settings = React.memo((props) => {
     setKeybindKey('')
     setKeybindShift(false)
     setKeybindText('')
-    setAdvanced(false)
 
     props.close()
   }
@@ -145,8 +216,10 @@ const Settings = React.memo((props) => {
         return
       }
 
-      // Only accept single printable keys for simplicity
-      if (e.key && e.key.length === 1) {
+      // Accept any single-character key (printable character)
+      // This includes letters, numbers, and symbols like /, @, !, etc.
+      const excludedKeys = ['Control', 'Shift', 'Alt', 'Meta', 'Enter', 'Tab', 'Backspace', 'Delete', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'PageUp', 'PageDown', 'CapsLock', 'NumLock']
+      if (e.key && e.key.length === 1 && !excludedKeys.includes(e.key)) {
         const normalized = e.key.toLowerCase()
         const shiftHeld = e.shiftKey === true
         if (captureTarget === 'settings') {
@@ -196,6 +269,8 @@ const Settings = React.memo((props) => {
     setSettingsShortcutShift(DEFAULT_SETTINGS.settingsShortcutShift)
     setClearShortcutShift(DEFAULT_SETTINGS.clearShortcutShift)
     setDownloadFormat(DEFAULT_SETTINGS.downloadFormat)
+    setParseANSIOutput(DEFAULT_SETTINGS.parseANSIOutput)
+    setAdvanced(DEFAULT_SETTINGS.advanced)
     setControlAliases(DEFAULT_SETTINGS.customControlAliases)
     setAliasKey('')
     setAliasShift(false)
@@ -204,13 +279,12 @@ const Settings = React.memo((props) => {
     setKeybindKey('')
     setKeybindShift(false)
     setKeybindText('')
-    setAdvanced(false)
   }
 
   const save = () => {
     // Check for conflicts between Settings and Clear shortcuts
-    if (settingsShortcut && clearShortcut && 
-        settingsShortcutKey === clearShortcutKey && 
+    if (settingsShortcut && clearShortcut &&
+        settingsShortcutKey === clearShortcutKey &&
         settingsShortcutShift === clearShortcutShift) {
       alert('Open Settings and Clear Terminal cannot use the same keybind!')
       return
@@ -234,7 +308,9 @@ const Settings = React.memo((props) => {
       clearShortcutShift,
       downloadFormat,
       customControlAliases: controlAliases,
-      commandKeybinds: commandKeybinds
+      commandKeybinds: commandKeybinds,
+      parseANSIOutput,
+      advanced
     })
 
     props.close()
@@ -417,6 +493,19 @@ const Settings = React.memo((props) => {
         <Collapse in={advanced} timeout='auto' unmountOnExit>
           <Divider sx={{ my: 2 }} />
 
+          <FormGroup sx={{ mb: 2 }}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={parseANSIOutput}
+                  onChange={(e) => setParseANSIOutput(e.target.checked)}
+                  sx={{ color: '#ffffffb3', '&.Mui-checked': { color: '#fff' } }}
+                />
+              }
+              label='Parse ANSI Escape Sequences in Received Output'
+            />
+          </FormGroup>
+
           <DialogContentText sx={{ mt: 2 }}>
             Rebindings
           </DialogContentText>
@@ -515,7 +604,10 @@ const Settings = React.memo((props) => {
             Control Aliases
           </Typography>
           <Typography variant='body2' sx={{ color: '#ffffff99', mt: 0.5 }}>
-            Map Ctrl/⌘ + key to send a control code.
+            Map Ctrl/⌘ + key to send a control code or ANSI sequence.
+          </Typography>
+          <Typography variant='body2' sx={{ color: '#ffffff77', mt: 1, fontSize: '0.85rem' }}>
+            <strong>Formats:</strong> Hex (\x04), decimal (4), escapes (\n, \r, \t, \0), or ANSI ([97m, ESC[2J)
           </Typography>
 
           <Box sx={{ mt: 1.5, display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -534,7 +626,18 @@ const Settings = React.memo((props) => {
                   p: 1.25,
                   borderRadius: 1.25,
                   border: '1px solid #555',
-                  backgroundColor: '#1e1e1e'
+                  backgroundColor: '#1e1e1e',
+                  cursor: 'pointer',
+                  '&:hover': { backgroundColor: '#252525', borderColor: '#777' }
+                }}
+                onClick={() => {
+                  setAliasKey(entry.key)
+                  setAliasShift(entry.shift)
+                  setAliasCode(entry.type === 'code' ? String(entry.value) : (entry.type === 'text' ? entry.value : ''))
+                  // Mark as editing by setting to edit mode
+                  setCaptureTarget(null)
+                  // Store the index to update instead of add
+                  setAliasEditIndex(index)
                 }}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -609,12 +712,11 @@ const Settings = React.memo((props) => {
               </Typography>
             </Box>
             <TextField
-              placeholder='Code (0-255)'
+              placeholder='Control Code'
               variant='outlined'
               value={aliasCode}
               onChange={(e) => setAliasCode(e.target.value)}
-              type='number'
-              inputProps={{ min: 0, max: 255 }}
+              helperText={aliasCode && aliasCodeValid ? `= byte ${aliasCodeParsed}` : ''}
               sx={{
                 marginTop: 0.75,
                 minWidth: '10em',
@@ -638,7 +740,7 @@ const Settings = React.memo((props) => {
                 '&.Mui-disabled': { color: 'rgba(255, 255, 255, 0.38)', borderColor: 'rgba(255, 255, 255, 0.12)' }
               }}
             >
-              Add
+              {aliasEditIndex !== null ? 'Update' : 'Add'}
             </Button>
           </Box>
 
@@ -660,14 +762,26 @@ const Settings = React.memo((props) => {
             {commandKeybinds.map((entry, index) => (
               <Box
                 key={`${entry.key}-${index}`}
+                onClick={() => {
+                  setKeybindEditIndex(index)
+                  setKeybindKey(entry.key)
+                  setKeybindShift(entry.shift)
+                  setKeybindText(entry.text)
+                }}
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   p: 1.25,
                   borderRadius: 1.25,
-                  border: '1px solid #555',
-                  backgroundColor: '#1e1e1e'
+                  border: keybindEditIndex === index ? '2px solid #1976d2' : '1px solid #555',
+                  backgroundColor: keybindEditIndex === index ? '#2a2a3a' : '#1e1e1e',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    borderColor: '#888',
+                    backgroundColor: '#252535'
+                  }
                 }}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -690,7 +804,7 @@ const Settings = React.memo((props) => {
                     <span>{(entry.key || '').toUpperCase()}</span>
                   </Box>
                   <Typography variant='body2' sx={{ color: '#ffffffcc', maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    sends "{entry.text}"
+                    sends &quot;{entry.text}&quot;
                   </Typography>
                 </Box>
                 <IconButton aria-label='Delete keybind' size='small' onClick={() => removeKeybind(index)}>
@@ -769,7 +883,7 @@ const Settings = React.memo((props) => {
                 '&.Mui-disabled': { color: 'rgba(255, 255, 255, 0.38)', borderColor: 'rgba(255, 255, 255, 0.12)' }
               }}
             >
-              Add
+              {keybindEditIndex !== null ? 'Update' : 'Add'}
             </Button>
           </Box>
 

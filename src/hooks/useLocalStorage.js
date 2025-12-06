@@ -11,7 +11,16 @@ export function useLocalStorage (key, defaultValue, onError = null) {
   const [value, setValue] = useState(() => {
     try {
       const item = window.localStorage.getItem(key)
-      return item ? JSON.parse(item) : defaultValue
+      if (!item) return defaultValue
+      
+      const parsed = JSON.parse(item)
+      
+      // If defaultValue is an object, merge stored value with defaults to ensure all properties exist
+      if (typeof defaultValue === 'object' && defaultValue !== null && !Array.isArray(defaultValue)) {
+        return { ...defaultValue, ...parsed }
+      }
+      
+      return parsed
     } catch (error) {
       console.error(`Error reading localStorage key "${key}":`, error)
       if (onError) onError(error)
