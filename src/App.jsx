@@ -22,7 +22,7 @@ import { useLocalStorage } from './hooks/useLocalStorage'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 
 // Constants
-import { DEFAULT_SETTINGS, TOAST_DURATION } from './constants'
+import { DEFAULT_SETTINGS, TOAST_DURATION, KEYBOARD_SHORTCUTS } from './constants'
 
 function App () {
   // Serial Module
@@ -71,11 +71,21 @@ function App () {
   // Clear confirmation dialog state
   const [clearConfirmOpen, setClearConfirmOpen] = React.useState(false)
 
+  const settingsShortcutKey = (settings.settingsShortcutKey || KEYBOARD_SHORTCUTS.OPEN_SETTINGS.key).toLowerCase()
+  const clearShortcutKey = (settings.clearShortcutKey || KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.key).toLowerCase()
+  const settingsShortcutShift = settings.settingsShortcutShift === true
+  const clearShortcutShift = settings.clearShortcutShift === true
+  const detectCtrlC = settings.detectCtrlC !== undefined ? settings.detectCtrlC !== false : (settings.detectCtrl !== false)
+  const detectCtrlD = settings.detectCtrlD !== undefined ? settings.detectCtrlD !== false : (settings.detectCtrl !== false)
+  const customControlAliases = settings.customControlAliases || []
+  const commandKeybinds = settings.commandKeybinds || []
+
   // Keyboard shortcuts
   useKeyboardShortcuts([
     {
-      key: 'k',
+      key: settingsShortcutKey,
       ctrl: true,
+      shift: settingsShortcutShift,
       callback: () => {
         if (settings.settingsShortcut !== false) {
           setSettingsOpen(true)
@@ -83,8 +93,9 @@ function App () {
       }
     },
     {
-      key: 'l',
+      key: clearShortcutKey,
       ctrl: true,
+      shift: clearShortcutShift,
       callback: () => {
         if (settings.clearShortcut === true) {
           if (clearConfirmOpen) {
@@ -217,9 +228,13 @@ function App () {
                     setClearConfirmOpen(false)
                   }}
                   onClearCancel={() => setClearConfirmOpen(false)}
+                  downloadFormat={settings.downloadFormat}
                   echo={settings.localEcho !== false}
                   time={settings.timestamp !== false}
-                  ctrl={settings.detectCtrl !== false}
+                  ctrlC={detectCtrlC}
+                  ctrlD={detectCtrlD}
+                  controlAliases={customControlAliases}
+                  commandKeybinds={commandKeybinds}
                 />
               : <Home
                   connect={connect}

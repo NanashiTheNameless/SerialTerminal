@@ -81,15 +81,45 @@ const Terminal = forwardRef((props, ref) => {
   }
 
   const handleKeyDown = (e) => {
-    if (props.ctrl) {
-      const charCode = String.fromCharCode(e.which).toUpperCase()
+    const charCode = String.fromCharCode(e.which).toUpperCase()
 
-      if ((e.ctrlKey || e.metaKey) && charCode === 'C') {
+    if (props.ctrlC && (e.ctrlKey || e.metaKey) && charCode === 'C') {
+      e.preventDefault()
+      props.sendRaw(CTRL_C.charCodeAt(0))
+    }
+
+    if (props.ctrlD && (e.ctrlKey || e.metaKey) && charCode === 'D') {
+      e.preventDefault()
+      props.sendRaw(CTRL_D.charCodeAt(0))
+    }
+
+    if (props.controlAliases && (e.ctrlKey || e.metaKey)) {
+      const match = props.controlAliases.find(alias => alias && alias.key && alias.key.toUpperCase() === charCode)
+      if (match && typeof match.code === 'number') {
         e.preventDefault()
-        props.sendRaw(CTRL_C.charCodeAt(0))
-      } else if ((e.ctrlKey || e.metaKey) && charCode === 'D') {
+        props.sendRaw(match.code)
+      }
+    }
+
+    if (props.commandKeybinds && (e.ctrlKey || e.metaKey)) {
+      const match = props.commandKeybinds.find(keybind => keybind && keybind.key && keybind.key.toUpperCase() === charCode && keybind.shift === (e.shiftKey))
+      if (match && typeof match.text === 'string') {
         e.preventDefault()
-        props.sendRaw(CTRL_D.charCodeAt(0))
+        props.send(match.text)
+        setHistory((current) => {
+          const newHistory = [
+            ...current,
+            {
+              type: 'userInput',
+              value: match.text,
+              time: new Date()
+            }
+          ]
+          if (newHistory.length > MAX_HISTORY_LENGTH) {
+            return newHistory.slice(-MAX_HISTORY_LENGTH)
+          }
+          return newHistory
+        })
       }
     }
   }
@@ -107,6 +137,7 @@ const Terminal = forwardRef((props, ref) => {
           onClearRequest={props.onClearRequest}
           onClearConfirm={props.onClearConfirm}
           onClearCancel={props.onClearCancel}
+          downloadFormat={props.downloadFormat}
           echo={props.echo}
           time={props.time}
         />
@@ -136,9 +167,13 @@ Terminal.propTypes = {
   onClearRequest: PropTypes.func,
   onClearConfirm: PropTypes.func,
   onClearCancel: PropTypes.func,
+  downloadFormat: PropTypes.string,
   echo: PropTypes.bool,
   time: PropTypes.bool,
-  ctrl: PropTypes.bool
+  ctrlC: PropTypes.bool,
+  ctrlD: PropTypes.bool,
+  controlAliases: PropTypes.array,
+  commandKeybinds: PropTypes.array
 }
 
 export default Terminal

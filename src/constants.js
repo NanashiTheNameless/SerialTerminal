@@ -29,20 +29,26 @@ export const LINE_ENDING_LABELS = {
   CRLF: 'CRLF (\\r\\n)'
 }
 
+// Download format options
+export const DOWNLOAD_FORMATS = {
+  ASK: 'ask',
+  TXT: 'txt',
+  CSV: 'csv',
+  JSON: 'json',
+  MD: 'md'
+}
+
+export const DOWNLOAD_FORMAT_LABELS = {
+  ASK: 'Ask each time',
+  TXT: 'Plain Text (.txt)',
+  CSV: 'CSV (.csv)',
+  JSON: 'JSON (.json)',
+  MD: 'Markdown (.md)'
+}
+
 // Control characters
 export const CTRL_C = '\x03'
 export const CTRL_D = '\x04'
-
-// Default settings
-export const DEFAULT_SETTINGS = {
-  baudRate: 115200,
-  lineEnding: LINE_ENDING_VALUES.CRLF,
-  localEcho: true,
-  timestamp: true,
-  detectCtrl: true,
-  settingsShortcut: true,
-  clearShortcut: false
-}
 
 // Keyboard shortcuts
 export const KEYBOARD_SHORTCUTS = {
@@ -60,6 +66,25 @@ export const KEYBOARD_SHORTCUTS = {
     description: 'Open settings',
     settingKey: 'settingsShortcut'
   }
+}
+
+// Default settings
+export const DEFAULT_SETTINGS = {
+  baudRate: 115200,
+  lineEnding: LINE_ENDING_VALUES.CRLF,
+  localEcho: true,
+  timestamp: true,
+  detectCtrlC: true,
+  detectCtrlD: true,
+  settingsShortcut: true,
+  clearShortcut: false,
+  downloadFormat: 'ask',
+  settingsShortcutKey: KEYBOARD_SHORTCUTS.OPEN_SETTINGS.key,
+  clearShortcutKey: KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.key,
+  settingsShortcutShift: false,
+  clearShortcutShift: false,
+  customControlAliases: [],
+  commandKeybinds: []
 }
 
 // UI constants
