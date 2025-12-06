@@ -31,6 +31,7 @@ This tool requires the [Web Serial API](<https://developer.mozilla.org/en-US/doc
 - Opera 75+
 
 ### Not supported on
+
 - Firefox (not yet supported)
 - Safari (not supported)
 - Mobile browsers (not supported due to API limitations)
@@ -63,6 +64,7 @@ The application will open at `http://localhost:3000`
 ### Building
 
 ```sh
+yarn install --immutable
 yarn build
 ```
 

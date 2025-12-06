@@ -12,6 +12,7 @@ export default defineConfig({
     copyPublicDir: true,
     modulePreload: false,
     target: 'es2015',
+    chunkSizeWarningLimit: 1024,
     rollupOptions: {
       output: {
         format: 'iife',

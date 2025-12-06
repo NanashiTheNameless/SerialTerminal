@@ -23,7 +23,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          yarn install
+          yarn install --immutable
           yarn dlx update-browserslist-db@latest -y
 
       - name: Set Version
@@ -66,12 +66,6 @@ jobs:
         with:
           node-version: 25
 
-      - name: Install deps
-        run: yarn install
-
-      - name: Build
-        run: yarn build
-
       - name: Compute release metadata
         id: meta
         shell: bash
@@ -96,22 +90,9 @@ jobs:
           } >> "$GITHUB_OUTPUT"
           echo "::notice title=Release meta::sha7=${sha7}, prev_tag=${prev_tag}"
 
-      - name: Prepare offline HTML/JS (make paths relative, set name with SHA)
+      - name: Build offline bundle
         shell: bash
-        run: |
-          cp -f LICENSE build/LICENSE
-          cp -f README.md build/README.md
-          sed -i -E 's/(href|src)="\/([^/])/\1=".\/\2/g' build/index.html
-          sed -i -E 's/ crossorigin//g' build/index.html
-          sed -i -E 's/<script type="module"/<script defer/g' build/index.html
-          sed -i -E "s/[\"']\\/([a-zA-Z])/\".\\/\\1/g" build/assets/index-*.js
-          sed -i -E "s/name:\\s*\"dev\"/name:\"Offline Capable Static Build ${{ steps.meta.outputs.sha7 }}\"/g" build/assets/index-*.js
-          mv build "SerialTerminalOffline-${{ steps.meta.outputs.sha7 }}"
-
-      - name: Zip offline bundle
-        shell: bash
-        run: |
-          zip -r "SerialTerminalOffline-${{ steps.meta.outputs.sha7 }}.zip" "SerialTerminalOffline-${{ steps.meta.outputs.sha7 }}"
+        run: bash buildOffline.sh
 
       - name: Upload artifact (CI artifact)
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4
