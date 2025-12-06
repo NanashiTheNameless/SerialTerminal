@@ -2,6 +2,8 @@
 
 sha7="$(git rev-parse --short=7 HEAD)"
 
+rm -rf SerialTerminalOffline-* SerialTerminalOffline-*.zip
+
 yarn install
 
 yarn build
