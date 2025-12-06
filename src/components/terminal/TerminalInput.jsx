@@ -23,10 +23,10 @@ const TerminalInput = (props) => {
   }, [props.input, setInputFocus])
 
   return (
-    <Grid container spacing={0}>
+    <Grid container spacing={0} sx={{ width: '100%' }}>
       <Grid
         item sx={{
-          width: 'calc(100% - 8rem)',
+          flex: 1,
           paddingRight: '.5em'
         }}
       >
