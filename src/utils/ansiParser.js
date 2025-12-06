@@ -20,7 +20,7 @@ const ANSI_COLORS = {
   94: '#74c0fc', // bright blue
   95: '#ff8ed4', // bright magenta
   96: '#35d9d2', // bright cyan
-  97: '#ffffff'  // bright white
+  97: '#ffffff' // bright white
 }
 
 const ANSI_BG_COLORS = {
@@ -39,7 +39,7 @@ const ANSI_BG_COLORS = {
   104: '#74c0fc', // bright blue bg
   105: '#ff8ed4', // bright magenta bg
   106: '#35d9d2', // bright cyan bg
-  107: '#ffffff'  // bright white bg
+  107: '#ffffff' // bright white bg
 }
 
 /**
@@ -50,7 +50,8 @@ export const parseANSI = (text) => {
   if (!text || typeof text !== 'string') return [{ text: String(text), style: {} }]
 
   const segments = []
-  const ansiRegex = /\x1b\[([0-9;]*?)([a-zA-Z])/g
+  // eslint-disable-next-line no-control-regex
+  const ansiRegex = /\u001b\[([0-9;]*?)([a-zA-Z])/g
   let lastIndex = 0
   let currentStyle = {}
 
@@ -116,5 +117,6 @@ export const parseANSI = (text) => {
  * Strip ANSI codes from text (for plain text export)
  */
 export const stripANSI = (text) => {
-  return String(text).replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '')
+  // eslint-disable-next-line no-control-regex
+  return String(text).replace(/\u001b\[[0-9;]*[a-zA-Z]/g, '')
 }

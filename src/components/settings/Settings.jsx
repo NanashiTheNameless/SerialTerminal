@@ -30,6 +30,127 @@ const formElementCSS = {
   minWidth: '10em'
 }
 
+// Reusable KeybindDisplay component for showing Ctrl+Key combinations
+const KeybindDisplay = ({ ctrlKey, shift, label }) => (
+  <Box sx={{
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 1,
+    px: 1.25,
+    py: 0.5,
+    borderRadius: 1,
+    border: '1px solid #ccc',
+    backgroundColor: '#2e2e2e',
+    fontWeight: 700,
+    letterSpacing: 0.5,
+    fontSize: '0.95rem',
+    color: '#fff'
+  }}>
+    <span>Ctrl</span>
+    {shift && <span>Shift</span>}
+    <span>{(ctrlKey || label || '').toUpperCase()}</span>
+  </Box>
+)
+
+KeybindDisplay.propTypes = {
+  ctrlKey: PropTypes.string,
+  shift: PropTypes.bool,
+  label: PropTypes.string
+}
+
+// Reusable KeyCapture component for capturing key presses
+const KeyCapture = ({ captureTarget, currentTarget, onClick, ctrlKey, shift, label }) => (
+  <Box
+    role='button'
+    tabIndex={0}
+    onClick={onClick}
+    onFocus={onClick}
+    sx={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: 1.5,
+      p: 1.75,
+      mt: 0.75,
+      borderRadius: 1.5,
+      border: '1px solid #666',
+      backgroundColor: '#1a1a1a',
+      cursor: 'pointer',
+      flex: 1
+    }}
+  >
+    <Box sx={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 1,
+      px: 1.5,
+      py: 0.75,
+      borderRadius: 1.25,
+      border: '1px solid #777',
+      backgroundColor: '#2e2e2e',
+      fontWeight: 700,
+      letterSpacing: 0.75,
+      fontSize: '1rem',
+      color: '#fff'
+    }}>
+      <span>Ctrl</span>
+      {shift && <span>Shift</span>}
+      <span>{ctrlKey ? ctrlKey.toUpperCase() : (label ? label.toUpperCase() : '?')}</span>
+    </Box>
+    <Typography variant='body2' sx={{ color: '#ffffffcc' }}>
+      {captureTarget === currentTarget ? 'Press a key (Esc to cancel)' : 'Click then press a key'}
+    </Typography>
+  </Box>
+)
+
+KeyCapture.propTypes = {
+  captureTarget: PropTypes.string,
+  currentTarget: PropTypes.string.isRequired,
+  onClick: PropTypes.func.isRequired,
+  ctrlKey: PropTypes.string,
+  shift: PropTypes.bool,
+  label: PropTypes.string
+}
+
+// Reusable KeybindListItem component for displaying keybind entries
+const KeybindListItem = ({ entry, index, onClick, onDelete, isSelected, children }) => (
+  <Box
+    key={`${entry.key}-${index}`}
+    onClick={onClick}
+    sx={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      p: 1.25,
+      borderRadius: 1.25,
+      border: isSelected ? '2px solid #1976d2' : '1px solid #555',
+      backgroundColor: isSelected ? '#2a2a3a' : '#1e1e1e',
+      cursor: 'pointer',
+      transition: 'all 0.2s ease',
+      '&:hover': {
+        borderColor: isSelected ? '#1976d2' : '#888',
+        backgroundColor: isSelected ? '#2a2a3a' : '#252535'
+      }
+    }}
+  >
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      <KeybindDisplay ctrlKey={entry.key} shift={entry.shift} />
+      {children}
+    </Box>
+    <IconButton aria-label='Delete' size='small' onClick={(e) => { e.stopPropagation(); onDelete(); }}>
+      <DeleteIcon fontSize='small' />
+    </IconButton>
+  </Box>
+)
+
+KeybindListItem.propTypes = {
+  entry: PropTypes.object.isRequired,
+  index: PropTypes.number.isRequired,
+  onClick: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
+  isSelected: PropTypes.bool,
+  children: PropTypes.node
+}
+
 // Settings dialog for configuring serial connection parameters
 const Settings = React.memo((props) => {
   const [baudRate, setBaudRate] = React.useState(props.settings.baudRate)
@@ -513,90 +634,26 @@ const Settings = React.memo((props) => {
           <Typography variant='subtitle1' sx={{ color: '#ffffffcc', mt: 2, fontWeight: 700 }}>
             Open Settings
           </Typography>
-          <Box
-            role='button'
-            tabIndex={0}
+          <KeyCapture
+            captureTarget={captureTarget}
+            currentTarget='settings'
             onClick={() => setCaptureTarget('settings')}
-            onFocus={() => setCaptureTarget('settings')}
-            sx={{
-              ...formElementCSS,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1.5,
-              p: 1.75,
-              mt: 0.75,
-              borderRadius: 1.5,
-              border: '1px solid #666',
-              backgroundColor: '#1a1a1a',
-              cursor: 'pointer'
-            }}
-          >
-            <Box sx={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 1,
-              px: 1.5,
-              py: 0.75,
-              borderRadius: 1.25,
-              border: '1px solid #ccc',
-              backgroundColor: '#2e2e2e',
-              fontWeight: 700,
-              letterSpacing: 0.75,
-              fontSize: '1rem',
-              color: '#fff'
-            }}>
-              <span>Ctrl</span>
-              {settingsShortcutShift && <span>Shift</span>}
-              <span>{(settingsShortcutKey || KEYBOARD_SHORTCUTS.OPEN_SETTINGS.key).toUpperCase()}</span>
-            </Box>
-            <Typography variant='body2' sx={{ color: '#ffffffcc' }}>
-              {captureTarget === 'settings' ? 'Press a key (Esc to cancel)' : 'Click then press a key'}
-            </Typography>
-          </Box>
+            ctrlKey={settingsShortcutKey}
+            shift={settingsShortcutShift}
+            label={KEYBOARD_SHORTCUTS.OPEN_SETTINGS.key}
+          />
 
           <Typography variant='subtitle1' sx={{ color: '#ffffffcc', mt: 2, fontWeight: 700 }}>
             Clear Terminal
           </Typography>
-          <Box
-            role='button'
-            tabIndex={0}
+          <KeyCapture
+            captureTarget={captureTarget}
+            currentTarget='clear'
             onClick={() => setCaptureTarget('clear')}
-            onFocus={() => setCaptureTarget('clear')}
-            sx={{
-              ...formElementCSS,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1.5,
-              p: 1.75,
-              mt: 0.75,
-              borderRadius: 1.5,
-              border: '1px solid #666',
-              backgroundColor: '#1a1a1a',
-              cursor: 'pointer'
-            }}
-          >
-            <Box sx={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 1,
-              px: 1.5,
-              py: 0.75,
-              borderRadius: 1.25,
-              border: '1px solid #777',
-              backgroundColor: '#2e2e2e',
-              fontWeight: 700,
-              letterSpacing: 0.75,
-              fontSize: '1rem',
-              color: '#fff'
-            }}>
-              <span>Ctrl</span>
-              {clearShortcutShift && <span>Shift</span>}
-              <span>{(clearShortcutKey || KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.key).toUpperCase()}</span>
-            </Box>
-            <Typography variant='body2' sx={{ color: '#ffffffcc' }}>
-              {captureTarget === 'clear' ? 'Press a key (Esc to cancel)' : 'Click then press a key'}
-            </Typography>
-          </Box>
+            ctrlKey={clearShortcutKey}
+            shift={clearShortcutShift}
+            label={KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.key}
+          />
 
           <Divider sx={{ my: 3 }} />
 
@@ -617,100 +674,35 @@ const Settings = React.memo((props) => {
               </Typography>
             )}
             {controlAliases.map((entry, index) => (
-              <Box
+              <KeybindListItem
                 key={`${entry.key}-${index}`}
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  p: 1.25,
-                  borderRadius: 1.25,
-                  border: '1px solid #555',
-                  backgroundColor: '#1e1e1e',
-                  cursor: 'pointer',
-                  '&:hover': { backgroundColor: '#252525', borderColor: '#777' }
-                }}
+                entry={entry}
+                index={index}
+                isSelected={aliasEditIndex === index}
                 onClick={() => {
                   setAliasKey(entry.key)
                   setAliasShift(entry.shift)
                   setAliasCode(entry.type === 'code' ? String(entry.value) : (entry.type === 'text' ? entry.value : ''))
-                  // Mark as editing by setting to edit mode
                   setCaptureTarget(null)
-                  // Store the index to update instead of add
                   setAliasEditIndex(index)
                 }}
+                onDelete={() => removeAlias(index)}
               >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <Box sx={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 1,
-                    px: 1.25,
-                    py: 0.5,
-                    borderRadius: 1,
-                    border: '1px solid #ccc',
-                    backgroundColor: '#2e2e2e',
-                    fontWeight: 700,
-                    letterSpacing: 0.5,
-                    fontSize: '0.95rem',
-                    color: '#fff'
-                  }}>
-                    <span>Ctrl</span>
-                    {entry.shift && <span>Shift</span>}
-                    <span>{(entry.key || '').toUpperCase()}</span>
-                  </Box>
-                  <Typography variant='body2' sx={{ color: '#ffffffcc' }}>
-                    sends code {entry.code}
-                  </Typography>
-                </Box>
-                <IconButton aria-label='Delete alias' size='small' onClick={() => removeAlias(index)}>
-                  <DeleteIcon fontSize='small' />
-                </IconButton>
-              </Box>
+                <Typography variant='body2' sx={{ color: '#ffffffcc' }}>
+                  sends code {entry.code}
+                </Typography>
+              </KeybindListItem>
             ))}
           </Box>
 
           <Box sx={{ display: 'flex', gap: 1, mt: 2, alignItems: 'center', flexWrap: 'nowrap', width: '100%' }}>
-            <Box
-              role='button'
-              tabIndex={0}
+            <KeyCapture
+              captureTarget={captureTarget}
+              currentTarget='alias'
               onClick={() => setCaptureTarget('alias')}
-              onFocus={() => setCaptureTarget('alias')}
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1.5,
-                p: 1.75,
-                mt: 0.75,
-                borderRadius: 1.5,
-                border: '1px solid #666',
-                backgroundColor: '#1a1a1a',
-                cursor: 'pointer',
-                flex: 1
-              }}
-            >
-              <Box sx={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 1,
-                px: 1.5,
-                py: 0.75,
-                borderRadius: 1.25,
-                border: '1px solid #777',
-                backgroundColor: '#2e2e2e',
-                fontWeight: 700,
-                letterSpacing: 0.75,
-                fontSize: '1rem',
-                color: '#fff'
-              }}>
-                <span>Ctrl</span>
-                {aliasShift && <span>Shift</span>}
-                <span>{aliasKey ? aliasKey.toUpperCase() : '?'}</span>
-              </Box>
-              <Typography variant='body2' sx={{ color: '#ffffffcc' }}>
-                {captureTarget === 'alias' ? 'Press a key (Esc to cancel)' : 'Click then press a key'}
-              </Typography>
-            </Box>
+              ctrlKey={aliasKey}
+              shift={aliasShift}
+            />
             <TextField
               placeholder='Control Code'
               variant='outlined'
@@ -760,101 +752,34 @@ const Settings = React.memo((props) => {
               </Typography>
             )}
             {commandKeybinds.map((entry, index) => (
-              <Box
+              <KeybindListItem
                 key={`${entry.key}-${index}`}
+                entry={entry}
+                index={index}
+                isSelected={keybindEditIndex === index}
                 onClick={() => {
                   setKeybindEditIndex(index)
                   setKeybindKey(entry.key)
                   setKeybindShift(entry.shift)
                   setKeybindText(entry.text)
                 }}
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  p: 1.25,
-                  borderRadius: 1.25,
-                  border: keybindEditIndex === index ? '2px solid #1976d2' : '1px solid #555',
-                  backgroundColor: keybindEditIndex === index ? '#2a2a3a' : '#1e1e1e',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  '&:hover': {
-                    borderColor: '#888',
-                    backgroundColor: '#252535'
-                  }
-                }}
+                onDelete={() => removeKeybind(index)}
               >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <Box sx={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 1,
-                    px: 1.25,
-                    py: 0.5,
-                    borderRadius: 1,
-                    border: '1px solid #ccc',
-                    backgroundColor: '#2e2e2e',
-                    fontWeight: 700,
-                    letterSpacing: 0.5,
-                    fontSize: '0.95rem',
-                    color: '#fff'
-                  }}>
-                    <span>Ctrl</span>
-                    {entry.shift && <span>Shift</span>}
-                    <span>{(entry.key || '').toUpperCase()}</span>
-                  </Box>
-                  <Typography variant='body2' sx={{ color: '#ffffffcc', maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    sends &quot;{entry.text}&quot;
-                  </Typography>
-                </Box>
-                <IconButton aria-label='Delete keybind' size='small' onClick={() => removeKeybind(index)}>
-                  <DeleteIcon fontSize='small' />
-                </IconButton>
-              </Box>
+                <Typography variant='body2' sx={{ color: '#ffffffcc', maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  sends &quot;{entry.text}&quot;
+                </Typography>
+              </KeybindListItem>
             ))}
           </Box>
 
           <Box sx={{ display: 'flex', gap: 1, mt: 2, alignItems: 'center', flexWrap: 'nowrap', width: '100%' }}>
-            <Box
-              role='button'
-              tabIndex={0}
+            <KeyCapture
+              captureTarget={captureTarget}
+              currentTarget='keybind'
               onClick={() => setCaptureTarget('keybind')}
-              onFocus={() => setCaptureTarget('keybind')}
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1.5,
-                p: 1.75,
-                mt: 0.75,
-                borderRadius: 1.5,
-                border: '1px solid #666',
-                backgroundColor: '#1a1a1a',
-                cursor: 'pointer',
-                flex: 1
-              }}
-            >
-              <Box sx={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 1,
-                px: 1.5,
-                py: 0.75,
-                borderRadius: 1.25,
-                border: '1px solid #777',
-                backgroundColor: '#2e2e2e',
-                fontWeight: 700,
-                letterSpacing: 0.75,
-                fontSize: '1rem',
-                color: '#fff'
-              }}>
-                <span>Ctrl</span>
-                {keybindShift && <span>Shift</span>}
-                <span>{keybindKey ? keybindKey.toUpperCase() : '?'}</span>
-              </Box>
-              <Typography variant='body2' sx={{ color: '#ffffffcc' }}>
-                {captureTarget === 'keybind' ? 'Press a key (Esc to cancel)' : 'Click then press a key'}
-              </Typography>
-            </Box>
+              ctrlKey={keybindKey}
+              shift={keybindShift}
+            />
             <TextField
               placeholder='Text'
               variant='outlined'
