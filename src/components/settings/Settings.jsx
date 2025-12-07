@@ -264,10 +264,13 @@ const Settings = React.memo((props) => {
   const [detectCtrlD, setDetectCtrlD] = React.useState(props.settings.detectCtrlD !== undefined ? props.settings.detectCtrlD !== false : legacyDetectCtrl !== false)
   const [settingsShortcut, setSettingsShortcut] = React.useState(props.settings.settingsShortcut !== false)
   const [clearShortcut, setClearShortcut] = React.useState(props.settings.clearShortcut === true)
+  const [disconnectShortcut, setDisconnectShortcut] = React.useState(props.settings.disconnectShortcut === true)
   const [settingsShortcutKey, setSettingsShortcutKey] = React.useState((props.settings.settingsShortcutKey || KEYBOARD_SHORTCUTS.OPEN_SETTINGS.key).toLowerCase())
   const [clearShortcutKey, setClearShortcutKey] = React.useState((props.settings.clearShortcutKey || KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.key).toLowerCase())
+  const [disconnectShortcutKey, setDisconnectShortcutKey] = React.useState((props.settings.disconnectShortcutKey || KEYBOARD_SHORTCUTS.DISCONNECT.key).toLowerCase())
   const [settingsShortcutShift, setSettingsShortcutShift] = React.useState(props.settings.settingsShortcutShift === true)
   const [clearShortcutShift, setClearShortcutShift] = React.useState(props.settings.clearShortcutShift === true)
+  const [disconnectShortcutShift, setDisconnectShortcutShift] = React.useState(props.settings.disconnectShortcutShift === true)
   const [downloadFormat, setDownloadFormat] = React.useState(props.settings.downloadFormat || 'ask')
   const [advanced, setAdvanced] = React.useState(props.settings.advanced === true)
   const [captureTarget, setCaptureTarget] = React.useState(null)
@@ -288,11 +291,13 @@ const Settings = React.memo((props) => {
   const [quickDownloadKey, setQuickDownloadKey] = React.useState((props.settings.quickDownloadKey || 'd').toLowerCase())
   const [quickClearKey, setQuickClearKey] = React.useState((props.settings.quickClearKey || 'c').toLowerCase())
   const [quickSettingsKey, setQuickSettingsKey] = React.useState((props.settings.quickSettingsKey || 's').toLowerCase())
+  const [quickDisconnectKey, setQuickDisconnectKey] = React.useState((props.settings.quickDisconnectKey || 'x').toLowerCase())
   const [quickFocusShift, setQuickFocusShift] = React.useState(props.settings.quickFocusShift === true)
   const [quickHistoryShift, setQuickHistoryShift] = React.useState(props.settings.quickHistoryShift === true)
   const [quickDownloadShift, setQuickDownloadShift] = React.useState(props.settings.quickDownloadShift === true)
   const [quickClearShift, setQuickClearShift] = React.useState(props.settings.quickClearShift === true)
   const [quickSettingsShift, setQuickSettingsShift] = React.useState(props.settings.quickSettingsShift === true)
+  const [quickDisconnectShift, setQuickDisconnectShift] = React.useState(props.settings.quickDisconnectShift === true)
 
   const formatLabel = (key, shift, fallbackKey) => {
     const finalKey = (key || fallbackKey || '').toUpperCase()
@@ -435,10 +440,13 @@ const Settings = React.memo((props) => {
     setDetectCtrlD(props.settings.detectCtrlD !== undefined ? props.settings.detectCtrlD !== false : legacyDetectCtrl !== false)
     setSettingsShortcut(props.settings.settingsShortcut !== false)
     setClearShortcut(props.settings.clearShortcut === true)
+    setDisconnectShortcut(props.settings.disconnectShortcut === true)
     setSettingsShortcutKey((props.settings.settingsShortcutKey || KEYBOARD_SHORTCUTS.OPEN_SETTINGS.key).toLowerCase())
     setClearShortcutKey((props.settings.clearShortcutKey || KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.key).toLowerCase())
+    setDisconnectShortcutKey((props.settings.disconnectShortcutKey || KEYBOARD_SHORTCUTS.DISCONNECT.key).toLowerCase())
     setSettingsShortcutShift(props.settings.settingsShortcutShift === true)
     setClearShortcutShift(props.settings.clearShortcutShift === true)
+    setDisconnectShortcutShift(props.settings.disconnectShortcutShift === true)
     setDownloadFormat(props.settings.downloadFormat || 'ask')
     setParseANSIOutput(props.settings.parseANSIOutput !== false)
     setAdvanced(props.settings.advanced === true)
@@ -456,11 +464,13 @@ const Settings = React.memo((props) => {
     setQuickDownloadKey(normalizeHotkey(props.settings.quickDownloadKey || 'd'))
     setQuickClearKey(normalizeHotkey(props.settings.quickClearKey || 'c'))
     setQuickSettingsKey(normalizeHotkey(props.settings.quickSettingsKey || 's'))
+    setQuickDisconnectKey(normalizeHotkey(props.settings.quickDisconnectKey || 'x'))
     setQuickFocusShift(props.settings.quickFocusShift === true)
     setQuickHistoryShift(props.settings.quickHistoryShift === true)
     setQuickDownloadShift(props.settings.quickDownloadShift === true)
     setQuickClearShift(props.settings.quickClearShift === true)
     setQuickSettingsShift(props.settings.quickSettingsShift === true)
+    setQuickDisconnectShift(props.settings.quickDisconnectShift === true)
 
     props.close()
   }
@@ -490,6 +500,10 @@ const Settings = React.memo((props) => {
           setClearShortcutKey(normalized)
           setClearShortcutShift(shiftHeld)
         }
+        if (captureTarget === 'disconnect') {
+          setDisconnectShortcutKey(normalized)
+          setDisconnectShortcutShift(shiftHeld)
+        }
         if (captureTarget === 'alias') {
           setAliasKey(normalized)
           setAliasShift(shiftHeld)
@@ -518,6 +532,10 @@ const Settings = React.memo((props) => {
           setQuickSettingsKey(normalized)
           setQuickSettingsShift(shiftHeld)
         }
+        if (captureTarget === 'quickDisconnect') {
+          setQuickDisconnectKey(normalized)
+          setQuickDisconnectShift(shiftHeld)
+        }
         setCaptureTarget(null)
       }
     }
@@ -544,10 +562,13 @@ const Settings = React.memo((props) => {
     setDetectCtrlD(DEFAULT_SETTINGS.detectCtrlD)
     setSettingsShortcut(DEFAULT_SETTINGS.settingsShortcut)
     setClearShortcut(DEFAULT_SETTINGS.clearShortcut)
+    setDisconnectShortcut(DEFAULT_SETTINGS.disconnectShortcut)
     setSettingsShortcutKey(DEFAULT_SETTINGS.settingsShortcutKey)
     setClearShortcutKey(DEFAULT_SETTINGS.clearShortcutKey)
+    setDisconnectShortcutKey(DEFAULT_SETTINGS.disconnectShortcutKey)
     setSettingsShortcutShift(DEFAULT_SETTINGS.settingsShortcutShift)
     setClearShortcutShift(DEFAULT_SETTINGS.clearShortcutShift)
+    setDisconnectShortcutShift(DEFAULT_SETTINGS.disconnectShortcutShift)
     setDownloadFormat(DEFAULT_SETTINGS.downloadFormat)
     setParseANSIOutput(DEFAULT_SETTINGS.parseANSIOutput)
     setAdvanced(DEFAULT_SETTINGS.advanced)
@@ -565,11 +586,13 @@ const Settings = React.memo((props) => {
     setQuickDownloadKey(DEFAULT_SETTINGS.quickDownloadKey)
     setQuickClearKey(DEFAULT_SETTINGS.quickClearKey)
     setQuickSettingsKey(DEFAULT_SETTINGS.quickSettingsKey)
+    setQuickDisconnectKey(DEFAULT_SETTINGS.quickDisconnectKey)
     setQuickFocusShift(DEFAULT_SETTINGS.quickFocusShift)
     setQuickHistoryShift(DEFAULT_SETTINGS.quickHistoryShift)
     setQuickDownloadShift(DEFAULT_SETTINGS.quickDownloadShift)
     setQuickClearShift(DEFAULT_SETTINGS.quickClearShift)
     setQuickSettingsShift(DEFAULT_SETTINGS.quickSettingsShift)
+    setQuickDisconnectShift(DEFAULT_SETTINGS.quickDisconnectShift)
   }
 
   const save = () => {
@@ -581,8 +604,24 @@ const Settings = React.memo((props) => {
       return
     }
 
+    // Check for conflicts between Settings and Disconnect shortcuts
+    if (settingsShortcut && disconnectShortcut &&
+        settingsShortcutKey === disconnectShortcutKey &&
+        settingsShortcutShift === disconnectShortcutShift) {
+      alert('Open Settings and Disconnect cannot use the same keybind!')
+      return
+    }
+
+    // Check for conflicts between Clear and Disconnect shortcuts
+    if (clearShortcut && disconnectShortcut &&
+        clearShortcutKey === disconnectShortcutKey &&
+        clearShortcutShift === disconnectShortcutShift) {
+      alert('Clear Terminal and Disconnect cannot use the same keybind!')
+      return
+    }
+
     if (enableQuickHotkeys) {
-      const hotkeys = [quickFocusKey, quickHistoryKey, quickDownloadKey, quickClearKey, quickSettingsKey]
+      const hotkeys = [quickFocusKey, quickHistoryKey, quickDownloadKey, quickClearKey, quickSettingsKey, quickDisconnectKey]
       if (hotkeys.some(k => !hotkeyValid(k))) {
         alert('All terminal hotkeys must be a single character (letters or symbols).')
         return
@@ -591,6 +630,7 @@ const Settings = React.memo((props) => {
 
     const normalizedSettingsKey = (settingsShortcutKey || KEYBOARD_SHORTCUTS.OPEN_SETTINGS.key).toLowerCase()
     const normalizedClearKey = (clearShortcutKey || KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.key).toLowerCase()
+    const normalizedDisconnectKey = (disconnectShortcutKey || KEYBOARD_SHORTCUTS.DISCONNECT.key).toLowerCase()
 
     props.save({
       baudRate,
@@ -599,12 +639,15 @@ const Settings = React.memo((props) => {
       timestamp,
       settingsShortcut,
       clearShortcut,
+      disconnectShortcut,
       detectCtrlC,
       detectCtrlD,
       settingsShortcutKey: normalizedSettingsKey,
       clearShortcutKey: normalizedClearKey,
+      disconnectShortcutKey: normalizedDisconnectKey,
       settingsShortcutShift,
       clearShortcutShift,
+      disconnectShortcutShift,
       downloadFormat,
       customControlAliases: controlAliases,
       commandKeybinds: commandKeybinds,
@@ -616,11 +659,13 @@ const Settings = React.memo((props) => {
       quickDownloadKey: normalizeHotkey(quickDownloadKey || 'd'),
       quickClearKey: normalizeHotkey(quickClearKey || 'c'),
       quickSettingsKey: normalizeHotkey(quickSettingsKey || 's'),
+      quickDisconnectKey: normalizeHotkey(quickDisconnectKey || 'x'),
       quickFocusShift,
       quickHistoryShift,
       quickDownloadShift,
       quickClearShift,
-      quickSettingsShift
+      quickSettingsShift,
+      quickDisconnectShift
     })
 
     props.close()
@@ -733,20 +778,30 @@ const Settings = React.memo((props) => {
 
         <Divider sx={{ my: 2 }} />
 
-        <DialogContentText>
-          Keybind Options
-        </DialogContentText>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <DialogContentText sx={{ m: 0 }}>
+            Keybind Options
+          </DialogContentText>
+          <a href='https://github.com/NanashiTheNameless/SerialTerminal?tab=readme-ov-file#keyboard-shortcuts' target='_blank' rel='noreferrer' style={{ color: '#4a90e2', textDecoration: 'underline', fontSize: '0.9rem', cursor: 'pointer' }}>
+            (RTFM)
+          </a>
+        </Box>
 
         <FormGroup>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={enableQuickHotkeys}
-                onChange={(e) => setEnableQuickHotkeys(e.target.checked)}
-                sx={{ color: '#ffffffb3', '&.Mui-checked': { color: '#fff' } }}
-              />
-            } label='Enable terminal quick hotkeys (Alt + key)'
-          />
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={enableQuickHotkeys}
+                  onChange={(e) => setEnableQuickHotkeys(e.target.checked)}
+                  sx={{ color: '#ffffffb3', '&.Mui-checked': { color: '#fff' } }}
+                />
+              } label='Enable terminal quick hotkeys (Alt + key)'
+            />
+            <a href='https://github.com/NanashiTheNameless/SerialTerminal?tab=readme-ov-file#quick-hotkeys-customizable-in-settings' target='_blank' rel='noreferrer' style={{ color: '#4a90e2', textDecoration: 'underline', fontSize: '0.85rem', cursor: 'pointer' }}>
+              (RTFM)
+            </a>
+          </Box>
         </FormGroup>
 
         <FormGroup>
@@ -757,7 +812,7 @@ const Settings = React.memo((props) => {
                 onChange={(e) => setDetectCtrlC(e.target.checked)}
                 sx={{ color: '#ffffffb3', '&.Mui-checked': { color: '#fff' } }}
               />
-            } label='Detect Ctrl+C'
+            } label='Detect Ctrl+C (send SIGINT code 0x03)'
           />
         </FormGroup>
 
@@ -769,7 +824,7 @@ const Settings = React.memo((props) => {
                 onChange={(e) => setDetectCtrlD(e.target.checked)}
                 sx={{ color: '#ffffffb3', '&.Mui-checked': { color: '#fff' } }}
               />
-            } label='Detect Ctrl+D'
+            } label='Detect Ctrl+D (send EOF code 0x04)'
           />
         </FormGroup>
 
@@ -794,6 +849,18 @@ const Settings = React.memo((props) => {
                 sx={{ color: '#ffffffb3', '&.Mui-checked': { color: '#fff' } }}
               />
             } label={`${KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.description} (${formatLabel(clearShortcutKey, clearShortcutShift, KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.key)})`}
+          />
+        </FormGroup>
+
+        <FormGroup>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={disconnectShortcut}
+                onChange={(e) => setDisconnectShortcut(e.target.checked)}
+                sx={{ color: '#ffffffb3', '&.Mui-checked': { color: '#fff' } }}
+              />
+            } label={`${KEYBOARD_SHORTCUTS.DISCONNECT.description} (${formatLabel(disconnectShortcutKey, disconnectShortcutShift, KEYBOARD_SHORTCUTS.DISCONNECT.key)})`}
           />
         </FormGroup>
 
@@ -835,82 +902,149 @@ const Settings = React.memo((props) => {
               </DialogContentText>
 
               <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 2, mt: 1 }}>
-                <KeyCapture
-                  captureTarget={captureTarget}
-                  currentTarget='quickFocus'
-                  onClick={() => setCaptureTarget('quickFocus')}
-                  ctrlKey={quickFocusKey}
-                  shift={quickFocusShift}
-                  label={formatAltLabel(quickFocusKey, quickFocusShift)}
-                  modifierLabel='Alt'
-                />
-                <KeyCapture
-                  captureTarget={captureTarget}
-                  currentTarget='quickHistory'
-                  onClick={() => setCaptureTarget('quickHistory')}
-                  ctrlKey={quickHistoryKey}
-                  shift={quickHistoryShift}
-                  label={formatAltLabel(quickHistoryKey, quickHistoryShift)}
-                  modifierLabel='Alt'
-                />
-                <KeyCapture
-                  captureTarget={captureTarget}
-                  currentTarget='quickDownload'
-                  onClick={() => setCaptureTarget('quickDownload')}
-                  ctrlKey={quickDownloadKey}
-                  shift={quickDownloadShift}
-                  label={formatAltLabel(quickDownloadKey, quickDownloadShift)}
-                  modifierLabel='Alt'
-                />
-                <KeyCapture
-                  captureTarget={captureTarget}
-                  currentTarget='quickClear'
-                  onClick={() => setCaptureTarget('quickClear')}
-                  ctrlKey={quickClearKey}
-                  shift={quickClearShift}
-                  label={formatAltLabel(quickClearKey, quickClearShift)}
-                  modifierLabel='Alt'
-                />
-                <KeyCapture
-                  captureTarget={captureTarget}
-                  currentTarget='quickSettings'
-                  onClick={() => setCaptureTarget('quickSettings')}
-                  ctrlKey={quickSettingsKey}
-                  shift={quickSettingsShift}
-                  label={formatAltLabel(quickSettingsKey, quickSettingsShift)}
-                  modifierLabel='Alt'
-                />
+                <Box>
+                  <Typography variant='body2' sx={{ color: '#ffffffcc', mb: 1, fontWeight: 600 }}>
+                    Focus Input
+                  </Typography>
+                  <KeyCapture
+                    captureTarget={captureTarget}
+                    currentTarget='quickFocus'
+                    onClick={() => setCaptureTarget('quickFocus')}
+                    ctrlKey={quickFocusKey}
+                    shift={quickFocusShift}
+                    label={formatAltLabel(quickFocusKey, quickFocusShift)}
+                    modifierLabel='Alt'
+                  />
+                </Box>
+                <Box>
+                  <Typography variant='body2' sx={{ color: '#ffffffcc', mb: 1, fontWeight: 600 }}>
+                    Show History
+                  </Typography>
+                  <KeyCapture
+                    captureTarget={captureTarget}
+                    currentTarget='quickHistory'
+                    onClick={() => setCaptureTarget('quickHistory')}
+                    ctrlKey={quickHistoryKey}
+                    shift={quickHistoryShift}
+                    label={formatAltLabel(quickHistoryKey, quickHistoryShift)}
+                    modifierLabel='Alt'
+                  />
+                </Box>
+                <Box>
+                  <Typography variant='body2' sx={{ color: '#ffffffcc', mb: 1, fontWeight: 600 }}>
+                    Download Output
+                  </Typography>
+                  <KeyCapture
+                    captureTarget={captureTarget}
+                    currentTarget='quickDownload'
+                    onClick={() => setCaptureTarget('quickDownload')}
+                    ctrlKey={quickDownloadKey}
+                    shift={quickDownloadShift}
+                    label={formatAltLabel(quickDownloadKey, quickDownloadShift)}
+                    modifierLabel='Alt'
+                  />
+                </Box>
+                <Box>
+                  <Typography variant='body2' sx={{ color: '#ffffffcc', mb: 1, fontWeight: 600 }}>
+                    Clear Terminal
+                  </Typography>
+                  <KeyCapture
+                    captureTarget={captureTarget}
+                    currentTarget='quickClear'
+                    onClick={() => setCaptureTarget('quickClear')}
+                    ctrlKey={quickClearKey}
+                    shift={quickClearShift}
+                    label={formatAltLabel(quickClearKey, quickClearShift)}
+                    modifierLabel='Alt'
+                  />
+                </Box>
+                <Box>
+                  <Typography variant='body2' sx={{ color: '#ffffffcc', mb: 1, fontWeight: 600 }}>
+                    Open Settings
+                  </Typography>
+                  <KeyCapture
+                    captureTarget={captureTarget}
+                    currentTarget='quickSettings'
+                    onClick={() => setCaptureTarget('quickSettings')}
+                    ctrlKey={quickSettingsKey}
+                    shift={quickSettingsShift}
+                    label={formatAltLabel(quickSettingsKey, quickSettingsShift)}
+                    modifierLabel='Alt'
+                  />
+                </Box>
+                <Box>
+                  <Typography variant='body2' sx={{ color: '#ffffffcc', mb: 1, fontWeight: 600 }}>
+                    Disconnect
+                  </Typography>
+                  <KeyCapture
+                    captureTarget={captureTarget}
+                    currentTarget='quickDisconnect'
+                    onClick={() => setCaptureTarget('quickDisconnect')}
+                    ctrlKey={quickDisconnectKey}
+                    shift={quickDisconnectShift}
+                    label={formatAltLabel(quickDisconnectKey, quickDisconnectShift)}
+                    modifierLabel='Alt'
+                  />
+                </Box>
               </Box>
             </>
           )}
 
-          <DialogContentText sx={{ mt: 2 }}>
-            Rebindings
-          </DialogContentText>
+          {(settingsShortcut || clearShortcut || disconnectShortcut) && (
+            <>
+              <DialogContentText sx={{ mt: 2 }}>
+                Rebindings
+              </DialogContentText>
 
-          <Typography variant='subtitle1' sx={{ color: '#ffffffcc', mt: 2, fontWeight: 700 }}>
-            Open Settings
-          </Typography>
-          <KeyCapture
-            captureTarget={captureTarget}
-            currentTarget='settings'
-            onClick={() => setCaptureTarget('settings')}
-            ctrlKey={settingsShortcutKey}
-            shift={settingsShortcutShift}
-            label={KEYBOARD_SHORTCUTS.OPEN_SETTINGS.key}
-          />
+              {settingsShortcut && (
+                <>
+                  <Typography variant='subtitle1' sx={{ color: '#ffffffcc', mt: 2, fontWeight: 700 }}>
+                    Open Settings
+                  </Typography>
+                  <KeyCapture
+                    captureTarget={captureTarget}
+                    currentTarget='settings'
+                    onClick={() => setCaptureTarget('settings')}
+                    ctrlKey={settingsShortcutKey}
+                    shift={settingsShortcutShift}
+                    label={KEYBOARD_SHORTCUTS.OPEN_SETTINGS.key}
+                  />
+                </>
+              )}
 
-          <Typography variant='subtitle1' sx={{ color: '#ffffffcc', mt: 2, fontWeight: 700 }}>
-            Clear Terminal
-          </Typography>
-          <KeyCapture
-            captureTarget={captureTarget}
-            currentTarget='clear'
-            onClick={() => setCaptureTarget('clear')}
-            ctrlKey={clearShortcutKey}
-            shift={clearShortcutShift}
-            label={KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.key}
-          />
+              {clearShortcut && (
+                <>
+                  <Typography variant='subtitle1' sx={{ color: '#ffffffcc', mt: 2, fontWeight: 700 }}>
+                    Clear Terminal
+                  </Typography>
+                  <KeyCapture
+                    captureTarget={captureTarget}
+                    currentTarget='clear'
+                    onClick={() => setCaptureTarget('clear')}
+                    ctrlKey={clearShortcutKey}
+                    shift={clearShortcutShift}
+                    label={KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.key}
+                  />
+                </>
+              )}
+
+              {disconnectShortcut && (
+                <>
+                  <Typography variant='subtitle1' sx={{ color: '#ffffffcc', mt: 2, fontWeight: 700 }}>
+                    Disconnect
+                  </Typography>
+                  <KeyCapture
+                    captureTarget={captureTarget}
+                    currentTarget='disconnect'
+                    onClick={() => setCaptureTarget('disconnect')}
+                    ctrlKey={disconnectShortcutKey}
+                    shift={disconnectShortcutShift}
+                    label={KEYBOARD_SHORTCUTS.DISCONNECT.key}
+                  />
+                </>
+              )}
+            </>
+          )}
 
           <Divider sx={{ my: 3 }} />
 

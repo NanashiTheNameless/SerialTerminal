@@ -73,10 +73,13 @@ function App () {
 
   const settingsShortcutKey = (settings.settingsShortcutKey || KEYBOARD_SHORTCUTS.OPEN_SETTINGS.key).toLowerCase()
   const clearShortcutKey = (settings.clearShortcutKey || KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.key).toLowerCase()
+  const disconnectShortcutKey = (settings.disconnectShortcutKey || KEYBOARD_SHORTCUTS.DISCONNECT.key).toLowerCase()
   const settingsShortcutShift = settings.settingsShortcutShift === true
   const clearShortcutShift = settings.clearShortcutShift === true
+  const disconnectShortcutShift = settings.disconnectShortcutShift === true
   const detectCtrlC = settings.detectCtrlC !== undefined ? settings.detectCtrlC !== false : (settings.detectCtrl !== false)
   const detectCtrlD = settings.detectCtrlD !== undefined ? settings.detectCtrlD !== false : (settings.detectCtrl !== false)
+  const disconnectShortcut = settings.disconnectShortcut === true
   const customControlAliases = settings.customControlAliases || []
   const commandKeybinds = settings.commandKeybinds || []
   const quickHotkeys = {
@@ -122,6 +125,16 @@ function App () {
             // First press - show confirmation
             setClearConfirmOpen(true)
           }
+        }
+      }
+    },
+    {
+      key: disconnectShortcutKey,
+      ctrl: true,
+      shift: disconnectShortcutShift,
+      callback: () => {
+        if (disconnectShortcut && connected) {
+          handleDisconnect()
         }
       }
     }
@@ -241,11 +254,13 @@ function App () {
                     setClearConfirmOpen(false)
                   }}
                   onClearCancel={() => setClearConfirmOpen(false)}
+                  onDisconnect={handleDisconnect}
                   downloadFormat={settings.downloadFormat}
                   echo={settings.localEcho !== false}
                   time={settings.timestamp !== false}
                   ctrlC={detectCtrlC}
                   ctrlD={detectCtrlD}
+                  disconnectShortcut={disconnectShortcut}
                   controlAliases={customControlAliases}
                   commandKeybinds={commandKeybinds}
                   parseANSIOutput={settings.parseANSIOutput !== false}

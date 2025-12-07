@@ -36,13 +36,27 @@ This tool requires the [Web Serial API](<https://developer.mozilla.org/en-US/doc
 - Safari (not supported)
 - Mobile browsers (not supported due to API limitations)
 
-## Keyboard Shortcuts
+## Keyboard Shortcuts [(RTFM)](https://github.com/NanashiTheNameless/serialterminal?tab=readme-ov-file#keyboard-shortcuts)
+
+### Main Shortcuts
 
 - `Ctrl+K` - Open settings
-- `Ctrl+L` - Clear terminal history (disabled by default, enable in settings)
-- `Ctrl+C` - Send control character (when enabled in settings)
-- `Ctrl+D` - Send control character (when enabled in settings)
+- `Ctrl+L` - Clear terminal history
+- `Ctrl+C` - Send SIGINT (Ctrl+C control character 0x03, when enabled in settings)
+- `Ctrl+D` - Send EOF (Ctrl+D control character 0x04, when enabled in settings)
+- `Ctrl+X` - Disconnect from serial port (disabled by default, enable in settings)
 - `Enter` - Send command
+
+### Quick Hotkeys (customizable in settings)
+
+- `Alt+I` - Focus terminal input
+- `Alt+H` - Show command history
+- `Alt+D` - Download terminal output
+- `Alt+C` - Clear terminal dialoog
+- `Alt+S` - Open settings
+- `Alt+X` - Disconnect from serial port
+
+Note: Quick hotkeys can be toggled and configured in the settings panel
 
 ## Development
 

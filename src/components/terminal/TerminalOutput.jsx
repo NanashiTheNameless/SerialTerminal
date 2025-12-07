@@ -141,11 +141,13 @@ const TerminalOutput = React.memo((props) => {
     const downloadKey = (hotkeys.download || DEFAULT_SETTINGS.quickDownloadKey).toLowerCase()
     const clearKey = (hotkeys.clear || DEFAULT_SETTINGS.quickClearKey).toLowerCase()
     const settingsKey = (hotkeys.settings || DEFAULT_SETTINGS.quickSettingsKey).toLowerCase()
+    const disconnectKey = (hotkeys.disconnect || DEFAULT_SETTINGS.quickDisconnectKey).toLowerCase()
     const focusShift = hotkeys.focusShift === true || DEFAULT_SETTINGS.quickFocusShift === true
     const historyShift = hotkeys.historyShift === true || DEFAULT_SETTINGS.quickHistoryShift === true
     const downloadShift = hotkeys.downloadShift === true || DEFAULT_SETTINGS.quickDownloadShift === true
     const clearShift = hotkeys.clearShift === true || DEFAULT_SETTINGS.quickClearShift === true
     const settingsShift = hotkeys.settingsShift === true || DEFAULT_SETTINGS.quickSettingsShift === true
+    const disconnectShift = hotkeys.disconnectShift === true || DEFAULT_SETTINGS.quickDisconnectShift === true
 
     const handler = (e) => {
       if (e.altKey && !e.ctrlKey && !e.metaKey) {
@@ -173,6 +175,11 @@ const TerminalOutput = React.memo((props) => {
         if (key === settingsKey && (!!settingsShift === e.shiftKey)) {
           e.preventDefault()
           props.openSettings?.()
+          return
+        }
+        if (key === disconnectKey && (!!disconnectShift === e.shiftKey)) {
+          e.preventDefault()
+          props.onDisconnect?.()
           return
         }
       }
@@ -322,6 +329,7 @@ TerminalOutput.propTypes = {
   onClearRequest: PropTypes.func,
   onClearConfirm: PropTypes.func,
   onClearCancel: PropTypes.func,
+  onDisconnect: PropTypes.func,
   downloadFormat: PropTypes.string,
   echo: PropTypes.bool,
   time: PropTypes.bool,

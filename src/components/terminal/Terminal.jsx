@@ -115,6 +115,13 @@ const Terminal = forwardRef((props, ref) => {
       return
     }
 
+    // Check Ctrl+X for disconnect
+    if (props.disconnectShortcut && charCode.toUpperCase() === 'X' && !hasShift) {
+      e.preventDefault()
+      props.onDisconnect?.()
+      return
+    }
+
     // Check control aliases (normalize to lowercase for comparison)
     const aliasMatch = findKeybindMatch(props.controlAliases, charCode, false)
     if (aliasMatch) {
@@ -162,6 +169,7 @@ const Terminal = forwardRef((props, ref) => {
           onClearRequest={props.onClearRequest}
           onClearConfirm={props.onClearConfirm}
           onClearCancel={props.onClearCancel}
+          onDisconnect={props.onDisconnect}
           downloadFormat={props.downloadFormat}
           echo={props.echo}
           time={props.time}
@@ -195,11 +203,13 @@ Terminal.propTypes = {
   onClearRequest: PropTypes.func,
   onClearConfirm: PropTypes.func,
   onClearCancel: PropTypes.func,
+  onDisconnect: PropTypes.func,
   downloadFormat: PropTypes.string,
   echo: PropTypes.bool,
   time: PropTypes.bool,
   ctrlC: PropTypes.bool,
   ctrlD: PropTypes.bool,
+  disconnectShortcut: PropTypes.bool,
   controlAliases: PropTypes.array,
   commandKeybinds: PropTypes.array,
   parseANSIOutput: PropTypes.bool,

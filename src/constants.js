@@ -65,6 +65,13 @@ export const KEYBOARD_SHORTCUTS = {
     label: 'Ctrl+K',
     description: 'Open settings',
     settingKey: 'settingsShortcut'
+  },
+  DISCONNECT: {
+    key: 'x',
+    ctrl: true,
+    label: 'Ctrl+X',
+    description: 'Disconnect from port',
+    settingKey: 'disconnectShortcut'
   }
 }
 
@@ -78,16 +85,19 @@ export const DEFAULT_SETTINGS = {
   detectCtrlD: true,
   settingsShortcut: true,
   clearShortcut: true,
+  disconnectShortcut: false,
   downloadFormat: 'ask',
   settingsShortcutKey: KEYBOARD_SHORTCUTS.OPEN_SETTINGS.key,
   clearShortcutKey: KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.key,
+  disconnectShortcutKey: KEYBOARD_SHORTCUTS.DISCONNECT.key,
   settingsShortcutShift: false,
   clearShortcutShift: false,
+  disconnectShortcutShift: false,
   customControlAliases: [],
   commandKeybinds: [],
   parseANSIOutput: true,
   advanced: false,
-  enableQuickHotkeys: true,
+  enableQuickHotkeys: false,
   quickFocusKey: 'i',
   quickFocusShift: false,
   quickHistoryKey: 'h',
@@ -97,7 +107,9 @@ export const DEFAULT_SETTINGS = {
   quickClearKey: 'c',
   quickClearShift: false,
   quickSettingsKey: 's',
-  quickSettingsShift: false
+  quickSettingsShift: false,
+  quickDisconnectKey: 'x',
+  quickDisconnectShift: false
 }
 
 // UI constants
