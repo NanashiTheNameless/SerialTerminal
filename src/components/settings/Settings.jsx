@@ -875,7 +875,7 @@ const Settings = React.memo((props) => {
                 sx={{ color: '#ffffffb3', '&.Mui-checked': { color: '#fff' } }}
               />
             }
-            label='Advanced Options'
+            label='Show Advanced Options'
           />
         </FormGroup>
 
