@@ -60,7 +60,7 @@ const styles = {
     backgroundColor: 'white',
     padding: '40px',
     borderRadius: '8px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+    boxShadow: '0 2px 8px #0000001a',
     maxWidth: '500px',
     textAlign: 'center'
   },

@@ -196,8 +196,8 @@ const KeybindInputForm = ({ captureTarget, currentTarget, onCaptureClick, ctrlKe
         height: '56px',
         color: '#fff',
         borderColor: '#fff',
-        '&:hover': { borderColor: '#fff', backgroundColor: 'rgba(255, 255, 255, 0.08)' },
-        '&.Mui-disabled': { color: 'rgba(255, 255, 255, 0.38)', borderColor: 'rgba(255, 255, 255, 0.12)' }
+        '&:hover': { borderColor: '#fff', backgroundColor: '#ffffff14' },
+        '&.Mui-disabled': { color: '#ffffff61', borderColor: '#ffffff1f' }
       }}
     >
       {submitLabel}
