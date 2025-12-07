@@ -713,7 +713,7 @@ const Settings = React.memo((props) => {
         </FormControl>
 
         <FormControl fullWidth sx={formElementCSS}>
-          <InputLabel notched={true}>Line Ending</InputLabel>
+          <InputLabel>Line Ending</InputLabel>
           <Select
             value={lineEnding}
             onChange={(e) => setLineEnding(e.target.value)}
@@ -731,7 +731,7 @@ const Settings = React.memo((props) => {
         </FormControl>
 
         <FormControl fullWidth sx={formElementCSS}>
-          <InputLabel notched={true}>Download Format</InputLabel>
+          <InputLabel>Download Format</InputLabel>
           <Select
             value={downloadFormat}
             onChange={(e) => setDownloadFormat(e.target.value)}

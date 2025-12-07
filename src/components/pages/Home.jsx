@@ -31,7 +31,7 @@ const Home = (props) => {
       sx={gridCSS}
     >
 
-      <Grid item xs={3}>
+      <Grid>
 
         {props.supported()
           ? <Box align='center'>

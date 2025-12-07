@@ -158,7 +158,7 @@ const Terminal = forwardRef((props, ref) => {
   return (
     <Grid container spacing={1} sx={{ p: 0.75, flexGrow: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }} onKeyDown={handleKeyDown}>
       {/* Terminal Window */}
-      <Grid item xs={12} sx={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+      <Grid sx={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
         <TerminalOutput
           history={history}
           setHistory={setHistory}
@@ -179,7 +179,7 @@ const Terminal = forwardRef((props, ref) => {
       </Grid>
 
       {/* Input Field & Send Button */}
-      <Grid item xs={12} sx={{ flexShrink: 0 }}>
+      <Grid sx={{ flexShrink: 0 }}>
         <TerminalInput
           ref={inputRef}
           input={input}
