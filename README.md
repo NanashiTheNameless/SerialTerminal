@@ -36,7 +36,7 @@ This tool requires the [Web Serial API](<https://developer.mozilla.org/en-US/doc
 - Safari (not supported)
 - Mobile browsers (not supported due to API limitations)
 
-## Keyboard Shortcuts [(RTFM)](https://github.com/NanashiTheNameless/serialterminal?tab=readme-ov-file#keyboard-shortcuts)
+## Keyboard Shortcuts
 
 ### Main Shortcuts
 
@@ -56,7 +56,7 @@ This tool requires the [Web Serial API](<https://developer.mozilla.org/en-US/doc
 - `Alt+S` - Open settings
 - `Alt+X` - Disconnect from serial port
 
-Note: Quick hotkeys can be toggled and configured in the settings panel
+Note: Quick hotkeys can be toggled and configured in the advanced settings panel
 
 ## Development
 
