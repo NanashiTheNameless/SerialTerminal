@@ -12,6 +12,7 @@ import EdgeIcon from '../../icons/Edge'
 import OperaIcon from '../../icons/Opera'
 import UngoogledChromiumIcon from '../../icons/UngoogledChromium'
 import SettingsIcon from '@mui/icons-material/Settings'
+import LinkIcon from '@mui/icons-material/Link'
 
 const gridCSS = {
   flexGrow: 1,
@@ -35,14 +36,16 @@ const Home = (props) => {
         {props.supported()
           ? <Box align='center'>
             <Box>
-              <Button variant='contained' color='success' size='large' onClick={props.connect} sx={{ m: 1 }}>
+              <Button variant='contained' color='success' size='large' onClick={props.connect} sx={{ m: 1, fontSize: '1.5rem', padding: '8px 20px' }}>
+                <LinkIcon sx={{ mr: 1, fontSize: '1.5rem' }} />
                 Connect
               </Button>
             </Box>
 
             <Box>
-              <Button size='large' onClick={props.openSettings} sx={{ m: 1, color: '#bebebe' }}>
-                <SettingsIcon />
+              <Button variant='contained' color='inherit' size='large' onClick={props.openSettings} sx={{ m: 1, mb: 2, bgcolor: '#808080', '&:hover': { bgcolor: '#696969' }, fontSize: '1.5rem', padding: '8px 20px' }}>
+                <SettingsIcon sx={{ mr: 1, fontSize: '1.5rem' }} />
+                Settings
               </Button>
             </Box>
 

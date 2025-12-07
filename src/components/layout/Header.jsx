@@ -7,7 +7,7 @@ import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import Tooltip from '@mui/material/Tooltip'
 import AddCircleIcon from '@mui/icons-material/AddCircle'
-import CancelIcon from '@mui/icons-material/Cancel'
+import LinkOffIcon from '@mui/icons-material/LinkOff'
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder'
 
 import './Header.css'
@@ -47,7 +47,7 @@ const Header = ({ isConnected = false, onDisconnect }) => {
               onClick={onDisconnect}
               sx={{ color: '#fff', mr: 1 }}
             >
-              <CancelIcon />
+              <LinkOffIcon />
               <p className="buttonLabel">Disconnect</p>
             </Button>
           </Tooltip>
