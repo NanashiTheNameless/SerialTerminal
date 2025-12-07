@@ -6,8 +6,6 @@ rm -rf SerialTerminalOffline-* SerialTerminalOffline-*.zip
 
 yarn install --immutable
 
-yarn dlx update-browserslist-db@latest -y
-
 yarn build
 
 cp -f LICENSE build/LICENSE

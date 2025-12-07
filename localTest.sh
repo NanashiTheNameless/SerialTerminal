@@ -2,6 +2,4 @@
 
 yarn install --immutable
 
-yarn dlx update-browserslist-db@latest -y
-
 yarn start

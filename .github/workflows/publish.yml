@@ -22,9 +22,7 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: |
-          yarn install --immutable
-          yarn dlx update-browserslist-db@latest -y
+        run: yarn install --immutable
 
       - name: Set Version
         run: |
