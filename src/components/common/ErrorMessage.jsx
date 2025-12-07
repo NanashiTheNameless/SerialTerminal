@@ -24,7 +24,7 @@ const ErrorMessage = (props) => {
         <Typography sx={{ mt: 2 }}>
           Looks like something went wrong!<br />
           We recommend using the latest version of&nbsp;
-          <a href='https://github.com/ungoogled-software/ungoogled-chromium?tab=readme-ov-file#automated-or-maintained-builds' target='blank'>
+          <a href='https://github.com/ungoogled-software/ungoogled-chromium?tab=readme-ov-file#automated-or-maintained-builds' target='_blank' rel='noopener noreferrer'>
             <UngoogledChromiumIcon fontSize='inherit' /> <b>ungoogled chromium</b>
           </a> for desktop.
         </Typography>

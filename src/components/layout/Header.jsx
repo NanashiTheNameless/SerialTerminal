@@ -57,6 +57,7 @@ const Header = ({ isConnected = false, onDisconnect }) => {
           <Button
             sx={{ color: '#fff' }}
             target='_blank'
+            rel='noopener noreferrer'
             href='#'
           >
             <AddCircleIcon />
@@ -68,6 +69,7 @@ const Header = ({ isConnected = false, onDisconnect }) => {
           <Button
             sx={{ color: '#fff', ml: 1 }}
             target='_blank'
+            rel='noopener noreferrer'
             href='https://github.com/sponsors/NanashiTheNameless?o=esb'
           >
             <FavoriteBorderIcon />

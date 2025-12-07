@@ -17,7 +17,7 @@ const Footer = () => {
           target='_blank'
           underline='always'
           color='inherit'
-          rel='noreferrer'
+          rel='noopener noreferrer'
           sx={{ fontWeight: 'bold' }}
         >
           {version.name}
@@ -41,7 +41,7 @@ const Footer = () => {
           target='_blank'
           underline='always'
           color='inherit'
-          rel='noreferrer'
+          rel='noopener noreferrer'
           sx={{ fontWeight: 'bold' }}
         >
           latest release on GitHub
@@ -57,7 +57,7 @@ const Footer = () => {
             target='_blank'
             underline='always'
             color='inherit'
-            rel='noreferrer'
+            rel='noopener noreferrer'
             sx={{ fontWeight: 'bold' }}
           >
             NanashiTheNameless
@@ -85,7 +85,7 @@ const Footer = () => {
             target='_blank'
             underline='always'
             color='inherit'
-            rel='noreferrer'
+            rel='noopener noreferrer'
             sx={{ fontWeight: 'bold' }}
           >
             Spacehuhn

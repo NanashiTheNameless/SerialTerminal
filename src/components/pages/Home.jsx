@@ -59,24 +59,24 @@ const Home = (props) => {
           : <Alert severity='warning'>
             <AlertTitle>Your browser doesn&apos;t support the WebSerial API!</AlertTitle>
             Try using&nbsp;
-            <a href='https://github.com/ungoogled-software/ungoogled-chromium?tab=readme-ov-file#automated-or-maintained-builds' target='blank'>
+            <a href='https://github.com/ungoogled-software/ungoogled-chromium?tab=readme-ov-file#automated-or-maintained-builds' target='_blank' rel='noopener noreferrer'>
               <UngoogledChromiumIcon fontSize='inherit' /> <b>ungoogled chromium</b>
             </a>
             ,&nbsp;
-            <a href='https://www.google.com/chrome/' target='blank'>
+            <a href='https://www.google.com/chrome/' target='_blank' rel='noopener noreferrer'>
               <ChromeIcon fontSize='inherit' /> <b>Chrome</b>
             </a>
             ,&nbsp;
-            <a href='https://www.microsoft.com/en-us/edge' target='blank'>
+            <a href='https://www.microsoft.com/en-us/edge' target='_blank' rel='noopener noreferrer'>
               <EdgeIcon fontSize='inherit' /> <b>Edge</b>
             </a>
             , or&nbsp;
-            <a href='https://www.opera.com/' target='blank'>
+            <a href='https://www.opera.com/' target='_blank' rel='noopener noreferrer'>
               <OperaIcon fontSize='inherit' /> <b>Opera</b>
             </a>.
             <br />
             Learn more about&nbsp;
-            <a href='https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API#browser_compatibility' target='blank'>
+            <a href='https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API#browser_compatibility' target='_blank' rel='noopener noreferrer'>
               browser compatibility
             </a>.
             </Alert>}

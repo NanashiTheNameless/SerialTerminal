@@ -221,7 +221,7 @@ function App () {
                 </Box>
                 <Box component='div' sx={{ mb: 0.5 }}>
                   This is a technical limitation of the{' '}
-                  <a href='https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API' target='blank'>
+                  <a href='https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API' target='_blank' rel='noopener noreferrer'>
                     WebSerial API
                   </a>.
                 </Box>
@@ -230,7 +230,7 @@ function App () {
                 </Box>
                 <Box component='div'>
                   Learn more about{' '}
-                  <a href='https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API#browser_compatibility' target='blank'>
+                  <a href='https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API#browser_compatibility' target='_blank' rel='noopener noreferrer'>
                     browser compatibility
                   </a>.
                 </Box>

@@ -782,7 +782,7 @@ const Settings = React.memo((props) => {
           <DialogContentText sx={{ m: 0 }}>
             Keybind Options
           </DialogContentText>
-          <a href='https://github.com/NanashiTheNameless/SerialTerminal?tab=readme-ov-file#keyboard-shortcuts' target='_blank' rel='noreferrer' style={{ color: '#4a90e2', textDecoration: 'underline', fontSize: '0.9rem', cursor: 'pointer' }}>
+          <a href='https://github.com/NanashiTheNameless/SerialTerminal?tab=readme-ov-file#keyboard-shortcuts' target='_blank' rel='noopener noreferrer' style={{ color: '#4a90e2', textDecoration: 'underline', fontSize: '0.9rem', cursor: 'pointer' }}>
             (RTFM)
           </a>
         </Box>
@@ -798,7 +798,7 @@ const Settings = React.memo((props) => {
                 />
               } label='Enable terminal quick hotkeys (Alt + key)'
             />
-            <a href='https://github.com/NanashiTheNameless/SerialTerminal?tab=readme-ov-file#quick-hotkeys-customizable-in-settings' target='_blank' rel='noreferrer' style={{ color: '#4a90e2', textDecoration: 'underline', fontSize: '0.85rem', cursor: 'pointer' }}>
+            <a href='https://github.com/NanashiTheNameless/SerialTerminal?tab=readme-ov-file#quick-hotkeys-customizable-in-settings' target='_blank' rel='noopener noreferrer' style={{ color: '#4a90e2', textDecoration: 'underline', fontSize: '0.85rem', cursor: 'pointer' }}>
               (RTFM)
             </a>
           </Box>
