@@ -85,7 +85,7 @@ export const DEFAULT_SETTINGS = {
   detectCtrlD: true,
   settingsShortcut: true,
   clearShortcut: true,
-  disconnectShortcut: false,
+  disconnectShortcut: true,
   downloadFormat: 'ask',
   settingsShortcutKey: KEYBOARD_SHORTCUTS.OPEN_SETTINGS.key,
   clearShortcutKey: KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.key,
@@ -114,4 +114,4 @@ export const DEFAULT_SETTINGS = {
 
 // UI constants
 export const TOAST_DURATION = 3000 // milliseconds
-export const MAX_HISTORY_LENGTH = 1000 // maximum terminal history items
+export const MAX_HISTORY_LENGTH = 50000 // maximum terminal history items
