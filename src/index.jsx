@@ -3,6 +3,17 @@ import { createRoot } from 'react-dom/client'
 import App from './App'
 import GlobalStyles from '@mui/material/GlobalStyles'
 
+// Prevent automatic PWA install prompts on mobile
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Detect mobile devices
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+    (navigator.maxTouchPoints && navigator.maxTouchPoints > 2)
+  
+  if (isMobile) {
+    e.preventDefault()
+  }
+})
+
 const container = document.getElementById('root')
 const root = createRoot(container)
 
