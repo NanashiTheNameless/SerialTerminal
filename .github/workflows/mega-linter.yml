@@ -124,7 +124,7 @@ jobs:
       # Create pull request if applicable
       # (for now works only on PR from same repository, not from forks)
       - name: Create Pull Request with applied fixes
-        uses: NanashiTheNameless/create-pull-request@796d320ac5352cafa0d05d25dd5a637e6af25fb3
+        uses: NanashiTheNameless/create-pull-request@cfba6bfbbd4209f074bbf682607541e22deb7236
         id: cpr
         if: >-
           steps.ml.outputs.has_updated_sources == 1 &&
