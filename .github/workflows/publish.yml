@@ -100,7 +100,7 @@ jobs:
           if-no-files-found: error
 
       - name: Create tag Offline-${{ steps.meta.outputs.sha7 }}
-        uses: NanashiTheNameless/action-create-tag@57a1c6cf4f616b0a89c735e998335e5a85085cab
+        uses: NanashiTheNameless/action-create-tag@c3d6df4f94a5cbd01edbb29ce71d5e3403e61378
         with:
           tag: Offline-${{ steps.meta.outputs.sha7 }}
           message: Offline build for ${{ steps.meta.outputs.sha7 }}
