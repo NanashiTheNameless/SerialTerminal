@@ -1,0 +1,70 @@
+{
+  "name": "serialterminal",
+  "version": "0.0.1",
+  "description": "SerialTerminal Desktop App",
+  "main": "main.js",
+  "author": {
+    "name": "NanashiTheNameless",
+    "email": "Nanashi@NamelessNanashi.dev",
+    "url": "https://NamelessNanashi.dev"
+  },
+  "homepage": "https://serial.namelessnanashi.dev",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:linux": "electron-builder --linux",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:all": "electron-builder -mwl"
+  },
+  "build": {
+    "appId": "dev.namelessnanashi.serialterminal",
+    "productName": "SerialTerminal",
+    "files": [
+      "main.js",
+      "preload.js",
+      "port-picker.html",
+      "logo.png",
+      "logo.ico",
+      "logo.icns"
+    ],
+    "linux": {
+      "target": [
+        "deb",
+        "rpm",
+        "AppImage"
+      ],
+      "category": "Utility",
+      "icon": "logo.png"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "icon": "logo.ico"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        }
+      ],
+      "icon": "logo.icns",
+      "category": "public.app-category.utilities"
+    }
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "packageManager": "yarn@4.12.0"
+}

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Select Serial Port</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      font-size: 13px;
+      background: #2b2b2b;
+      color: #e8e8e8;
+      padding: 16px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .header {
+      margin-bottom: 16px;
+    }
+    
+    .title {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    
+    .subtitle {
+      font-size: 12px;
+      color: #999;
+    }
+    
+    .port-list {
+      list-style: none;
+      border: 1px solid #444;
+      border-radius: 4px;
+      background: #1e1e1e;
+      flex: 1;
+      min-height: 180px;
+      overflow-y: auto;
+      margin-bottom: 16px;
+    }
+    
+    .port-item {
+      padding: 12px 16px;
+      cursor: pointer;
+      border-bottom: 1px solid #333;
+      transition: background 0.1s;
+    }
+    
+    .port-item:last-child {
+      border-bottom: none;
+    }
+    
+    .port-item:hover {
+      background: #2d2d2d;
+    }
+    
+    .port-item.selected {
+      background: #0d47a1;
+    }
+    
+    .port-name {
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+    
+    .port-info {
+      font-size: 11px;
+      color: #999;
+    }
+    
+    .buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      position: sticky;
+      bottom: 0;
+      background: #2b2b2b;
+      padding-top: 8px;
+      padding-bottom: 4px;
+    }
+    
+    button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    
+    .btn-cancel {
+      background: #3a3a3a;
+      color: #e8e8e8;
+    }
+    
+    .btn-cancel:hover {
+      background: #4a4a4a;
+    }
+    
+    .btn-connect {
+      background: #1976d2;
+      color: white;
+    }
+    
+    .btn-connect:hover {
+      background: #1565c0;
+    }
+    
+    .btn-connect:disabled {
+      background: #555;
+      color: #888;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="title">serial.namelessnanashi.dev wants to connect to a serial port</div>
+  </div>
+  
+  <ul class="port-list" id="portList"></ul>
+  
+  <div class="buttons">
+    <button class="btn-cancel" onclick="cancel()">Cancel</button>
+    <button class="btn-connect" id="connectBtn" onclick="connect()" disabled>Connect</button>
+  </div>
+  
+  <script>
+    const { ipcRenderer } = require('electron');
+    
+    let selectedPortId = null;
+    let ports = [];
+    
+    // Receive port list from main process
+    ipcRenderer.on('port-list', (event, portList) => {
+      ports = portList;
+      renderPorts();
+    });
+    
+    function renderPorts() {
+      const portListEl = document.getElementById('portList');
+      const connectBtn = document.getElementById('connectBtn');
+      
+      portListEl.innerHTML = '';
+      
+      ports.forEach(port => {
+        const li = document.createElement('li');
+        li.className = 'port-item';
+        li.onclick = (e) => selectPort(port.portId, e);
+        
+        const name = document.createElement('div');
+        name.className = 'port-name';
+        name.textContent = port.portName || port.displayName || 'Unknown Port';
+        
+        li.appendChild(name);
+        portListEl.appendChild(li);
+      });
+    }
+    
+    function selectPort(portId, e) {
+      selectedPortId = portId;
+      
+      // Update UI
+      document.querySelectorAll('.port-item').forEach(item => {
+        item.classList.remove('selected');
+      });
+
+      (e.currentTarget || e.target).closest('.port-item').classList.add('selected');
+      document.getElementById('connectBtn').disabled = false;
+    }
+    
+    function connect() {
+      if (selectedPortId) {
+        ipcRenderer.send('port-selected', selectedPortId);
+      }
+    }
+    
+    function cancel() {
+      ipcRenderer.send('port-selected', null);
+    }
+  </script>
+</body>
+</html>
