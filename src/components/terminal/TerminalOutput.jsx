@@ -28,6 +28,17 @@ import './TerminalOutput.css'
 import { quickHotkeysPropType } from './propTypes'
 
 const TerminalOutput = React.memo((props) => {
+  const {
+    quickHotkeys,
+    focusInput,
+    onClearRequest,
+    openSettings,
+    onDisconnect,
+    history,
+    downloadFormat,
+    time
+  } = props
+
   // User input history window
   const [historyOpen, setHistoryOpen] = React.useState(false)
   // Format selection dialog
@@ -35,38 +46,25 @@ const TerminalOutput = React.memo((props) => {
   const [selectedFormat, setSelectedFormat] = React.useState('txt')
   const containerRef = React.useRef(null)
 
-  const handleDownload = () => {
-    if (!props.history || props.history.length === 0) return
-
-    const format = props.downloadFormat || 'ask'
-    if (format === 'ask') {
-      setSelectedFormat('txt')
-      setFormatDialogOpen(true)
-      return
-    }
-
-    performDownload(format)
-  }
-
-  const performDownload = (format) => {
+  const performDownload = React.useCallback((format) => {
     let content = ''
     let filename = `terminal-output-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}`
     let mimeType = 'text/plain'
 
     switch (format) {
       case 'txt':
-        content = props.history.map(line => {
-          const time = props.time ? `${line.time.toTimeString().substring(0, 8)} ` : ''
+        content = history.map(line => {
+          const timePrefix = time ? `${line.time.toTimeString().substring(0, 8)} ` : ''
           const prefix = line.type === 'userInput' ? '> ' : '< '
           const cleanValue = stripANSI(line.value)
-          return `${time}${prefix}${cleanValue}`
+          return `${timePrefix}${prefix}${cleanValue}`
         }).join('\n')
         filename += '.txt'
         mimeType = 'text/plain'
         break
 
       case 'csv':
-        content = 'Timestamp,Type,Value\n' + props.history.map(line => {
+        content = 'Timestamp,Type,Value\n' + history.map(line => {
           const time = line.time.toISOString()
           const cleanValue = stripANSI(line.value)
           const value = `"${cleanValue.replace(/"/g, '""')}"`
@@ -77,7 +75,7 @@ const TerminalOutput = React.memo((props) => {
         break
 
       case 'json':
-        content = JSON.stringify(props.history.map(line => ({
+        content = JSON.stringify(history.map(line => ({
           timestamp: line.time.toISOString(),
           type: line.type,
           value: line.value
@@ -90,13 +88,13 @@ const TerminalOutput = React.memo((props) => {
         content = '# Terminal Output\n\n'
         content += `Generated: ${new Date().toISOString()}\n\n`
         content += '## Session Log\n\n'
-        props.history.forEach(line => {
-          const time = props.time ? `${line.time.toTimeString().substring(0, 8)} ` : ''
+        history.forEach(line => {
+          const timePrefix = time ? `${line.time.toTimeString().substring(0, 8)} ` : ''
           const cleanValue = stripANSI(line.value)
           if (line.type === 'userInput') {
-            content += `**${time}Input:**\n\`\`\`\n${cleanValue}\n\`\`\`\n\n`
+            content += `**${timePrefix}Input:**\n\`\`\`\n${cleanValue}\n\`\`\`\n\n`
           } else {
-            content += `${time}Output:\n\`\`\`\n${cleanValue}\n\`\`\`\n\n`
+            content += `${timePrefix}Output:\n\`\`\`\n${cleanValue}\n\`\`\`\n\n`
           }
         })
         filename += '.md'
@@ -104,7 +102,7 @@ const TerminalOutput = React.memo((props) => {
         break
 
       default:
-        content = props.history.map(line => stripANSI(line.value)).join('\n')
+        content = history.map(line => stripANSI(line.value)).join('\n')
         filename += '.txt'
     }
 
@@ -117,7 +115,20 @@ const TerminalOutput = React.memo((props) => {
     link.click()
     document.body.removeChild(link)
     URL.revokeObjectURL(url)
-  }
+  }, [history, time])
+
+  const handleDownload = React.useCallback(() => {
+    if (!history || history.length === 0) return
+
+    const format = downloadFormat || 'ask'
+    if (format === 'ask') {
+      setSelectedFormat('txt')
+      setFormatDialogOpen(true)
+      return
+    }
+
+    performDownload(format)
+  }, [history, downloadFormat, performDownload])
 
   const handleFormatConfirm = () => {
     performDownload(selectedFormat)
@@ -133,7 +144,7 @@ const TerminalOutput = React.memo((props) => {
 
   // Keyboard shortcuts for accessibility inside the log
   React.useEffect(() => {
-    const hotkeys = props.quickHotkeys || {}
+    const hotkeys = quickHotkeys || {}
     if (hotkeys.enabled === false) return
 
     const focusKey = (hotkeys.focus || DEFAULT_SETTINGS.quickFocusKey).toLowerCase()
@@ -154,7 +165,7 @@ const TerminalOutput = React.memo((props) => {
         const key = e.key?.toLowerCase()
         if (key === focusKey && (!!focusShift === e.shiftKey)) {
           e.preventDefault()
-          props.focusInput?.()
+          focusInput?.()
           return
         }
         if (key === historyKey && (!!historyShift === e.shiftKey)) {
@@ -169,17 +180,17 @@ const TerminalOutput = React.memo((props) => {
         }
         if (key === clearKey && (!!clearShift === e.shiftKey)) {
           e.preventDefault()
-          props.onClearRequest?.()
+          onClearRequest?.()
           return
         }
         if (key === settingsKey && (!!settingsShift === e.shiftKey)) {
           e.preventDefault()
-          props.openSettings?.()
+          openSettings?.()
           return
         }
         if (key === disconnectKey && (!!disconnectShift === e.shiftKey)) {
           e.preventDefault()
-          props.onDisconnect?.()
+          onDisconnect?.()
           return
         }
       }
@@ -187,7 +198,7 @@ const TerminalOutput = React.memo((props) => {
 
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [props.quickHotkeys, props.focusInput, props.onClearRequest, props.openSettings, handleDownload])
+  }, [quickHotkeys, focusInput, onClearRequest, openSettings, onDisconnect, handleDownload])
 
   return (
     <section className='terminalOutput' aria-label='Terminal output'>

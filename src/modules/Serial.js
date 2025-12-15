@@ -220,10 +220,23 @@ export default class Serial {
 
     // Pace large payloads to avoid overflowing small device RX buffers.
     // Small payloads still go through the same path (single chunk).
-    await this._enqueueWrite(() => this._writeBytes(bytes, {
-      chunkSize: bytes.length > 256 ? 64 : bytes.length,
-      chunkDelayMs: bytes.length > 256 ? 2 : 0
-    }))
+    let chunkSize = bytes.length
+    let chunkDelayMs = 0
+
+    if (bytes.length > 256) {
+      chunkSize = 64
+      chunkDelayMs = 2
+    }
+    if (bytes.length > 1024) {
+      chunkSize = 32
+      chunkDelayMs = 5
+    }
+    if (bytes.length > 2048) {
+      chunkSize = 16
+      chunkDelayMs = 8
+    }
+
+    await this._enqueueWrite(() => this._writeBytes(bytes, { chunkSize, chunkDelayMs }))
   }
 
   /**
