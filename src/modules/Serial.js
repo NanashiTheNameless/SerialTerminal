@@ -27,6 +27,40 @@ export default class Serial {
     // Buffer for accumulating data chunks before calling onReceive
     this.receiveBuffer = ''
     this.receiveTimeout = null
+
+    // Serialize outbound writes to avoid writer lock errors and device overruns
+    this._writeChain = Promise.resolve()
+  }
+
+  _sleep (ms) {
+    return new Promise(resolve => setTimeout(resolve, ms))
+  }
+
+  _enqueueWrite (fn) {
+    this._writeChain = this._writeChain
+      .then(fn)
+      .catch((error) => {
+        console.error('[SERIAL] Write failed:', error)
+      })
+    return this._writeChain
+  }
+
+  async _writeBytes (bytes, { chunkSize, chunkDelayMs } = {}) {
+    const safeChunkSize = Number.isFinite(chunkSize) && chunkSize > 0 ? chunkSize : 64
+    const safeChunkDelayMs = Number.isFinite(chunkDelayMs) && chunkDelayMs >= 0 ? chunkDelayMs : 2
+
+    const writer = this.outputStream.getWriter()
+    try {
+      for (let offset = 0; offset < bytes.length; offset += safeChunkSize) {
+        const chunk = bytes.subarray(offset, Math.min(offset + safeChunkSize, bytes.length))
+        await writer.write(chunk)
+        if (safeChunkDelayMs > 0 && offset + safeChunkSize < bytes.length) {
+          await this._sleep(safeChunkDelayMs)
+        }
+      }
+    } finally {
+      writer.releaseLock()
+    }
   }
 
   /**
@@ -178,17 +212,18 @@ export default class Serial {
       return
     }
 
-    console.log(`[SERIAL] Send: ${value}`)
+    const preview = typeof value === 'string' && value.length > 200 ? `${value.slice(0, 200)}…` : value
+    console.log(`[SERIAL] Send (${value?.length ?? 0} chars): ${preview}`)
 
-    try {
-      const encoder = new TextEncoder()
-      const writer = this.outputStream.getWriter()
+    const encoder = new TextEncoder()
+    const bytes = encoder.encode(value)
 
-      await writer.write(encoder.encode(value))
-      writer.releaseLock()
-    } catch (error) {
-      console.error('[SERIAL] Send failed:', error)
-    }
+    // Pace large payloads to avoid overflowing small device RX buffers.
+    // Small payloads still go through the same path (single chunk).
+    await this._enqueueWrite(() => this._writeBytes(bytes, {
+      chunkSize: bytes.length > 256 ? 64 : bytes.length,
+      chunkDelayMs: bytes.length > 256 ? 2 : 0
+    }))
   }
 
   /**
@@ -201,17 +236,11 @@ export default class Serial {
       return
     }
 
-    try {
-      const writer = this.outputStream.getWriter()
-
-      const data = new Uint8Array([value])
-      await writer.write(data)
-
-      writer.releaseLock()
+    const data = new Uint8Array([value])
+    await this._enqueueWrite(async () => {
+      await this._writeBytes(data, { chunkSize: 1, chunkDelayMs: 0 })
       console.log(`[SERIAL] Sent byte: 0x${value.toString(16).padStart(2, '0')}`)
-    } catch (error) {
-      console.error('[SERIAL] Send byte failed:', error)
-    }
+    })
   }
 
   /**

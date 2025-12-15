@@ -74,6 +74,8 @@ const TerminalInput = forwardRef((props, ref) => {
   )
 })
 
+TerminalInput.displayName = 'TerminalInput'
+
 TerminalInput.propTypes = {
   input: PropTypes.string,
   setInput: PropTypes.func,
