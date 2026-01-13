@@ -23,7 +23,7 @@ import IconButton from '@mui/material/IconButton'
 import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
 
-import { BAUD_RATES, LINE_ENDING_VALUES, LINE_ENDING_LABELS, DOWNLOAD_FORMATS, DOWNLOAD_FORMAT_LABELS, DEFAULT_SETTINGS, KEYBOARD_SHORTCUTS } from '../../constants'
+import { ALL_BAUD_RATES, COMMON_BAUD_RATES, LINE_ENDING_VALUES, LINE_ENDING_LABELS, DOWNLOAD_FORMATS, DOWNLOAD_FORMAT_LABELS, DEFAULT_SETTINGS, KEYBOARD_SHORTCUTS } from '../../constants'
 
 const UNSET_CHAR = '�'
 
@@ -255,7 +255,21 @@ KeybindList.propTypes = {
 
 // Settings dialog for configuring serial connection parameters
 const Settings = React.memo((props) => {
-  const [baudRate, setBaudRate] = React.useState(props.settings.baudRate)
+  const [baudRate, setBaudRate] = React.useState(() => {
+    const rate = props.settings.baudRate
+    const arbitrary = props.settings.allowArbitraryBaudrates === true
+    const uncommon = props.settings.allowUncommonBaudrates === true
+    
+    // If arbitrary baudrates are allowed, any value is valid
+    if (arbitrary === true) return rate
+    
+    // Otherwise, check against the filtered list
+    const allowedRates = uncommon === true ? ALL_BAUD_RATES : COMMON_BAUD_RATES
+    if (!allowedRates.includes(rate)) {
+      return DEFAULT_SETTINGS.baudRate
+    }
+    return rate
+  })
   const [lineEnding, setLineEnding] = React.useState(props.settings.lineEnding)
   const [localEcho, setLocalEcho] = React.useState(props.settings.localEcho !== false)
   const [timestamp, setTimestamp] = React.useState(props.settings.timestamp !== false)
@@ -273,6 +287,8 @@ const Settings = React.memo((props) => {
   const [disconnectShortcutShift, setDisconnectShortcutShift] = React.useState(props.settings.disconnectShortcutShift === true)
   const [downloadFormat, setDownloadFormat] = React.useState(props.settings.downloadFormat || 'ask')
   const [advanced, setAdvanced] = React.useState(props.settings.advanced === true)
+  const [allowUncommonBaudrates, setAllowUncommonBaudrates] = React.useState(props.settings.allowUncommonBaudrates === true)
+  const [allowArbitraryBaudrates, setAllowArbitraryBaudrates] = React.useState(props.settings.allowArbitraryBaudrates === true)
   const [captureTarget, setCaptureTarget] = React.useState(null)
   const [parseANSIOutput, setParseANSIOutput] = React.useState(props.settings.parseANSIOutput !== false)
   const [enableQuickHotkeys, setEnableQuickHotkeys] = React.useState(props.settings.enableQuickHotkeys !== false)
@@ -432,7 +448,20 @@ const Settings = React.memo((props) => {
   }
 
   const cancel = () => {
-    setBaudRate(props.settings.baudRate)
+    const rate = props.settings.baudRate
+    const arbitrary = props.settings.allowArbitraryBaudrates === true
+    const uncommon = props.settings.allowUncommonBaudrates === true
+    let validatedRate = rate
+    
+    // Validate baudrate
+    if (arbitrary !== true) {
+      const allowedRates = uncommon === true ? ALL_BAUD_RATES : COMMON_BAUD_RATES
+      if (!allowedRates.includes(rate)) {
+        validatedRate = DEFAULT_SETTINGS.baudRate
+      }
+    }
+    
+    setBaudRate(validatedRate)
     setLineEnding(props.settings.lineEnding)
     setLocalEcho(props.settings.localEcho !== false)
     setTimestamp(props.settings.timestamp !== false)
@@ -553,6 +582,22 @@ const Settings = React.memo((props) => {
     setCommandKeybinds(props.settings.commandKeybinds || [])
   }, [props.settings.commandKeybinds])
 
+  // Validate baudrate against current allowed rates
+  React.useEffect(() => {
+    const getAllowedBaudrates = () => {
+      if (allowArbitraryBaudrates === true) {
+        return null // any baudrate is allowed
+      }
+      return allowUncommonBaudrates === true ? ALL_BAUD_RATES : COMMON_BAUD_RATES
+    }
+
+    const allowedBaudrates = getAllowedBaudrates()
+    // Only reset if current baudrate is invalid for the new filter settings
+    if (allowedBaudrates !== null && !allowedBaudrates.includes(baudRate)) {
+      setBaudRate(DEFAULT_SETTINGS.baudRate)
+    }
+  }, [allowArbitraryBaudrates, allowUncommonBaudrates])
+
   const reset = () => {
     if (!props.openPort) setBaudRate(DEFAULT_SETTINGS.baudRate)
     setLineEnding(DEFAULT_SETTINGS.lineEnding)
@@ -572,6 +617,8 @@ const Settings = React.memo((props) => {
     setDownloadFormat(DEFAULT_SETTINGS.downloadFormat)
     setParseANSIOutput(DEFAULT_SETTINGS.parseANSIOutput)
     setAdvanced(DEFAULT_SETTINGS.advanced)
+    setAllowUncommonBaudrates(DEFAULT_SETTINGS.allowUncommonBaudrates)
+    setAllowArbitraryBaudrates(DEFAULT_SETTINGS.allowArbitraryBaudrates)
     setEnableQuickHotkeys(DEFAULT_SETTINGS.enableQuickHotkeys)
     setControlAliases(DEFAULT_SETTINGS.customControlAliases)
     setAliasKey('')
@@ -653,6 +700,8 @@ const Settings = React.memo((props) => {
       commandKeybinds: commandKeybinds,
       parseANSIOutput,
       advanced,
+      allowUncommonBaudrates,
+      allowArbitraryBaudrates,
       enableQuickHotkeys,
       quickFocusKey: normalizeHotkey(quickFocusKey || 'i'),
       quickHistoryKey: normalizeHotkey(quickHistoryKey || 'h'),
@@ -698,19 +747,34 @@ const Settings = React.memo((props) => {
           Serial Connection
         </DialogContentText>
 
-        <FormControl fullWidth sx={formElementCSS}>
-          <InputLabel>Baud Rate {props.openPort && '(Requires Reconnect)'}</InputLabel>
-          <Select
+        {!allowArbitraryBaudrates ? (
+          <FormControl fullWidth sx={formElementCSS}>
+            <InputLabel>Baud Rate {props.openPort && '(Requires Reconnect)'}</InputLabel>
+            <Select
+              value={baudRate}
+              onChange={(e) => setBaudRate(Number(e.target.value))}
+              label='baudrate'
+              disabled={props.openPort}
+            >
+              {(!allowUncommonBaudrates ? COMMON_BAUD_RATES : ALL_BAUD_RATES).map(baud =>
+                <MenuItem value={baud} key={baud}>{baud} baud</MenuItem>
+              )}
+            </Select>
+          </FormControl>
+        ) : (
+          <TextField
+            label='Baud Rate'
+            type='number'
+            variant='outlined'
+            fullWidth
             value={baudRate}
             onChange={(e) => setBaudRate(Number(e.target.value))}
-            label='baudrate'
             disabled={props.openPort}
-          >
-            {BAUD_RATES.map(baud =>
-              <MenuItem value={baud} key={baud}>{baud} baud</MenuItem>
-            )}
-          </Select>
-        </FormControl>
+            inputProps={{ min: 1, step: 1 }}
+            helperText={props.openPort ? 'Requires Reconnect' : ''}
+            sx={formElementCSS}
+          />
+        )}
 
         <FormControl fullWidth sx={formElementCSS}>
           <InputLabel>Line Ending</InputLabel>
@@ -881,6 +945,34 @@ const Settings = React.memo((props) => {
 
         <Collapse in={advanced} timeout='auto' unmountOnExit>
           <Divider sx={{ my: 2 }} />
+
+          {!allowArbitraryBaudrates && (
+            <FormGroup sx={{ mb: 2 }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={allowUncommonBaudrates}
+                    onChange={(e) => setAllowUncommonBaudrates(e.target.checked)}
+                    sx={{ color: '#ffffffb3', '&.Mui-checked': { color: '#fff' } }}
+                  />
+                }
+                label='Allow Uncommon Baudrates'
+              />
+            </FormGroup>
+          )}
+
+          <FormGroup sx={{ mb: 2 }}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={allowArbitraryBaudrates}
+                  onChange={(e) => setAllowArbitraryBaudrates(e.target.checked)}
+                  sx={{ color: '#ffffffb3', '&.Mui-checked': { color: '#fff' } }}
+                />
+              }
+              label='Allow Arbitrary Baudrates'
+            />
+          </FormGroup>
 
           <FormGroup sx={{ mb: 2 }}>
             <FormControlLabel

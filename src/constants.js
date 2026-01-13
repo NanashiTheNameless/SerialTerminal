@@ -1,7 +1,7 @@
 // Application-wide constants
 
 // Serial port configuration
-export const BAUD_RATES = [
+export const ALL_BAUD_RATES = [
   // Legacy rates (< 1200)
   50, 75, 110, 134, 150, 200, 300, 600,
   // Low speed (1200-9600)
@@ -12,6 +12,13 @@ export const BAUD_RATES = [
   100000, 115200, 125000, 128000, 153600, 230400, 250000, 256000, 307200, 460800, 500000, 576000, 614400, 748800, 921600,
   // Very high speed (1M+)
   1000000, 1500000, 2000000, 3000000, 4000000
+]
+
+export const COMMON_BAUD_RATES = [
+  // Standard rates
+  9600, 19200, 38400, 57600, 115200,
+  // High speed
+  230400, 460800, 921600
 ]
 
 // Line ending options
@@ -85,7 +92,7 @@ export const DEFAULT_SETTINGS = {
   detectCtrlD: true,
   settingsShortcut: true,
   clearShortcut: true,
-  disconnectShortcut: true,
+  disconnectShortcut: false,
   downloadFormat: 'ask',
   settingsShortcutKey: KEYBOARD_SHORTCUTS.OPEN_SETTINGS.key,
   clearShortcutKey: KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.key,
@@ -109,7 +116,9 @@ export const DEFAULT_SETTINGS = {
   quickSettingsKey: 's',
   quickSettingsShift: false,
   quickDisconnectKey: 'x',
-  quickDisconnectShift: false
+  quickDisconnectShift: false,
+  allowUncommonBaudrates: false,
+  allowArbitraryBaudrates: false
 }
 
 // UI constants
