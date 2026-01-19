@@ -180,7 +180,7 @@ jobs:
         run: sudo chown -Rc $UID .git/
 
       - name: Commit and push applied linter fixes
-        uses: stefanzweifel/git-auto-commit-action@6739571eaee7f2e84e98784215d23acd69740d13
+        uses: stefanzweifel/git-auto-commit-action@df21a760ddce5aca932ba20fa2ba4f17a182c39a
         if: >-
           steps.ml.outputs.has_updated_sources == 1 &&
           (
