@@ -9,7 +9,7 @@ permissions: {}
 jobs:
   shellcheck:
     name: Shellcheck
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - name: Cache shellcheck download
         id: cache-shellcheck-v0_11
