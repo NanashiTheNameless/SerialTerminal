@@ -38,7 +38,7 @@ const RAW_RUNTIME_STATE =
           ["eslint", "virtual:0cb01096e93a4838df04ecb3d52bb4fb19ff62ed5e04c3d8cbe696bc0a465bc89c025094a9a21eb1a80d5d3fed4333b6bd2efda3b61410e4cc0d924bfdee2e96#npm:9.39.2"],\
           ["eslint-plugin-react", "virtual:0cb01096e93a4838df04ecb3d52bb4fb19ff62ed5e04c3d8cbe696bc0a465bc89c025094a9a21eb1a80d5d3fed4333b6bd2efda3b61410e4cc0d924bfdee2e96#npm:7.37.5"],\
           ["eslint-plugin-react-hooks", "virtual:0cb01096e93a4838df04ecb3d52bb4fb19ff62ed5e04c3d8cbe696bc0a465bc89c025094a9a21eb1a80d5d3fed4333b6bd2efda3b61410e4cc0d924bfdee2e96#npm:7.0.1"],\
-          ["globals", "npm:17.1.0"],\
+          ["globals", "npm:17.2.0"],\
           ["prop-types", "npm:15.8.1"],\
           ["react", "npm:19.2.1"],\
           ["react-dom", "virtual:0cb01096e93a4838df04ecb3d52bb4fb19ff62ed5e04c3d8cbe696bc0a465bc89c025094a9a21eb1a80d5d3fed4333b6bd2efda3b61410e4cc0d924bfdee2e96#npm:19.2.1"],\
@@ -2894,10 +2894,10 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["npm:17.1.0", {\
-        "packageLocation": "../../.yarn/berry/cache/globals-npm-17.1.0-baf660f37b-10c0.zip/node_modules/globals/",\
+      ["npm:17.2.0", {\
+        "packageLocation": "../../.yarn/berry/cache/globals-npm-17.2.0-7947ef6e16-10c0.zip/node_modules/globals/",\
         "packageDependencies": [\
-          ["globals", "npm:17.1.0"]\
+          ["globals", "npm:17.2.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -4360,7 +4360,7 @@ const RAW_RUNTIME_STATE =
           ["eslint", "virtual:0cb01096e93a4838df04ecb3d52bb4fb19ff62ed5e04c3d8cbe696bc0a465bc89c025094a9a21eb1a80d5d3fed4333b6bd2efda3b61410e4cc0d924bfdee2e96#npm:9.39.2"],\
           ["eslint-plugin-react", "virtual:0cb01096e93a4838df04ecb3d52bb4fb19ff62ed5e04c3d8cbe696bc0a465bc89c025094a9a21eb1a80d5d3fed4333b6bd2efda3b61410e4cc0d924bfdee2e96#npm:7.37.5"],\
           ["eslint-plugin-react-hooks", "virtual:0cb01096e93a4838df04ecb3d52bb4fb19ff62ed5e04c3d8cbe696bc0a465bc89c025094a9a21eb1a80d5d3fed4333b6bd2efda3b61410e4cc0d924bfdee2e96#npm:7.0.1"],\
-          ["globals", "npm:17.1.0"],\
+          ["globals", "npm:17.2.0"],\
           ["prop-types", "npm:15.8.1"],\
           ["react", "npm:19.2.1"],\
           ["react-dom", "virtual:0cb01096e93a4838df04ecb3d52bb4fb19ff62ed5e04c3d8cbe696bc0a465bc89c025094a9a21eb1a80d5d3fed4333b6bd2efda3b61410e4cc0d924bfdee2e96#npm:19.2.1"],\
