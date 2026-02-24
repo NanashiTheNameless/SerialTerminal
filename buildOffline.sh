@@ -11,8 +11,8 @@ yarn install --immutable
 yarn build
 
 if [[ ! -d build ]]; then
-  echo "Expected build output directory 'build' was not created."
-  exit 1
+	echo "Expected build output directory 'build' was not created."
+	exit 1
 fi
 
 cp -f LICENSE build/LICENSE
