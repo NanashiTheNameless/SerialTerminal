@@ -1,25 +1,25 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.4.4/schema.json",
-	"files": {
-		"includes": [
-			"**",
-			"!**/build",
-			"!**/dist",
-			"!**/node_modules",
-			"!**/SerialTerminalOffline-*",
-			"!**/.yarn/**",
-			"!**/.pnp.cjs",
-			"!**/.pnp.loader.mjs"
-		]
-	},
-	"linter": {
-		"enabled": true,
-		"rules": {
-			"recommended": false,
-			"correctness": {
-				"noUnusedImports": "off",
-				"noUnusedVariables": "warn"
-			}
-		}
-	}
+  "$schema": "https://biomejs.dev/schemas/2.4.4/schema.json",
+  "files": {
+    "includes": [
+      "**",
+      "!**/build",
+      "!**/dist",
+      "!**/node_modules",
+      "!**/SerialTerminalOffline-*",
+      "!**/.yarn/**",
+      "!**/.pnp.cjs",
+      "!**/.pnp.loader.mjs"
+    ]
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": false,
+      "correctness": {
+        "noUnusedImports": "off",
+        "noUnusedVariables": "warn"
+      }
+    }
+  }
 }
