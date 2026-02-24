@@ -21,8 +21,8 @@ DISABLE:
 DISABLE_LINTERS:
   - SPELL_LYCHEE
   - REPOSITORY_CHECKOV
-  - JAVASCRIPT_ES # Disable MegaLinter's bundled ESLint v8, use local v9 instead
-  - JSX_ESLINT # Disable MegaLinter's bundled ESLint v8, use local v9 instead
+  - JAVASCRIPT_ES # Disable ESLint; project linting uses Biome via yarn scripts
+  - JSX_ESLINT # Disable ESLint; project linting uses Biome via yarn scripts
 
 SHOW_ELAPSED_TIME: true
 # Uncomment if you want MegaLinter to detect errors but not block CI to pass

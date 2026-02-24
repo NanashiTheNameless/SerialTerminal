@@ -50,7 +50,6 @@ export const parseANSI = (text) => {
   if (!text || typeof text !== 'string') return [{ text: String(text), style: {} }]
 
   const segments = []
-  // eslint-disable-next-line no-control-regex
   const ansiRegex = /\u001b\[([0-9;]*?)([a-zA-Z])/g
   let lastIndex = 0
   let currentStyle = {}
@@ -117,6 +116,5 @@ export const parseANSI = (text) => {
  * Strip ANSI codes from text (for plain text export)
  */
 export const stripANSI = (text) => {
-  // eslint-disable-next-line no-control-regex
   return String(text).replace(/\u001b\[[0-9;]*[a-zA-Z]/g, '')
 }

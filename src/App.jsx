@@ -152,7 +152,6 @@ function App () {
 
   // Setup serial callbacks when component mounts
   React.useEffect(() => {
-    // eslint-disable-next-line react-hooks/immutability -- Serial callbacks are designed to be assigned
     serial.onSuccess = () => {
       setConnected(true)
       setToast({ open: true, severity: 'success', value: 'Connected!' })

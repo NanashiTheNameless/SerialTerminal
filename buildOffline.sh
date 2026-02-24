@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 sha7="$(git rev-parse --short=7 HEAD)"
 
 rm -rf SerialTerminalOffline-* SerialTerminalOffline-*.zip
@@ -7,6 +9,11 @@ rm -rf SerialTerminalOffline-* SerialTerminalOffline-*.zip
 yarn install --immutable
 
 yarn build
+
+if [[ ! -d build ]]; then
+  echo "Expected build output directory 'build' was not created."
+  exit 1
+fi
 
 cp -f LICENSE build/LICENSE
 
