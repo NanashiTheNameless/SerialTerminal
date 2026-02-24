@@ -1,28 +1,28 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React from 'react'
+import PropTypes from 'prop-types'
 
 /**
  * Error Boundary component to catch and display React errors gracefully
  */
 class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false, error: null };
+  constructor (props) {
+    super(props)
+    this.state = { hasError: false, error: null }
   }
 
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error };
+  static getDerivedStateFromError (error) {
+    return { hasError: true, error }
   }
 
-  componentDidCatch(error, errorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+  componentDidCatch (error, errorInfo) {
+    console.error('ErrorBoundary caught an error:', error, errorInfo)
   }
 
   handleReload = () => {
-    window.location.reload();
-  };
+    window.location.reload()
+  }
 
-  render() {
+  render () {
     if (this.state.hasError) {
       return (
         <div style={styles.container}>
@@ -36,16 +36,16 @@ class ErrorBoundary extends React.Component {
             </button>
           </div>
         </div>
-      );
+      )
     }
 
-    return this.props.children;
+    return this.props.children
   }
 }
 
 ErrorBoundary.propTypes = {
   children: PropTypes.node.isRequired
-};
+}
 
 const styles = {
   container: {
@@ -83,6 +83,6 @@ const styles = {
     fontSize: '14px',
     fontWeight: '500'
   }
-};
+}
 
-export default ErrorBoundary;
+export default ErrorBoundary

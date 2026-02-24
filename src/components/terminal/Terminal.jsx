@@ -50,7 +50,7 @@ const Terminal = forwardRef((props, ref) => {
           })
         })
       }
-      
+
       // Apply history length limit
       setHistory((current) => {
         const combined = current.concat(newLines)
@@ -151,7 +151,6 @@ const Terminal = forwardRef((props, ref) => {
         ]
         return newHistory.length > MAX_HISTORY_LENGTH ? newHistory.slice(-MAX_HISTORY_LENGTH) : newHistory
       })
-      return
     }
   }
 

@@ -47,7 +47,8 @@ const KeybindDisplay = ({ ctrlKey, shift, label, modifierLabel = 'Ctrl' }) => (
     letterSpacing: 0.5,
     fontSize: '0.95rem',
     color: '#fff'
-  }}>
+  }}
+  >
     <span>{modifierLabel}</span>
     {shift && <span>Shift</span>}
     <span>{(ctrlKey || label || UNSET_CHAR).toUpperCase()}</span>
@@ -99,7 +100,8 @@ const KeyCapture = ({ captureTarget, currentTarget, onClick, ctrlKey, shift, lab
       letterSpacing: 0.75,
       fontSize: '1rem',
       color: '#fff'
-    }}>
+    }}
+    >
       <span>{modifierLabel}</span>
       {shift && <span>Shift</span>}
       <span>{ctrlKey ? ctrlKey.toUpperCase() : (label ? label.toUpperCase() : UNSET_CHAR)}</span>
@@ -145,7 +147,7 @@ const KeybindListItem = ({ entry, index, onClick, onDelete, isSelected, children
       <KeybindDisplay ctrlKey={entry.key} shift={entry.shift} />
       {children}
     </Box>
-    <IconButton aria-label='Delete' size='small' onClick={(e) => { e.stopPropagation(); onDelete(); }}>
+    <IconButton aria-label='Delete' size='small' onClick={(e) => { e.stopPropagation(); onDelete() }}>
       <DeleteIcon fontSize='small' />
     </IconButton>
   </Box>
@@ -259,10 +261,10 @@ const Settings = React.memo((props) => {
     const rate = props.settings.baudRate
     const arbitrary = props.settings.allowArbitraryBaudrates === true
     const uncommon = props.settings.allowUncommonBaudrates === true
-    
+
     // If arbitrary baudrates are allowed, any value is valid
     if (arbitrary === true) return rate
-    
+
     // Otherwise, check against the filtered list
     const allowedRates = uncommon === true ? ALL_BAUD_RATES : COMMON_BAUD_RATES
     if (!allowedRates.includes(rate)) {
@@ -334,11 +336,11 @@ const Settings = React.memo((props) => {
     }
     // Handle common escape sequences
     const escapeMap = {
-      '\\n': 10,    // newline
-      '\\r': 13,    // carriage return
-      '\\t': 9,     // tab
-      '\\0': 0,     // null
-      '\\\\': 92   // backslash
+      '\\n': 10, // newline
+      '\\r': 13, // carriage return
+      '\\t': 9, // tab
+      '\\0': 0, // null
+      '\\\\': 92 // backslash
     }
     if (escapeMap[str] !== undefined) {
       return { type: 'code', value: escapeMap[str] }
@@ -392,7 +394,7 @@ const Settings = React.memo((props) => {
       const exists = controlAliases.some((entry) => entry.key === normalizedKey && entry.shift === aliasShift)
       if (exists) {
         const shiftLabel = aliasShift ? 'Ctrl+Shift+' : 'Ctrl+'
-        alert(`${shiftLabel}${normalizedKey.toUpperCase()} is already mapped. Delete the existing alias first.`)
+        window.alert(`${shiftLabel}${normalizedKey.toUpperCase()} is already mapped. Delete the existing alias first.`)
         return
       }
       // Store the parsed result (either code or text)
@@ -427,7 +429,7 @@ const Settings = React.memo((props) => {
       const exists = commandKeybinds.some((entry) => entry.key === normalizedKey && entry.shift === keybindShift)
       if (exists) {
         const shiftLabel = keybindShift ? 'Ctrl+Shift+' : 'Ctrl+'
-        alert(`${shiftLabel}${normalizedKey.toUpperCase()} is already mapped. Delete the existing keybind first.`)
+        window.alert(`${shiftLabel}${normalizedKey.toUpperCase()} is already mapped. Delete the existing keybind first.`)
         return
       }
       setCommandKeybinds((prev) => [...prev, { key: normalizedKey, shift: keybindShift, text: keybindText.trim() }])
@@ -452,7 +454,7 @@ const Settings = React.memo((props) => {
     const arbitrary = props.settings.allowArbitraryBaudrates === true
     const uncommon = props.settings.allowUncommonBaudrates === true
     let validatedRate = rate
-    
+
     // Validate baudrate
     if (arbitrary !== true) {
       const allowedRates = uncommon === true ? ALL_BAUD_RATES : COMMON_BAUD_RATES
@@ -460,7 +462,7 @@ const Settings = React.memo((props) => {
         validatedRate = DEFAULT_SETTINGS.baudRate
       }
     }
-    
+
     setBaudRate(validatedRate)
     setLineEnding(props.settings.lineEnding)
     setLocalEcho(props.settings.localEcho !== false)
@@ -647,7 +649,7 @@ const Settings = React.memo((props) => {
     if (settingsShortcut && clearShortcut &&
         settingsShortcutKey === clearShortcutKey &&
         settingsShortcutShift === clearShortcutShift) {
-      alert('Open Settings and Clear Terminal cannot use the same keybind!')
+      window.alert('Open Settings and Clear Terminal cannot use the same keybind!')
       return
     }
 
@@ -655,7 +657,7 @@ const Settings = React.memo((props) => {
     if (settingsShortcut && disconnectShortcut &&
         settingsShortcutKey === disconnectShortcutKey &&
         settingsShortcutShift === disconnectShortcutShift) {
-      alert('Open Settings and Disconnect cannot use the same keybind!')
+      window.alert('Open Settings and Disconnect cannot use the same keybind!')
       return
     }
 
@@ -663,14 +665,14 @@ const Settings = React.memo((props) => {
     if (clearShortcut && disconnectShortcut &&
         clearShortcutKey === disconnectShortcutKey &&
         clearShortcutShift === disconnectShortcutShift) {
-      alert('Clear Terminal and Disconnect cannot use the same keybind!')
+      window.alert('Clear Terminal and Disconnect cannot use the same keybind!')
       return
     }
 
     if (enableQuickHotkeys) {
       const hotkeys = [quickFocusKey, quickHistoryKey, quickDownloadKey, quickClearKey, quickSettingsKey, quickDisconnectKey]
       if (hotkeys.some(k => !hotkeyValid(k))) {
-        alert('All terminal hotkeys must be a single character (letters or symbols).')
+        window.alert('All terminal hotkeys must be a single character (letters or symbols).')
         return
       }
     }
@@ -697,7 +699,7 @@ const Settings = React.memo((props) => {
       disconnectShortcutShift,
       downloadFormat,
       customControlAliases: controlAliases,
-      commandKeybinds: commandKeybinds,
+      commandKeybinds,
       parseANSIOutput,
       advanced,
       allowUncommonBaudrates,
@@ -747,34 +749,36 @@ const Settings = React.memo((props) => {
           Serial Connection
         </DialogContentText>
 
-        {!allowArbitraryBaudrates ? (
-          <FormControl fullWidth sx={formElementCSS}>
-            <InputLabel>Baud Rate {props.openPort && '(Requires Reconnect)'}</InputLabel>
-            <Select
+        {!allowArbitraryBaudrates
+          ? (
+            <FormControl fullWidth sx={formElementCSS}>
+              <InputLabel>Baud Rate {props.openPort && '(Requires Reconnect)'}</InputLabel>
+              <Select
+                value={baudRate}
+                onChange={(e) => setBaudRate(Number(e.target.value))}
+                label='baudrate'
+                disabled={props.openPort}
+              >
+                {(!allowUncommonBaudrates ? COMMON_BAUD_RATES : ALL_BAUD_RATES).map(baud =>
+                  <MenuItem value={baud} key={baud}>{baud} baud</MenuItem>
+                )}
+              </Select>
+            </FormControl>
+            )
+          : (
+            <TextField
+              label='Baud Rate'
+              type='number'
+              variant='outlined'
+              fullWidth
               value={baudRate}
               onChange={(e) => setBaudRate(Number(e.target.value))}
-              label='baudrate'
               disabled={props.openPort}
-            >
-              {(!allowUncommonBaudrates ? COMMON_BAUD_RATES : ALL_BAUD_RATES).map(baud =>
-                <MenuItem value={baud} key={baud}>{baud} baud</MenuItem>
-              )}
-            </Select>
-          </FormControl>
-        ) : (
-          <TextField
-            label='Baud Rate'
-            type='number'
-            variant='outlined'
-            fullWidth
-            value={baudRate}
-            onChange={(e) => setBaudRate(Number(e.target.value))}
-            disabled={props.openPort}
-            inputProps={{ min: 1, step: 1 }}
-            helperText={props.openPort ? 'Requires Reconnect' : ''}
-            sx={formElementCSS}
-          />
-        )}
+              inputProps={{ min: 1, step: 1 }}
+              helperText={props.openPort ? 'Requires Reconnect' : ''}
+              sx={formElementCSS}
+            />
+            )}
 
         <FormControl fullWidth sx={formElementCSS}>
           <InputLabel>Line Ending</InputLabel>

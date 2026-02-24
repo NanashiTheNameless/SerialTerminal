@@ -21,6 +21,9 @@ const gridCSS = {
 
 // Landing page displayed when not connected to a device
 const Home = (props) => {
+  const handleConnect = props.connect
+  const handleOpenSettings = props.openSettings
+
   return (
     <Grid
       container
@@ -34,52 +37,56 @@ const Home = (props) => {
       <Grid>
 
         {props.supported()
-          ? <Box align='center'>
-            <Box>
-              <Button variant='contained' color='success' size='large' onClick={props.connect} sx={{ m: 1, fontSize: '1.5rem', padding: '8px 20px' }}>
-                <LinkIcon sx={{ mr: 1, fontSize: '1.5rem' }} />
-                Connect
-              </Button>
-            </Box>
+          ? (
+            <Box align='center'>
+              <Box>
+                <Button variant='contained' color='success' size='large' onClick={handleConnect} sx={{ m: 1, fontSize: '1.5rem', padding: '8px 20px' }}>
+                  <LinkIcon sx={{ mr: 1, fontSize: '1.5rem' }} />
+                  Connect
+                </Button>
+              </Box>
 
-            <Box>
-              <Button variant='contained' color='inherit' size='large' onClick={props.openSettings} sx={{ m: 1, mb: 2, bgcolor: '#808080', '&:hover': { bgcolor: '#696969' }, fontSize: '1.5rem', padding: '8px 20px' }}>
-                <SettingsIcon sx={{ mr: 1, fontSize: '1.5rem' }} />
-                Settings
-              </Button>
-            </Box>
+              <Box>
+                <Button variant='contained' color='inherit' size='large' onClick={handleOpenSettings} sx={{ m: 1, mb: 2, bgcolor: '#808080', '&:hover': { bgcolor: '#696969' }, fontSize: '1.5rem', padding: '8px 20px' }}>
+                  <SettingsIcon sx={{ mr: 1, fontSize: '1.5rem' }} />
+                  Settings
+                </Button>
+              </Box>
 
-            <Alert severity='info' align='left'>
-              1. Click CONNECT!<br />
-              2. Plug in your device & select the port!<br />
-              3. Enjoy having an easy Serial Terminal!<br />
+              <Alert severity='info' align='left'>
+                1. Click CONNECT!<br />
+                2. Plug in your device & select the port!<br />
+                3. Enjoy having an easy Serial Terminal!<br />
+              </Alert>
+            </Box>
+            )
+
+          : (
+            <Alert severity='warning'>
+              <AlertTitle>Your browser doesn&apos;t support the WebSerial API!</AlertTitle>
+              Try using&nbsp;
+              <a href='https://github.com/ungoogled-software/ungoogled-chromium?tab=readme-ov-file#automated-or-maintained-builds' target='_blank' rel='noopener noreferrer'>
+                <UngoogledChromiumIcon fontSize='inherit' /> <b>ungoogled chromium</b>
+              </a>
+              ,&nbsp;
+              <a href='https://www.google.com/chrome/' target='_blank' rel='noopener noreferrer'>
+                <ChromeIcon fontSize='inherit' /> <b>Chrome</b>
+              </a>
+              ,&nbsp;
+              <a href='https://www.microsoft.com/en-us/edge' target='_blank' rel='noopener noreferrer'>
+                <EdgeIcon fontSize='inherit' /> <b>Edge</b>
+              </a>
+              , or&nbsp;
+              <a href='https://www.opera.com/' target='_blank' rel='noopener noreferrer'>
+                <OperaIcon fontSize='inherit' /> <b>Opera</b>
+              </a>.
+              <br />
+              Learn more about&nbsp;
+              <a href='https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API#browser_compatibility' target='_blank' rel='noopener noreferrer'>
+                browser compatibility
+              </a>.
             </Alert>
-            </Box>
-
-          : <Alert severity='warning'>
-            <AlertTitle>Your browser doesn&apos;t support the WebSerial API!</AlertTitle>
-            Try using&nbsp;
-            <a href='https://github.com/ungoogled-software/ungoogled-chromium?tab=readme-ov-file#automated-or-maintained-builds' target='_blank' rel='noopener noreferrer'>
-              <UngoogledChromiumIcon fontSize='inherit' /> <b>ungoogled chromium</b>
-            </a>
-            ,&nbsp;
-            <a href='https://www.google.com/chrome/' target='_blank' rel='noopener noreferrer'>
-              <ChromeIcon fontSize='inherit' /> <b>Chrome</b>
-            </a>
-            ,&nbsp;
-            <a href='https://www.microsoft.com/en-us/edge' target='_blank' rel='noopener noreferrer'>
-              <EdgeIcon fontSize='inherit' /> <b>Edge</b>
-            </a>
-            , or&nbsp;
-            <a href='https://www.opera.com/' target='_blank' rel='noopener noreferrer'>
-              <OperaIcon fontSize='inherit' /> <b>Opera</b>
-            </a>.
-            <br />
-            Learn more about&nbsp;
-            <a href='https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API#browser_compatibility' target='_blank' rel='noopener noreferrer'>
-              browser compatibility
-            </a>.
-            </Alert>}
+            )}
       </Grid>
 
     </Grid>

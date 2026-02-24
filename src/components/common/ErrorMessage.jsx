@@ -12,8 +12,10 @@ import UngoogledChromiumIcon from '../../icons/UngoogledChromium'
 
 // Error dialog for displaying connection failures
 const ErrorMessage = (props) => {
+  const handleClose = props.close
+
   return (
-    <Dialog open={props.open} onClose={props.close}>
+    <Dialog open={props.open} onClose={handleClose}>
       <DialogTitle>Connection failed</DialogTitle>
 
       <DialogContent>
@@ -31,7 +33,7 @@ const ErrorMessage = (props) => {
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={props.close} color='primary'>Close</Button>
+        <Button onClick={handleClose} color='primary'>Close</Button>
       </DialogActions>
     </Dialog>
   )

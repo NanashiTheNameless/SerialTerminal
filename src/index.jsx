@@ -8,7 +8,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
   // Detect mobile devices
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
     (navigator.maxTouchPoints && navigator.maxTouchPoints > 2)
-  
+
   if (isMobile) {
     e.preventDefault()
   }

@@ -48,7 +48,7 @@ const Header = ({ isConnected = false, onDisconnect }) => {
               sx={{ color: '#fff', mr: 1 }}
             >
               <LinkOffIcon />
-              <p className="buttonLabel">Disconnect</p>
+              <p className='buttonLabel'>Disconnect</p>
             </Button>
           </Tooltip>
         )}
@@ -61,7 +61,7 @@ const Header = ({ isConnected = false, onDisconnect }) => {
             href='#'
           >
             <AddCircleIcon />
-            <p className="buttonLabel">New terminal</p>
+            <p className='buttonLabel'>New terminal</p>
           </Button>
         </Tooltip>
 
@@ -73,7 +73,7 @@ const Header = ({ isConnected = false, onDisconnect }) => {
             href='https://github.com/sponsors/NanashiTheNameless?o=esb'
           >
             <FavoriteBorderIcon />
-            <p className="buttonLabel">Support</p>
+            <p className='buttonLabel'>Support</p>
           </Button>
         </Tooltip>
       </Toolbar>

@@ -213,7 +213,8 @@ function App () {
 
         {/* Homepage or Terminal */}
         {isMobile
-          ? <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2 }}>
+          ? (
+            <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2 }}>
               <Alert severity='warning' sx={{ maxWidth: 575 }}>
                 <Box component='div' sx={{ fontWeight: 600, mb: 0.5 }}>
                   This tool is not supported on mobile devices.
@@ -235,41 +236,46 @@ function App () {
                 </Box>
               </Alert>
             </Box>
+            )
           : connected
-              ? <Terminal
-                  ref={terminalRef}
-                  received={received}
-                  send={handleSend}
-                  sendRaw={handleRawSend}
-                  openSettings={() => setSettingsOpen(true)}
-                  showToast={(message, severity = 'info') => setToast({ open: true, severity, value: message })}
-                  clearConfirmOpen={clearConfirmOpen}
-                  onClearRequest={() => setClearConfirmOpen(true)}
-                  onClearConfirm={() => {
-                    if (terminalRef.current) {
-                      terminalRef.current.clearHistory()
-                      setToast({ open: true, severity: 'success', value: 'History cleared!' })
-                    }
-                    setClearConfirmOpen(false)
-                  }}
-                  onClearCancel={() => setClearConfirmOpen(false)}
-                  onDisconnect={handleDisconnect}
-                  downloadFormat={settings.downloadFormat}
-                  echo={settings.localEcho !== false}
-                  time={settings.timestamp !== false}
-                  ctrlC={detectCtrlC}
-                  ctrlD={detectCtrlD}
-                  disconnectShortcut={disconnectShortcut}
-                  controlAliases={customControlAliases}
-                  commandKeybinds={commandKeybinds}
-                  parseANSIOutput={settings.parseANSIOutput !== false}
-                  quickHotkeys={quickHotkeys}
-                />
-              : <Home
-                  connect={connect}
-                  supported={serial.supported}
-                  openSettings={() => setSettingsOpen(true)}
-                />}
+            ? (
+              <Terminal
+                ref={terminalRef}
+                received={received}
+                send={handleSend}
+                sendRaw={handleRawSend}
+                openSettings={() => setSettingsOpen(true)}
+                showToast={(message, severity = 'info') => setToast({ open: true, severity, value: message })}
+                clearConfirmOpen={clearConfirmOpen}
+                onClearRequest={() => setClearConfirmOpen(true)}
+                onClearConfirm={() => {
+                  if (terminalRef.current) {
+                    terminalRef.current.clearHistory()
+                    setToast({ open: true, severity: 'success', value: 'History cleared!' })
+                  }
+                  setClearConfirmOpen(false)
+                }}
+                onClearCancel={() => setClearConfirmOpen(false)}
+                onDisconnect={handleDisconnect}
+                downloadFormat={settings.downloadFormat}
+                echo={settings.localEcho !== false}
+                time={settings.timestamp !== false}
+                ctrlC={detectCtrlC}
+                ctrlD={detectCtrlD}
+                disconnectShortcut={disconnectShortcut}
+                controlAliases={customControlAliases}
+                commandKeybinds={commandKeybinds}
+                parseANSIOutput={settings.parseANSIOutput !== false}
+                quickHotkeys={quickHotkeys}
+              />
+              )
+            : (
+              <Home
+                connect={connect}
+                supported={serial.supported}
+                openSettings={() => setSettingsOpen(true)}
+              />
+              )}
 
         {/* Settings Window */}
         <Settings

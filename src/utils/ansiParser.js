@@ -42,6 +42,8 @@ const ANSI_BG_COLORS = {
   107: '#ffffff' // bright white bg
 }
 
+const ESC = String.fromCharCode(27)
+
 /**
  * Parse ANSI escape sequences and return styled segments
  * Returns array of { text, style } objects
@@ -50,7 +52,7 @@ export const parseANSI = (text) => {
   if (!text || typeof text !== 'string') return [{ text: String(text), style: {} }]
 
   const segments = []
-  const ansiRegex = /\u001b\[([0-9;]*?)([a-zA-Z])/g
+  const ansiRegex = new RegExp(`${ESC}\\[([0-9;]*?)([a-zA-Z])`, 'g')
   let lastIndex = 0
   let currentStyle = {}
 
@@ -116,5 +118,5 @@ export const parseANSI = (text) => {
  * Strip ANSI codes from text (for plain text export)
  */
 export const stripANSI = (text) => {
-  return String(text).replace(/\u001b\[[0-9;]*[a-zA-Z]/g, '')
+  return String(text).replace(new RegExp(`${ESC}\\[[0-9;]*[a-zA-Z]`, 'g'), '')
 }

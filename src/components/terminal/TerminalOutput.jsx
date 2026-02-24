@@ -38,6 +38,7 @@ const TerminalOutput = React.memo((props) => {
     downloadFormat,
     time
   } = props
+  const handleOpenSettings = openSettings
 
   // User input history window
   const [historyOpen, setHistoryOpen] = React.useState(false)
@@ -185,20 +186,19 @@ const TerminalOutput = React.memo((props) => {
         }
         if (key === settingsKey && (!!settingsShift === e.shiftKey)) {
           e.preventDefault()
-          openSettings?.()
+          handleOpenSettings?.()
           return
         }
         if (key === disconnectKey && (!!disconnectShift === e.shiftKey)) {
           e.preventDefault()
           onDisconnect?.()
-          return
         }
       }
     }
 
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [quickHotkeys, focusInput, onClearRequest, openSettings, onDisconnect, handleDownload])
+  }, [quickHotkeys, focusInput, onClearRequest, handleOpenSettings, onDisconnect, handleDownload])
 
   return (
     <section className='terminalOutput' aria-label='Terminal output'>
@@ -222,7 +222,7 @@ const TerminalOutput = React.memo((props) => {
         </Button>
 
         {/* Settings */}
-        <Button onClick={props.openSettings} aria-label='Open settings'>
+        <Button onClick={handleOpenSettings} aria-label='Open settings'>
           <SettingsIcon color='inherit' />
         </Button>
       </ButtonGroup>
@@ -311,10 +311,10 @@ const TerminalOutput = React.memo((props) => {
             value={selectedFormat}
             onChange={(e) => setSelectedFormat(e.target.value)}
           >
-            <FormControlLabel value="txt" control={<Radio />} label="Plain Text (.txt)" />
-            <FormControlLabel value="csv" control={<Radio />} label="CSV (.csv)" />
-            <FormControlLabel value="json" control={<Radio />} label="JSON (.json)" />
-            <FormControlLabel value="md" control={<Radio />} label="Markdown (.md)" />
+            <FormControlLabel value='txt' control={<Radio />} label='Plain Text (.txt)' />
+            <FormControlLabel value='csv' control={<Radio />} label='CSV (.csv)' />
+            <FormControlLabel value='json' control={<Radio />} label='JSON (.json)' />
+            <FormControlLabel value='md' control={<Radio />} label='Markdown (.md)' />
           </RadioGroup>
         </DialogContent>
         <DialogActions>
