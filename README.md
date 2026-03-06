@@ -62,7 +62,7 @@ Note: Quick hotkeys can be toggled and configured in the advanced settings panel
 
 ### Prerequisites
 
-- Node.js 18+ and Yarn 4+
+- Node.js 25+ and Yarn 4+
 - A browser with WebSerial support
 
 ### Local testing/running

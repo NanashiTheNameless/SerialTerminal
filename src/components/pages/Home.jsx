@@ -13,6 +13,7 @@ import OperaIcon from '../../icons/Opera'
 import UngoogledChromiumIcon from '../../icons/UngoogledChromium'
 import SettingsIcon from '@mui/icons-material/Settings'
 import LinkIcon from '@mui/icons-material/Link'
+import FlashOnIcon from '@mui/icons-material/FlashOn'
 
 const gridCSS = {
   flexGrow: 1,
@@ -23,6 +24,7 @@ const gridCSS = {
 const Home = (props) => {
   const handleConnect = props.connect
   const handleOpenSettings = props.openSettings
+  const handleOpenEspToolFlasher = props.openEspToolFlasher
 
   return (
     <Grid
@@ -58,6 +60,13 @@ const Home = (props) => {
                 2. Plug in your device & select the port!<br />
                 3. Enjoy having an easy Serial Terminal!<br />
               </Alert>
+
+              <Box>
+                <Button variant='contained' color='primary' size='large' onClick={handleOpenEspToolFlasher} sx={{ m: 1, mt: 2, mb: 2, fontSize: '1.25rem', padding: '8px 20px' }}>
+                  <FlashOnIcon sx={{ mr: 1, fontSize: '1.5rem' }} />
+                  ESPTool Flasher
+                </Button>
+              </Box>
             </Box>
             )
 
@@ -96,7 +105,8 @@ const Home = (props) => {
 Home.propTypes = {
   connect: PropTypes.func,
   supported: PropTypes.func,
-  openSettings: PropTypes.func
+  openSettings: PropTypes.func,
+  openEspToolFlasher: PropTypes.func
 }
 
 export default Home

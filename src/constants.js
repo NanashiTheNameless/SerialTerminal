@@ -118,7 +118,12 @@ export const DEFAULT_SETTINGS = {
   quickDisconnectKey: 'x',
   quickDisconnectShift: false,
   allowUncommonBaudrates: false,
-  allowArbitraryBaudrates: false
+  allowArbitraryBaudrates: false,
+  flashBaudRate: 460800,
+  flashAddress: '0x0',
+  flashEraseAll: true,
+  splitFirmwareFiles: false,
+  allowAnyFileFormat: false
 }
 
 // UI constants

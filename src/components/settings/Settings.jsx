@@ -32,6 +32,15 @@ const formElementCSS = {
   minWidth: '10em'
 }
 
+const INPUT_ROW_HEIGHT = 56
+
+const getValidatedBaudRate = (rate, allowArbitrary, allowUncommon, fallback) => {
+  if (allowArbitrary === true) return rate
+
+  const allowedRates = allowUncommon === true ? ALL_BAUD_RATES : COMMON_BAUD_RATES
+  return allowedRates.includes(rate) ? rate : fallback
+}
+
 // Reusable KeybindDisplay component for showing Ctrl+Key combinations
 const KeybindDisplay = ({ ctrlKey, shift, label, modifierLabel = 'Ctrl' }) => (
   <Box sx={{
@@ -78,8 +87,11 @@ const KeyCapture = ({ captureTarget, currentTarget, onClick, ctrlKey, shift, lab
       display: 'flex',
       alignItems: 'center',
       gap: 1.5,
-      p: 1.75,
+      px: 1.75,
+      py: 0.75,
       mt: 0.75,
+      height: INPUT_ROW_HEIGHT,
+      boxSizing: 'border-box',
       borderRadius: 1.5,
       border: '1px solid #666',
       backgroundColor: '#1a1a1a',
@@ -183,7 +195,7 @@ const KeybindInputForm = ({ captureTarget, currentTarget, onCaptureClick, ctrlKe
         marginTop: 0.75,
         minWidth: '10em',
         width: 'auto',
-        '& .MuiOutlinedInput-root': { height: '56px' }
+        '& .MuiOutlinedInput-root': { height: `${INPUT_ROW_HEIGHT}px` }
       }}
       size='small'
       error={textError}
@@ -195,7 +207,7 @@ const KeybindInputForm = ({ captureTarget, currentTarget, onCaptureClick, ctrlKe
       disabled={submitDisabled}
       sx={{
         marginTop: 0.75,
-        height: '56px',
+        height: `${INPUT_ROW_HEIGHT}px`,
         color: '#fff',
         borderColor: '#fff',
         '&:hover': { borderColor: '#fff', backgroundColor: '#ffffff14' },
@@ -258,20 +270,23 @@ KeybindList.propTypes = {
 // Settings dialog for configuring serial connection parameters
 const Settings = React.memo((props) => {
   const [baudRate, setBaudRate] = React.useState(() => {
-    const rate = props.settings.baudRate
-    const arbitrary = props.settings.allowArbitraryBaudrates === true
-    const uncommon = props.settings.allowUncommonBaudrates === true
-
-    // If arbitrary baudrates are allowed, any value is valid
-    if (arbitrary === true) return rate
-
-    // Otherwise, check against the filtered list
-    const allowedRates = uncommon === true ? ALL_BAUD_RATES : COMMON_BAUD_RATES
-    if (!allowedRates.includes(rate)) {
-      return DEFAULT_SETTINGS.baudRate
-    }
-    return rate
+    return getValidatedBaudRate(
+      props.settings.baudRate,
+      props.settings.allowArbitraryBaudrates === true,
+      props.settings.allowUncommonBaudrates === true,
+      DEFAULT_SETTINGS.baudRate
+    )
   })
+  const [flashBaudRate, setFlashBaudRate] = React.useState(() => {
+    return getValidatedBaudRate(
+      props.settings.flashBaudRate || DEFAULT_SETTINGS.flashBaudRate,
+      props.settings.allowArbitraryBaudrates === true,
+      props.settings.allowUncommonBaudrates === true,
+      DEFAULT_SETTINGS.flashBaudRate
+    )
+  })
+  const [flashAddress, setFlashAddress] = React.useState(props.settings.flashAddress || DEFAULT_SETTINGS.flashAddress)
+  const [flashEraseAll, setFlashEraseAll] = React.useState(props.settings.flashEraseAll !== false)
   const [lineEnding, setLineEnding] = React.useState(props.settings.lineEnding)
   const [localEcho, setLocalEcho] = React.useState(props.settings.localEcho !== false)
   const [timestamp, setTimestamp] = React.useState(props.settings.timestamp !== false)
@@ -291,6 +306,8 @@ const Settings = React.memo((props) => {
   const [advanced, setAdvanced] = React.useState(props.settings.advanced === true)
   const [allowUncommonBaudrates, setAllowUncommonBaudrates] = React.useState(props.settings.allowUncommonBaudrates === true)
   const [allowArbitraryBaudrates, setAllowArbitraryBaudrates] = React.useState(props.settings.allowArbitraryBaudrates === true)
+  const [splitFirmwareFiles, setSplitFirmwareFiles] = React.useState(props.settings.splitFirmwareFiles === true)
+  const [allowAnyFileFormat, setAllowAnyFileFormat] = React.useState(props.settings.allowAnyFileFormat === true)
   const [captureTarget, setCaptureTarget] = React.useState(null)
   const [parseANSIOutput, setParseANSIOutput] = React.useState(props.settings.parseANSIOutput !== false)
   const [enableQuickHotkeys, setEnableQuickHotkeys] = React.useState(props.settings.enableQuickHotkeys !== false)
@@ -376,6 +393,193 @@ const Settings = React.memo((props) => {
 
   const normalizeHotkey = (val) => (val || '').trim().toLowerCase().slice(0, 1)
   const hotkeyValid = (val) => val && val.trim().length === 1
+  const normalizePositiveInteger = (value, fallback) => {
+    const parsed = Number(value)
+    return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback
+  }
+  const normalizeBoolean = (value, fallback) => (value === undefined ? fallback : value === true)
+  const normalizeControlAliases = (entries) => {
+    if (!Array.isArray(entries)) return DEFAULT_SETTINGS.customControlAliases
+
+    return entries.map((entry) => {
+      if (!entry || typeof entry !== 'object') return null
+
+      const key = normalizeHotkey(entry.key)
+      if (!hotkeyValid(key)) return null
+
+      if (entry.type === 'code') {
+        const value = Number(entry.value)
+        if (!Number.isInteger(value) || value < 0 || value > 255) return null
+        return { key, shift: entry.shift === true, type: 'code', value }
+      }
+
+      if (entry.type === 'text' && typeof entry.value === 'string') {
+        return { key, shift: entry.shift === true, type: 'text', value: entry.value }
+      }
+
+      return null
+    }).filter(Boolean)
+  }
+  const normalizeCommandKeybinds = (entries) => {
+    if (!Array.isArray(entries)) return DEFAULT_SETTINGS.commandKeybinds
+
+    return entries.map((entry) => {
+      if (!entry || typeof entry !== 'object') return null
+
+      const key = normalizeHotkey(entry.key)
+      if (!hotkeyValid(key) || typeof entry.text !== 'string' || entry.text.length === 0) return null
+
+      return { key, shift: entry.shift === true, text: entry.text }
+    }).filter(Boolean)
+  }
+  const buildSettingsPayload = () => {
+    const normalizedSettingsKey = (settingsShortcutKey || KEYBOARD_SHORTCUTS.OPEN_SETTINGS.key).toLowerCase()
+    const normalizedClearKey = (clearShortcutKey || KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.key).toLowerCase()
+    const normalizedDisconnectKey = (disconnectShortcutKey || KEYBOARD_SHORTCUTS.DISCONNECT.key).toLowerCase()
+
+    return {
+      baudRate,
+      flashBaudRate,
+      flashAddress,
+      flashEraseAll,
+      lineEnding,
+      localEcho,
+      timestamp,
+      settingsShortcut,
+      clearShortcut,
+      disconnectShortcut,
+      detectCtrlC,
+      detectCtrlD,
+      settingsShortcutKey: normalizedSettingsKey,
+      clearShortcutKey: normalizedClearKey,
+      disconnectShortcutKey: normalizedDisconnectKey,
+      settingsShortcutShift,
+      clearShortcutShift,
+      disconnectShortcutShift,
+      downloadFormat,
+      customControlAliases: controlAliases,
+      commandKeybinds,
+      parseANSIOutput,
+      advanced,
+      allowUncommonBaudrates,
+      allowArbitraryBaudrates,
+      splitFirmwareFiles,
+      allowAnyFileFormat,
+      enableQuickHotkeys,
+      quickFocusKey: normalizeHotkey(quickFocusKey || 'i'),
+      quickHistoryKey: normalizeHotkey(quickHistoryKey || 'h'),
+      quickDownloadKey: normalizeHotkey(quickDownloadKey || 'd'),
+      quickClearKey: normalizeHotkey(quickClearKey || 'c'),
+      quickSettingsKey: normalizeHotkey(quickSettingsKey || 's'),
+      quickDisconnectKey: normalizeHotkey(quickDisconnectKey || 'x'),
+      quickFocusShift,
+      quickHistoryShift,
+      quickDownloadShift,
+      quickClearShift,
+      quickSettingsShift,
+      quickDisconnectShift
+    }
+  }
+  const applyImportedSettings = (source) => {
+    if (!source || typeof source !== 'object' || Array.isArray(source)) {
+      throw new Error('Settings JSON must contain an object')
+    }
+
+    const arbitrary = source.allowArbitraryBaudrates === true
+    const uncommon = source.allowUncommonBaudrates === true
+    const legacyDetectCtrl = source.detectCtrl
+    const importedFlashAddress = `${source.flashAddress ?? ''}`.trim()
+    const allowedLineEndings = Object.values(LINE_ENDING_VALUES)
+    const allowedDownloadFormats = Object.values(DOWNLOAD_FORMATS)
+
+    setBaudRate(getValidatedBaudRate(
+      normalizePositiveInteger(source.baudRate, DEFAULT_SETTINGS.baudRate),
+      arbitrary,
+      uncommon,
+      DEFAULT_SETTINGS.baudRate
+    ))
+    setFlashBaudRate(getValidatedBaudRate(
+      normalizePositiveInteger(source.flashBaudRate, DEFAULT_SETTINGS.flashBaudRate),
+      arbitrary,
+      uncommon,
+      DEFAULT_SETTINGS.flashBaudRate
+    ))
+    setFlashAddress(importedFlashAddress.length > 0 ? importedFlashAddress : DEFAULT_SETTINGS.flashAddress)
+    setFlashEraseAll(normalizeBoolean(source.flashEraseAll, DEFAULT_SETTINGS.flashEraseAll))
+    setLineEnding(allowedLineEndings.includes(source.lineEnding) ? source.lineEnding : DEFAULT_SETTINGS.lineEnding)
+    setLocalEcho(normalizeBoolean(source.localEcho, DEFAULT_SETTINGS.localEcho))
+    setTimestamp(normalizeBoolean(source.timestamp, DEFAULT_SETTINGS.timestamp))
+    setDetectCtrlC(source.detectCtrlC !== undefined ? source.detectCtrlC === true : normalizeBoolean(legacyDetectCtrl, DEFAULT_SETTINGS.detectCtrlC))
+    setDetectCtrlD(source.detectCtrlD !== undefined ? source.detectCtrlD === true : normalizeBoolean(legacyDetectCtrl, DEFAULT_SETTINGS.detectCtrlD))
+    setSettingsShortcut(normalizeBoolean(source.settingsShortcut, DEFAULT_SETTINGS.settingsShortcut))
+    setClearShortcut(normalizeBoolean(source.clearShortcut, DEFAULT_SETTINGS.clearShortcut))
+    setDisconnectShortcut(normalizeBoolean(source.disconnectShortcut, DEFAULT_SETTINGS.disconnectShortcut))
+    setSettingsShortcutKey(normalizeHotkey(source.settingsShortcutKey || KEYBOARD_SHORTCUTS.OPEN_SETTINGS.key) || KEYBOARD_SHORTCUTS.OPEN_SETTINGS.key)
+    setClearShortcutKey(normalizeHotkey(source.clearShortcutKey || KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.key) || KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.key)
+    setDisconnectShortcutKey(normalizeHotkey(source.disconnectShortcutKey || KEYBOARD_SHORTCUTS.DISCONNECT.key) || KEYBOARD_SHORTCUTS.DISCONNECT.key)
+    setSettingsShortcutShift(normalizeBoolean(source.settingsShortcutShift, DEFAULT_SETTINGS.settingsShortcutShift))
+    setClearShortcutShift(normalizeBoolean(source.clearShortcutShift, DEFAULT_SETTINGS.clearShortcutShift))
+    setDisconnectShortcutShift(normalizeBoolean(source.disconnectShortcutShift, DEFAULT_SETTINGS.disconnectShortcutShift))
+    setDownloadFormat(allowedDownloadFormats.includes(source.downloadFormat) ? source.downloadFormat : DEFAULT_SETTINGS.downloadFormat)
+    setAdvanced(normalizeBoolean(source.advanced, DEFAULT_SETTINGS.advanced))
+    setAllowUncommonBaudrates(uncommon)
+    setAllowArbitraryBaudrates(arbitrary)
+    setSplitFirmwareFiles(normalizeBoolean(source.splitFirmwareFiles, DEFAULT_SETTINGS.splitFirmwareFiles))
+    setAllowAnyFileFormat(normalizeBoolean(source.allowAnyFileFormat, DEFAULT_SETTINGS.allowAnyFileFormat))
+    setParseANSIOutput(normalizeBoolean(source.parseANSIOutput, DEFAULT_SETTINGS.parseANSIOutput))
+    setEnableQuickHotkeys(normalizeBoolean(source.enableQuickHotkeys, DEFAULT_SETTINGS.enableQuickHotkeys))
+    setControlAliases(normalizeControlAliases(source.customControlAliases))
+    setCommandKeybinds(normalizeCommandKeybinds(source.commandKeybinds))
+    setAliasKey('')
+    setAliasShift(false)
+    setAliasCode('')
+    setAliasEditIndex(null)
+    setKeybindEditIndex(null)
+    setKeybindKey('')
+    setKeybindShift(false)
+    setKeybindText('')
+    setQuickFocusKey(normalizeHotkey(source.quickFocusKey || DEFAULT_SETTINGS.quickFocusKey) || DEFAULT_SETTINGS.quickFocusKey)
+    setQuickHistoryKey(normalizeHotkey(source.quickHistoryKey || DEFAULT_SETTINGS.quickHistoryKey) || DEFAULT_SETTINGS.quickHistoryKey)
+    setQuickDownloadKey(normalizeHotkey(source.quickDownloadKey || DEFAULT_SETTINGS.quickDownloadKey) || DEFAULT_SETTINGS.quickDownloadKey)
+    setQuickClearKey(normalizeHotkey(source.quickClearKey || DEFAULT_SETTINGS.quickClearKey) || DEFAULT_SETTINGS.quickClearKey)
+    setQuickSettingsKey(normalizeHotkey(source.quickSettingsKey || DEFAULT_SETTINGS.quickSettingsKey) || DEFAULT_SETTINGS.quickSettingsKey)
+    setQuickDisconnectKey(normalizeHotkey(source.quickDisconnectKey || DEFAULT_SETTINGS.quickDisconnectKey) || DEFAULT_SETTINGS.quickDisconnectKey)
+    setQuickFocusShift(normalizeBoolean(source.quickFocusShift, DEFAULT_SETTINGS.quickFocusShift))
+    setQuickHistoryShift(normalizeBoolean(source.quickHistoryShift, DEFAULT_SETTINGS.quickHistoryShift))
+    setQuickDownloadShift(normalizeBoolean(source.quickDownloadShift, DEFAULT_SETTINGS.quickDownloadShift))
+    setQuickClearShift(normalizeBoolean(source.quickClearShift, DEFAULT_SETTINGS.quickClearShift))
+    setQuickSettingsShift(normalizeBoolean(source.quickSettingsShift, DEFAULT_SETTINGS.quickSettingsShift))
+    setQuickDisconnectShift(normalizeBoolean(source.quickDisconnectShift, DEFAULT_SETTINGS.quickDisconnectShift))
+    setCaptureTarget(null)
+  }
+  const exportSettings = () => {
+    const blob = new Blob([`${JSON.stringify(buildSettingsPayload(), null, 2)}\n`], { type: 'application/json' })
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    const date = new Date().toISOString().slice(0, 10)
+
+    link.href = url
+    link.download = `serialterminal-settings-${date}.json`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+  }
+  const importSettings = async (event) => {
+    const input = event.target
+    const file = input.files?.[0]
+    if (!file) return
+
+    try {
+      const parsed = JSON.parse(await file.text())
+      applyImportedSettings(parsed)
+      window.alert('Settings imported into the dialog. Click Save to apply them.')
+    } catch (error) {
+      window.alert(`Failed to import settings: ${error?.message || error}`)
+    } finally {
+      input.value = ''
+    }
+  }
 
   const addAlias = () => {
     if (!aliasKeyValid || !aliasCodeValid) return
@@ -451,19 +655,15 @@ const Settings = React.memo((props) => {
 
   const cancel = () => {
     const rate = props.settings.baudRate
+    const flashRate = props.settings.flashBaudRate || DEFAULT_SETTINGS.flashBaudRate
+    const savedFlashAddress = props.settings.flashAddress || DEFAULT_SETTINGS.flashAddress
     const arbitrary = props.settings.allowArbitraryBaudrates === true
     const uncommon = props.settings.allowUncommonBaudrates === true
-    let validatedRate = rate
 
-    // Validate baudrate
-    if (arbitrary !== true) {
-      const allowedRates = uncommon === true ? ALL_BAUD_RATES : COMMON_BAUD_RATES
-      if (!allowedRates.includes(rate)) {
-        validatedRate = DEFAULT_SETTINGS.baudRate
-      }
-    }
-
-    setBaudRate(validatedRate)
+    setBaudRate(getValidatedBaudRate(rate, arbitrary, uncommon, DEFAULT_SETTINGS.baudRate))
+    setFlashBaudRate(getValidatedBaudRate(flashRate, arbitrary, uncommon, DEFAULT_SETTINGS.flashBaudRate))
+    setFlashAddress(savedFlashAddress)
+    setFlashEraseAll(props.settings.flashEraseAll !== false)
     setLineEnding(props.settings.lineEnding)
     setLocalEcho(props.settings.localEcho !== false)
     setTimestamp(props.settings.timestamp !== false)
@@ -481,6 +681,10 @@ const Settings = React.memo((props) => {
     setDownloadFormat(props.settings.downloadFormat || 'ask')
     setParseANSIOutput(props.settings.parseANSIOutput !== false)
     setAdvanced(props.settings.advanced === true)
+    setAllowUncommonBaudrates(props.settings.allowUncommonBaudrates === true)
+    setAllowArbitraryBaudrates(props.settings.allowArbitraryBaudrates === true)
+    setSplitFirmwareFiles(props.settings.splitFirmwareFiles === true)
+    setAllowAnyFileFormat(props.settings.allowAnyFileFormat === true)
     setEnableQuickHotkeys(props.settings.enableQuickHotkeys !== false)
     setControlAliases(props.settings.customControlAliases || [])
     setAliasKey('')
@@ -598,10 +802,16 @@ const Settings = React.memo((props) => {
     if (allowedBaudrates !== null && !allowedBaudrates.includes(baudRate)) {
       setBaudRate(DEFAULT_SETTINGS.baudRate)
     }
-  }, [allowArbitraryBaudrates, allowUncommonBaudrates])
+    if (allowedBaudrates !== null && !allowedBaudrates.includes(flashBaudRate)) {
+      setFlashBaudRate(DEFAULT_SETTINGS.flashBaudRate)
+    }
+  }, [allowArbitraryBaudrates, allowUncommonBaudrates, baudRate, flashBaudRate])
 
   const reset = () => {
     if (!props.openPort) setBaudRate(DEFAULT_SETTINGS.baudRate)
+    setFlashBaudRate(DEFAULT_SETTINGS.flashBaudRate)
+    setFlashAddress(DEFAULT_SETTINGS.flashAddress)
+    setFlashEraseAll(DEFAULT_SETTINGS.flashEraseAll)
     setLineEnding(DEFAULT_SETTINGS.lineEnding)
     setLocalEcho(DEFAULT_SETTINGS.localEcho)
     setTimestamp(DEFAULT_SETTINGS.timestamp)
@@ -621,6 +831,8 @@ const Settings = React.memo((props) => {
     setAdvanced(DEFAULT_SETTINGS.advanced)
     setAllowUncommonBaudrates(DEFAULT_SETTINGS.allowUncommonBaudrates)
     setAllowArbitraryBaudrates(DEFAULT_SETTINGS.allowArbitraryBaudrates)
+    setSplitFirmwareFiles(DEFAULT_SETTINGS.splitFirmwareFiles)
+    setAllowAnyFileFormat(DEFAULT_SETTINGS.allowAnyFileFormat)
     setEnableQuickHotkeys(DEFAULT_SETTINGS.enableQuickHotkeys)
     setControlAliases(DEFAULT_SETTINGS.customControlAliases)
     setAliasKey('')
@@ -677,47 +889,7 @@ const Settings = React.memo((props) => {
       }
     }
 
-    const normalizedSettingsKey = (settingsShortcutKey || KEYBOARD_SHORTCUTS.OPEN_SETTINGS.key).toLowerCase()
-    const normalizedClearKey = (clearShortcutKey || KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.key).toLowerCase()
-    const normalizedDisconnectKey = (disconnectShortcutKey || KEYBOARD_SHORTCUTS.DISCONNECT.key).toLowerCase()
-
-    props.save({
-      baudRate,
-      lineEnding,
-      localEcho,
-      timestamp,
-      settingsShortcut,
-      clearShortcut,
-      disconnectShortcut,
-      detectCtrlC,
-      detectCtrlD,
-      settingsShortcutKey: normalizedSettingsKey,
-      clearShortcutKey: normalizedClearKey,
-      disconnectShortcutKey: normalizedDisconnectKey,
-      settingsShortcutShift,
-      clearShortcutShift,
-      disconnectShortcutShift,
-      downloadFormat,
-      customControlAliases: controlAliases,
-      commandKeybinds,
-      parseANSIOutput,
-      advanced,
-      allowUncommonBaudrates,
-      allowArbitraryBaudrates,
-      enableQuickHotkeys,
-      quickFocusKey: normalizeHotkey(quickFocusKey || 'i'),
-      quickHistoryKey: normalizeHotkey(quickHistoryKey || 'h'),
-      quickDownloadKey: normalizeHotkey(quickDownloadKey || 'd'),
-      quickClearKey: normalizeHotkey(quickClearKey || 'c'),
-      quickSettingsKey: normalizeHotkey(quickSettingsKey || 's'),
-      quickDisconnectKey: normalizeHotkey(quickDisconnectKey || 'x'),
-      quickFocusShift,
-      quickHistoryShift,
-      quickDownloadShift,
-      quickClearShift,
-      quickSettingsShift,
-      quickDisconnectShift
-    })
+    props.save(buildSettingsPayload())
 
     props.close()
   }
@@ -815,6 +987,122 @@ const Settings = React.memo((props) => {
             )}
           </Select>
         </FormControl>
+
+        <Divider sx={{ my: 2 }} />
+
+        <DialogContentText>
+          ESPTool Flasher Settings
+        </DialogContentText>
+
+        {allowArbitraryBaudrates !== true
+          ? (
+            <FormControl fullWidth sx={formElementCSS}>
+              <InputLabel>Flash Baud Rate</InputLabel>
+              <Select
+                value={flashBaudRate}
+                onChange={(e) => setFlashBaudRate(Number(e.target.value))}
+                label='Flash Baud Rate'
+              >
+                {(!allowUncommonBaudrates ? COMMON_BAUD_RATES : ALL_BAUD_RATES).map(baud =>
+                  <MenuItem value={baud} key={`flash-${baud}`}>{baud} baud</MenuItem>
+                )}
+              </Select>
+            </FormControl>
+            )
+          : (
+            <TextField
+              label='Flash Baud Rate'
+              type='number'
+              variant='outlined'
+              fullWidth
+              value={flashBaudRate}
+              onChange={(e) => setFlashBaudRate(Number(e.target.value))}
+              inputProps={{ min: 1, step: 1 }}
+              sx={formElementCSS}
+            />
+            )}
+
+        <TextField
+          label='Default Flash Address'
+          variant='outlined'
+          fullWidth
+          value={flashAddress}
+          onChange={(e) => setFlashAddress(e.target.value)}
+          helperText='Examples: 0x0, 0x1000, 4096'
+          FormHelperTextProps={{ sx: { color: '#ffffffb3', mt: 0.25 } }}
+          sx={formElementCSS}
+        />
+
+        <FormGroup sx={{ mt: 1 }}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={flashEraseAll}
+                onChange={(e) => setFlashEraseAll(e.target.checked)}
+                sx={{ color: '#ffffffb3', '&.Mui-checked': { color: '#fff' } }}
+              />
+            }
+            label='Erase entire flash before writing'
+          />
+        </FormGroup>
+
+        <Collapse in={advanced} timeout='auto' unmountOnExit>
+          {!allowArbitraryBaudrates && (
+            <FormGroup sx={{ mt: 1 }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={allowUncommonBaudrates}
+                    onChange={(e) => setAllowUncommonBaudrates(e.target.checked)}
+                    sx={{ color: '#ffffffb3', '&.Mui-checked': { color: '#fff' } }}
+                  />
+                }
+                label='Allow Uncommon Baudrates'
+              />
+            </FormGroup>
+          )}
+
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={allowArbitraryBaudrates}
+                  onChange={(e) => setAllowArbitraryBaudrates(e.target.checked)}
+                  sx={{ color: '#ffffffb3', '&.Mui-checked': { color: '#fff' } }}
+                />
+              }
+              label='Allow Arbitrary Baudrates'
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={splitFirmwareFiles}
+                  onChange={(e) => setSplitFirmwareFiles(e.target.checked)}
+                  sx={{ color: '#ffffffb3', '&.Mui-checked': { color: '#fff' } }}
+                />
+              }
+              label='Split Firmware Files'
+            />
+          </FormGroup>
+
+          <FormGroup sx={{ mb: 1 }}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={allowAnyFileFormat}
+                  onChange={(e) => setAllowAnyFileFormat(e.target.checked)}
+                  sx={{ color: '#ffffffb3', '&.Mui-checked': { color: '#fff' } }}
+                />
+              }
+              label='Allow Any File Format'
+            />
+          </FormGroup>
+        </Collapse>
+
+        <Divider sx={{ my: 2 }} />
 
         <DialogContentText sx={{ mt: 3 }}>
           Display Options
@@ -949,34 +1237,6 @@ const Settings = React.memo((props) => {
 
         <Collapse in={advanced} timeout='auto' unmountOnExit>
           <Divider sx={{ my: 2 }} />
-
-          {!allowArbitraryBaudrates && (
-            <FormGroup sx={{ mb: 2 }}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={allowUncommonBaudrates}
-                    onChange={(e) => setAllowUncommonBaudrates(e.target.checked)}
-                    sx={{ color: '#ffffffb3', '&.Mui-checked': { color: '#fff' } }}
-                  />
-                }
-                label='Allow Uncommon Baudrates'
-              />
-            </FormGroup>
-          )}
-
-          <FormGroup sx={{ mb: 2 }}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={allowArbitraryBaudrates}
-                  onChange={(e) => setAllowArbitraryBaudrates(e.target.checked)}
-                  sx={{ color: '#ffffffb3', '&.Mui-checked': { color: '#fff' } }}
-                />
-              }
-              label='Allow Arbitrary Baudrates'
-            />
-          </FormGroup>
 
           <FormGroup sx={{ mb: 2 }}>
             <FormControlLabel
@@ -1233,6 +1493,30 @@ const Settings = React.memo((props) => {
             submitDisabled={!keybindKeyValid || !keybindTextValid}
             submitLabel={keybindEditIndex !== null ? 'Update' : 'Add'}
           />
+
+          <Divider sx={{ my: 3 }} />
+
+          <DialogContentText>
+            Settings Import / Export
+          </DialogContentText>
+          <Typography variant='body2' sx={{ color: '#ffffff99', mt: 0.5 }}>
+            Export the current settings form as JSON or import a previous JSON dump. Imported settings are staged until you click Save.
+          </Typography>
+
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1.5 }}>
+            <Button variant='outlined' onClick={exportSettings}>
+              Export Settings
+            </Button>
+            <Button variant='outlined' component='label'>
+              Import Settings
+              <input
+                hidden
+                type='file'
+                accept='.json,application/json'
+                onChange={importSettings}
+              />
+            </Button>
+          </Box>
 
         </Collapse>
 

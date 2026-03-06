@@ -11,6 +11,7 @@ import Footer from './components/layout/Footer'
 import Home from './components/pages/Home'
 import Terminal from './components/terminal/Terminal'
 import Settings from './components/settings/Settings'
+import ESPToolFlasherDialog from './components/flasher/ESPToolFlasherDialog'
 import ErrorMessage from './components/common/ErrorMessage'
 import ErrorBoundary from './components/common/ErrorBoundary'
 
@@ -42,6 +43,7 @@ function App () {
 
   // Settings Window Open
   const [settingsOpen, setSettingsOpen] = React.useState(false)
+  const [espToolFlasherOpen, setEspToolFlasherOpen] = React.useState(false)
 
   // Error Window
   const [errorOpen, setErrorOpen] = React.useState(false)
@@ -140,9 +142,16 @@ function App () {
     }
   ], true)
 
+  const updateSettings = (partialSettings) => {
+    const nextSettings = { ...settings, ...partialSettings }
+    if (partialSettings.baudRate !== undefined) {
+      serial.setBaudRate(partialSettings.baudRate)
+    }
+    setSettings(nextSettings)
+  }
+
   const saveSettings = (newSettings) => {
-    serial.setBaudRate(newSettings.baudRate)
-    setSettings(newSettings)
+    updateSettings(newSettings)
     setToast({ open: true, severity: 'success', value: 'Settings saved!' })
   }
 
@@ -274,6 +283,7 @@ function App () {
                 connect={connect}
                 supported={serial.supported}
                 openSettings={() => setSettingsOpen(true)}
+                openEspToolFlasher={() => setEspToolFlasherOpen(true)}
               />
               )}
 
@@ -284,6 +294,19 @@ function App () {
           settings={settings}
           save={saveSettings}
           openPort={connected}
+        />
+
+        <ESPToolFlasherDialog
+          open={espToolFlasherOpen}
+          close={() => setEspToolFlasherOpen(false)}
+          settings={settings}
+          updateSettings={updateSettings}
+          onSuccess={(message) => {
+            setToast({ open: true, severity: 'success', value: message })
+          }}
+          onError={(message) => {
+            setToast({ open: true, severity: 'error', value: message })
+          }}
         />
 
         {/* (Dis)connected Toast */}
