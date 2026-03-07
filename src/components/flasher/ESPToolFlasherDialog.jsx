@@ -34,7 +34,7 @@ import { ALL_BAUD_RATES, COMMON_BAUD_RATES, DEFAULT_SETTINGS } from '../../const
 const DEFAULT_ADDRESS = DEFAULT_SETTINGS.flashAddress
 const DEFAULT_FLASH_BAUD = DEFAULT_SETTINGS.flashBaudRate
 const MAX_LOG_LINES = 250
-const FIRMWARE_PROXY_URL = 'https://cors.namelessnanashi.dev/?url='
+const CORS_PROXY_URL = 'https://cors.namelessnanashi.dev/?url='
 const IS_OFFLINE_BUILD = import.meta.env.VITE_OFFLINE_BUILD === 'true'
 
 const formElementCSS = {
@@ -390,7 +390,7 @@ const ESPToolFlasherDialog = ({ open, close, settings, updateSettings, onSuccess
         sourceLabel
       }
     }
-    const proxyUrl = `${FIRMWARE_PROXY_URL}${encodeURIComponent(url)}`
+    const corsProxyUrl = `${CORS_PROXY_URL}${encodeURIComponent(url)}`
 
     appendRunLog(runId, `Downloading ${url}...`)
 
@@ -399,20 +399,20 @@ const ESPToolFlasherDialog = ({ open, close, settings, updateSettings, onSuccess
       return await readFirmwareResponse(response, url, 'Failed to download firmware from URL')
     } catch (directError) {
       const directMessage = directError?.message || `${directError}`
-      appendRunLog(runId, `Direct download failed (${directMessage}). Retrying via firmware proxy...`)
+      appendRunLog(runId, `Direct download failed (${directMessage}). Retrying via CORS proxy...`)
     }
 
     try {
-      appendRunLog(runId, 'Trying firmware proxy: cors.namelessnanashi.dev')
-      const proxyResponse = await fetch(proxyUrl)
+      appendRunLog(runId, 'Trying CORS proxy: cors.namelessnanashi.dev')
+      const proxyResponse = await fetch(corsProxyUrl)
       return await readFirmwareResponse(
         proxyResponse,
-        `${url} (via cors.namelessnanashi.dev)`,
-        'Failed to download firmware via cors.namelessnanashi.dev'
+        `${url} (via CORS proxy: cors.namelessnanashi.dev)`,
+        'Failed to download firmware via CORS proxy (cors.namelessnanashi.dev)'
       )
     } catch (proxyError) {
       const proxyMessage = proxyError?.message || `${proxyError}`
-      appendRunLog(runId, `Proxy failed (cors.namelessnanashi.dev): ${proxyMessage}`)
+      appendRunLog(runId, `CORS proxy failed (cors.namelessnanashi.dev): ${proxyMessage}`)
       throw proxyError
     }
   }, [allowFirmwareUrlInput, appendRunLog])
