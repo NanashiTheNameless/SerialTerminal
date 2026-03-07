@@ -563,7 +563,7 @@ const Settings = React.memo((props) => {
     const unixTime = Math.floor(now.getTime() / 1000)
 
     link.href = url
-    link.download = `serial.NamelessNanashi.dev-${month}-${day}-${year}-${unixTime}.json`
+    link.download = `serial.NamelessNanashi.dev-${year}.${month}.${day}-${unixTime}.json`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
