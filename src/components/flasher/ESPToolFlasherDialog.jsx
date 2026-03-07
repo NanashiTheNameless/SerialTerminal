@@ -34,6 +34,8 @@ import { ALL_BAUD_RATES, COMMON_BAUD_RATES, DEFAULT_SETTINGS } from '../../const
 const DEFAULT_ADDRESS = DEFAULT_SETTINGS.flashAddress
 const DEFAULT_FLASH_BAUD = DEFAULT_SETTINGS.flashBaudRate
 const MAX_LOG_LINES = 250
+const FIRMWARE_PROXY_URL = 'https://cors.namelessnanashi.dev/?url='
+const IS_OFFLINE_BUILD = import.meta.env.VITE_OFFLINE_BUILD === 'true'
 
 const formElementCSS = {
   marginTop: 1,
@@ -369,10 +371,15 @@ const ESPToolFlasherDialog = ({ open, close, settings, updateSettings, onSuccess
   const activeEntries = splitFirmwareFiles === true ? firmwareEntries : firmwareEntries.slice(0, 1)
   const fileAccept = allowAnyFileFormat === true ? undefined : '.bin,application/octet-stream'
   const fileButtonLabel = allowAnyFileFormat === true ? 'Select Firmware File' : 'Select Firmware (.bin)'
+  const allowFirmwareUrlInput = IS_OFFLINE_BUILD !== true
   const hasFirmwareSource = React.useCallback((entry) => (
-    entry.file != null || `${entry.url || ''}`.trim().length > 0
-  ), [])
+    entry.file != null || (allowFirmwareUrlInput && `${entry.url || ''}`.trim().length > 0)
+  ), [allowFirmwareUrlInput])
   const downloadFirmwareFromUrl = React.useCallback(async (url, runId) => {
+    if (allowFirmwareUrlInput !== true) {
+      throw new Error('Firmware URLs are unavailable in the offline build. Select a local firmware file instead')
+    }
+
     const readFirmwareResponse = async (response, sourceLabel, failurePrefix) => {
       if (!response.ok) {
         throw new Error(`${failurePrefix}: ${response.status} ${response.statusText}`.trim())
@@ -383,20 +390,7 @@ const ESPToolFlasherDialog = ({ open, close, settings, updateSettings, onSuccess
         sourceLabel
       }
     }
-    const proxyUrls = [
-      {
-        label: 'CORSfix',
-        url: `https://proxy.corsfix.com/?url=${encodeURIComponent(url)}`
-      },
-      {
-        label: 'Cloudflare CORS Anywhere',
-        url: `https://test.cors.workers.dev/?${encodeURIComponent(url)}`
-      },
-      {
-        label: 'GoxCORS',
-        url: `https://goxcors.appspot.com/cors?method=GET&url=${encodeURIComponent(url)}`
-      }
-    ]
+    const proxyUrl = `${FIRMWARE_PROXY_URL}${encodeURIComponent(url)}`
 
     appendRunLog(runId, `Downloading ${url}...`)
 
@@ -405,34 +399,35 @@ const ESPToolFlasherDialog = ({ open, close, settings, updateSettings, onSuccess
       return await readFirmwareResponse(response, url, 'Failed to download firmware from URL')
     } catch (directError) {
       const directMessage = directError?.message || `${directError}`
-      appendRunLog(runId, `Direct download failed (${directMessage}). Retrying via CORS proxy...`)
+      appendRunLog(runId, `Direct download failed (${directMessage}). Retrying via firmware proxy...`)
     }
 
-    let lastProxyError = null
-    for (const proxy of proxyUrls) {
-      try {
-        appendRunLog(runId, `Trying CORS proxy: ${proxy.label}`)
-        const proxyResponse = await fetch(proxy.url)
-        return await readFirmwareResponse(
-          proxyResponse,
-          `${url} (via ${proxy.label})`,
-          `Failed to download firmware via ${proxy.label}`
-        )
-      } catch (proxyError) {
-        lastProxyError = proxyError
-        const proxyMessage = proxyError?.message || `${proxyError}`
-        appendRunLog(runId, `Proxy failed (${proxy.label}): ${proxyMessage}`)
-      }
+    try {
+      appendRunLog(runId, 'Trying firmware proxy: cors.namelessnanashi.dev')
+      const proxyResponse = await fetch(proxyUrl)
+      return await readFirmwareResponse(
+        proxyResponse,
+        `${url} (via cors.namelessnanashi.dev)`,
+        'Failed to download firmware via cors.namelessnanashi.dev'
+      )
+    } catch (proxyError) {
+      const proxyMessage = proxyError?.message || `${proxyError}`
+      appendRunLog(runId, `Proxy failed (cors.namelessnanashi.dev): ${proxyMessage}`)
+      throw proxyError
     }
-
-    throw lastProxyError || new Error('Failed to download firmware via CORS proxy')
-  }, [appendRunLog])
+  }, [allowFirmwareUrlInput, appendRunLog])
 
   const handleFlash = async () => {
     if (activeEntries.some((entry) => !hasFirmwareSource(entry))) {
-      setError(splitFirmwareFiles
-        ? 'Select a file or enter a URL for every firmware entry'
-        : 'Select a firmware file or enter a firmware URL first')
+      setError(
+        allowFirmwareUrlInput
+          ? (splitFirmwareFiles
+              ? 'Select a file or enter a URL for every firmware entry'
+              : 'Select a firmware file or enter a firmware URL first')
+          : (splitFirmwareFiles
+              ? 'Select a local firmware file for every firmware entry'
+              : 'Select a local firmware file first')
+      )
       return
     }
 
@@ -623,22 +618,24 @@ const ESPToolFlasherDialog = ({ open, close, settings, updateSettings, onSuccess
                   />
                 </Button>
 
-                <TextField
-                  label={splitFirmwareFiles ? `Firmware URL ${index + 1}` : 'Firmware URL'}
-                  value={entry.url}
-                  onChange={(event) => {
-                    const nextUrl = event.target.value
-                    updateFirmwareEntry(entry.id, {
-                      url: nextUrl,
-                      ...(nextUrl.trim().length > 0 ? { file: null } : {})
-                    })
-                  }}
-                  placeholder='https://example.com/firmware.bin'
-                  disabled={flashing}
-                  helperText='Firmware Direct-download URL only. Remote host should allow CORS otherwise a proxy will be used.'
-                  FormHelperTextProps={{ sx: { color: '#ffffffb3 !important' } }}
-                  fullWidth
-                />
+                {allowFirmwareUrlInput && (
+                  <TextField
+                    label={splitFirmwareFiles ? `Firmware URL ${index + 1}` : 'Firmware URL'}
+                    value={entry.url}
+                    onChange={(event) => {
+                      const nextUrl = event.target.value
+                      updateFirmwareEntry(entry.id, {
+                        url: nextUrl,
+                        ...(nextUrl.trim().length > 0 ? { file: null } : {})
+                      })
+                    }}
+                    placeholder='https://example.com/firmware.bin'
+                    disabled={flashing}
+                    helperText='Firmware direct-download URL only. If the host blocks CORS, the app will retry via cors.namelessnanashi.dev.'
+                    FormHelperTextProps={{ sx: { color: '#ffffffb3 !important' } }}
+                    fullWidth
+                  />
+                )}
               </Stack>
 
               {splitFirmwareFiles && (

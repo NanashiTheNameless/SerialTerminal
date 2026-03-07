@@ -8,7 +8,7 @@ rm -rf SerialTerminalOffline-* SerialTerminalOffline-*.zip
 
 yarn install --immutable
 
-yarn build
+VITE_OFFLINE_BUILD=true yarn build
 
 if [[ ! -d build ]]; then
 	echo "Expected build output directory 'build' was not created."
