@@ -556,10 +556,14 @@ const Settings = React.memo((props) => {
     const blob = new Blob([`${JSON.stringify(buildSettingsPayload(), null, 2)}\n`], { type: 'application/json' })
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
-    const date = new Date().toISOString().slice(0, 10)
+    const now = new Date()
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const day = String(now.getDate()).padStart(2, '0')
+    const year = now.getFullYear()
+    const unixTime = Math.floor(now.getTime() / 1000)
 
     link.href = url
-    link.download = `serialterminal-settings-${date}.json`
+    link.download = `serial.NamelessNanashi.dev-${month}-${day}-${year}-${unixTime}.json`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -1047,35 +1051,7 @@ const Settings = React.memo((props) => {
         </FormGroup>
 
         <Collapse in={advanced} timeout='auto' unmountOnExit>
-          {!allowArbitraryBaudrates && (
-            <FormGroup sx={{ mt: 1 }}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={allowUncommonBaudrates}
-                    onChange={(e) => setAllowUncommonBaudrates(e.target.checked)}
-                    sx={{ color: '#ffffffb3', '&.Mui-checked': { color: '#fff' } }}
-                  />
-                }
-                label='Allow Uncommon Baudrates'
-              />
-            </FormGroup>
-          )}
-
-          <FormGroup>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={allowArbitraryBaudrates}
-                  onChange={(e) => setAllowArbitraryBaudrates(e.target.checked)}
-                  sx={{ color: '#ffffffb3', '&.Mui-checked': { color: '#fff' } }}
-                />
-              }
-              label='Allow Arbitrary Baudrates'
-            />
-          </FormGroup>
-
-          <FormGroup>
+          <FormGroup sx={{ mt: 1 }}>
             <FormControlLabel
               control={
                 <Checkbox
@@ -1238,7 +1214,39 @@ const Settings = React.memo((props) => {
         <Collapse in={advanced} timeout='auto' unmountOnExit>
           <Divider sx={{ my: 2 }} />
 
-          <FormGroup sx={{ mb: 2 }}>
+          <DialogContentText>
+            Other Settings
+          </DialogContentText>
+
+          {!allowArbitraryBaudrates && (
+            <FormGroup sx={{ mt: 1 }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={allowUncommonBaudrates}
+                    onChange={(e) => setAllowUncommonBaudrates(e.target.checked)}
+                    sx={{ color: '#ffffffb3', '&.Mui-checked': { color: '#fff' } }}
+                  />
+                }
+                label='Allow Uncommon Baudrates'
+              />
+            </FormGroup>
+          )}
+
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={allowArbitraryBaudrates}
+                  onChange={(e) => setAllowArbitraryBaudrates(e.target.checked)}
+                  sx={{ color: '#ffffffb3', '&.Mui-checked': { color: '#fff' } }}
+                />
+              }
+              label='Allow Arbitrary Baudrates'
+            />
+          </FormGroup>
+
+          <FormGroup sx={{ mb: 1 }}>
             <FormControlLabel
               control={
                 <Checkbox
@@ -1250,6 +1258,8 @@ const Settings = React.memo((props) => {
               label='Parse ANSI Escape Sequences in Received Output'
             />
           </FormGroup>
+
+          <Divider sx={{ my: 2 }} />
 
           {enableQuickHotkeys && (
             <>

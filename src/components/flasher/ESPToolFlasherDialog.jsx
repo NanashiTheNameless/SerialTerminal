@@ -799,8 +799,12 @@ const ESPToolFlasherDialog = ({ open, close, settings, updateSettings, onSuccess
               Advanced Options
             </DialogContentText>
 
+            <DialogContentText sx={{ mt: 2 }}>
+              Baud Rate Options
+            </DialogContentText>
+
             {!allowArbitraryBaudrates && (
-              <FormGroup sx={{ mb: 1 }}>
+              <FormGroup sx={{ mt: 1, mb: 1 }}>
                 <FormControlLabel
                   control={
                     <Checkbox
@@ -826,6 +830,10 @@ const ESPToolFlasherDialog = ({ open, close, settings, updateSettings, onSuccess
                 label='Allow Arbitrary Baudrates'
               />
             </FormGroup>
+
+            <DialogContentText sx={{ mt: 2 }}>
+              Firmware File Options
+            </DialogContentText>
 
             <FormGroup sx={{ mb: 1 }}>
               <FormControlLabel
