@@ -23,6 +23,7 @@ import IconButton from '@mui/material/IconButton'
 import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
 
+import { themedScrollbarSx } from '../common/themedScrollbarSx'
 import { ALL_BAUD_RATES, COMMON_BAUD_RATES, LINE_ENDING_VALUES, LINE_ENDING_LABELS, DOWNLOAD_FORMATS, DOWNLOAD_FORMAT_LABELS, DEFAULT_SETTINGS, KEYBOARD_SHORTCUTS } from '../../constants'
 
 const UNSET_CHAR = '�'
@@ -159,7 +160,18 @@ const KeybindListItem = ({ entry, index, onClick, onDelete, isSelected, children
       <KeybindDisplay ctrlKey={entry.key} shift={entry.shift} />
       {children}
     </Box>
-    <IconButton aria-label='Delete' size='small' onClick={(e) => { e.stopPropagation(); onDelete() }}>
+    <IconButton
+      aria-label='Delete'
+      size='small'
+      onClick={(e) => { e.stopPropagation(); onDelete() }}
+      sx={{
+        color: '#ffffffb3',
+        '&:hover': {
+          color: '#fff',
+          backgroundColor: '#ffffff14'
+        }
+      }}
+    >
       <DeleteIcon fontSize='small' />
     </IconButton>
   </Box>
@@ -920,7 +932,7 @@ const Settings = React.memo((props) => {
     >
       <DialogTitle>Settings</DialogTitle>
 
-      <DialogContent>
+      <DialogContent sx={themedScrollbarSx}>
         <DialogContentText>
           Serial Connection
         </DialogContentText>

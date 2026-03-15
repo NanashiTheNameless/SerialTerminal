@@ -29,6 +29,7 @@ import Typography from '@mui/material/Typography'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { ESPLoader, Transport } from 'esptool-js'
 
+import { themedScrollbarSx } from '../common/themedScrollbarSx'
 import { ALL_BAUD_RATES, COMMON_BAUD_RATES, DEFAULT_SETTINGS } from '../../constants'
 
 const DEFAULT_ADDRESS = DEFAULT_SETTINGS.flashAddress
@@ -54,27 +55,6 @@ const firmwareSelectButtonSx = {
     borderColor: 'var(--terminal-border)',
     WebkitTextFillColor: 'var(--terminal-muted)',
     opacity: 1
-  }
-}
-
-const themedScrollbarSx = {
-  scrollbarWidth: 'thin',
-  scrollbarColor: 'var(--terminal-muted) transparent',
-  '&::-webkit-scrollbar': {
-    width: 8,
-    height: 8
-  },
-  '&::-webkit-scrollbar-track': {
-    background: 'transparent',
-    borderRadius: 4
-  },
-  '&::-webkit-scrollbar-thumb': {
-    background: 'var(--terminal-muted)',
-    borderRadius: 4
-  },
-  '&::-webkit-scrollbar-corner': {
-    background: 'transparent',
-    borderRadius: 4
   }
 }
 
