@@ -1009,14 +1009,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esptool-js@npm:^0.5.7":
-  version: 0.5.7
-  resolution: "esptool-js@npm:0.5.7"
+"esptool-js@npm:^0.6.0":
+  version: 0.6.0
+  resolution: "esptool-js@npm:0.6.0"
   dependencies:
     atob-lite: "npm:^2.0.0"
     pako: "npm:^2.1.0"
     tslib: "npm:^2.4.1"
-  checksum: 10c0/4b473167f41eb75b2bb79aedb5ce2dd45471e9652eac0d5eef995744c5ceffd9868aa0e4ddfa92e69d55a4d84005c30925eceaa6c1c3f8f0b454bc6eab4fd262
+  checksum: 10c0/5f753241abb9669eb99b9435c14f8685fde47ebb1dff3041325f1bce90423a11484d81bdb095788afd3638554e82d6b7d0b2994ea7a936aaabdc4e7351cb1d1d
   languageName: node
   linkType: hard
 
@@ -1825,7 +1825,7 @@ __metadata:
     "@types/react": "npm:^19.2.14"
     "@types/react-dom": "npm:^19.2.3"
     "@vitejs/plugin-react": "npm:^6.0.1"
-    esptool-js: "npm:^0.5.7"
+    esptool-js: "npm:^0.6.0"
     prop-types: "npm:^15.8.1"
     react: "npm:^19.2.4"
     react-dom: "npm:^19.2.4"
