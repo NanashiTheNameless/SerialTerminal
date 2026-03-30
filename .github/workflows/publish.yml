@@ -11,6 +11,10 @@ permissions:
   pages: write
   id-token: write
 
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
 jobs:
   Publish:
     runs-on: ubuntu-slim
