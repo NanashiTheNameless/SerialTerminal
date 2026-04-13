@@ -42,7 +42,7 @@ jobs:
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d
 
       - name: Upload Pages Artifact
-        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9
         with:
           path: ./build
 
@@ -97,7 +97,7 @@ jobs:
         run: bash buildOffline.sh
 
       - name: Upload artifact (CI artifact)
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: SerialTerminalOffline-${{ steps.meta.outputs.sha7 }}.zip
           path: SerialTerminalOffline-${{ steps.meta.outputs.sha7 }}.zip
@@ -110,7 +110,7 @@ jobs:
           message: Offline build for ${{ steps.meta.outputs.sha7 }}
 
       - name: Create Release and upload assets
-        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda
         if: always()
         with:
           tag_name: Offline-${{ steps.meta.outputs.sha7 }}
