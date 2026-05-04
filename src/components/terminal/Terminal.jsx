@@ -1,5 +1,6 @@
 import React, { forwardRef, useImperativeHandle, useRef } from 'react'
 import PropTypes from 'prop-types'
+import { useHotkeys } from 'react-hotkeys-hook'
 
 import Grid from '@mui/material/Grid'
 
@@ -7,6 +8,7 @@ import TerminalOutput from './TerminalOutput'
 import TerminalInput from './TerminalInput'
 import { CTRL_C, CTRL_D, MAX_HISTORY_LENGTH } from '../../constants'
 import { quickHotkeysPropType } from './propTypes'
+import { matchesKeybind } from '../../utils/keybinds'
 
 // Helper to get character code from control character string
 const getControlCode = (ctrlChar) => ctrlChar.charCodeAt(0)
@@ -86,44 +88,27 @@ const Terminal = forwardRef((props, ref) => {
   }
 
   // Helper to find a keybind match
-  const findKeybindMatch = (keybinds, charCode, hasShift) => {
-    return keybinds?.find(kb => kb?.key && kb.key.toLowerCase() === charCode.toLowerCase() && kb.shift === hasShift)
+  const findKeybindMatch = (keybinds, event) => {
+    return keybinds?.find(kb => matchesKeybind(event, { key: kb?.key, shift: kb?.shift === true, modifier: kb?.modifier || 'primary' }))
   }
 
   const handleKeyDown = (e) => {
-    // Only process Ctrl/Cmd+key combinations
-    if (!(e.ctrlKey || e.metaKey)) return
-
-    // Use e.key for reliable character identification (works for / and other special chars)
-    // e.key is the actual character, e.which doesn't work well for special keys
-    const charCode = e.key?.length === 1 ? e.key : ''
-    const hasShift = e.shiftKey
-
-    if (!charCode) return
-
     // Check Ctrl+C
-    if (props.ctrlC && charCode.toUpperCase() === 'C' && !hasShift) {
+    if (props.ctrlC && matchesKeybind(e, { key: 'c', primary: true })) {
       e.preventDefault()
       props.sendRaw(getControlCode(CTRL_C))
       return
     }
 
     // Check Ctrl+D
-    if (props.ctrlD && charCode.toUpperCase() === 'D' && !hasShift) {
+    if (props.ctrlD && matchesKeybind(e, { key: 'd', primary: true })) {
       e.preventDefault()
       props.sendRaw(getControlCode(CTRL_D))
       return
     }
 
-    // Check Ctrl+X for disconnect
-    if (props.disconnectShortcut && charCode.toUpperCase() === 'X' && !hasShift) {
-      e.preventDefault()
-      props.onDisconnect?.()
-      return
-    }
-
-    // Check control aliases (normalize to lowercase for comparison)
-    const aliasMatch = findKeybindMatch(props.controlAliases, charCode, false)
+    // Check control aliases
+    const aliasMatch = findKeybindMatch(props.controlAliases, e)
     if (aliasMatch) {
       e.preventDefault()
       // Handle both raw codes and text sequences
@@ -136,7 +121,7 @@ const Terminal = forwardRef((props, ref) => {
     }
 
     // Check command keybinds
-    const commandMatch = findKeybindMatch(props.commandKeybinds, charCode, hasShift)
+    const commandMatch = findKeybindMatch(props.commandKeybinds, e)
     if (commandMatch && typeof commandMatch.text === 'string') {
       e.preventDefault()
       props.send(commandMatch.text)
@@ -154,8 +139,19 @@ const Terminal = forwardRef((props, ref) => {
     }
   }
 
+  useHotkeys('*', handleKeyDown, {
+    enableOnFormTags: true
+  }, [
+    props.ctrlC,
+    props.ctrlD,
+    props.controlAliases,
+    props.commandKeybinds,
+    props.sendRaw,
+    props.send
+  ])
+
   return (
-    <Grid container spacing={1} sx={{ p: 0.75, flexGrow: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }} onKeyDown={handleKeyDown}>
+    <Grid container spacing={1} sx={{ p: 0.75, flexGrow: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
       {/* Terminal Window */}
       <Grid sx={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
         <TerminalOutput
@@ -208,7 +204,6 @@ Terminal.propTypes = {
   time: PropTypes.bool,
   ctrlC: PropTypes.bool,
   ctrlD: PropTypes.bool,
-  disconnectShortcut: PropTypes.bool,
   controlAliases: PropTypes.array,
   commandKeybinds: PropTypes.array,
   parseANSIOutput: PropTypes.bool,

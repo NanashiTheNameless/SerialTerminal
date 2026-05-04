@@ -57,6 +57,13 @@ export const DOWNLOAD_FORMAT_LABELS = {
 export const CTRL_C = '\x03'
 export const CTRL_D = '\x04'
 
+export const KEYBIND_MODIFIERS = {
+  PRIMARY: 'primary',
+  CTRL: 'ctrl',
+  SUPER: 'super',
+  ALT: 'alt'
+}
+
 // Keyboard shortcuts
 export const KEYBOARD_SHORTCUTS = {
   CLEAR_TERMINAL: {
@@ -97,6 +104,9 @@ export const DEFAULT_SETTINGS = {
   settingsShortcutKey: KEYBOARD_SHORTCUTS.OPEN_SETTINGS.key,
   clearShortcutKey: KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.key,
   disconnectShortcutKey: KEYBOARD_SHORTCUTS.DISCONNECT.key,
+  settingsShortcutModifier: KEYBIND_MODIFIERS.PRIMARY,
+  clearShortcutModifier: KEYBIND_MODIFIERS.PRIMARY,
+  disconnectShortcutModifier: KEYBIND_MODIFIERS.PRIMARY,
   settingsShortcutShift: false,
   clearShortcutShift: false,
   disconnectShortcutShift: false,
@@ -106,16 +116,22 @@ export const DEFAULT_SETTINGS = {
   advanced: false,
   enableQuickHotkeys: false,
   quickFocusKey: 'i',
+  quickFocusModifier: KEYBIND_MODIFIERS.ALT,
   quickFocusShift: false,
   quickHistoryKey: 'h',
+  quickHistoryModifier: KEYBIND_MODIFIERS.ALT,
   quickHistoryShift: false,
   quickDownloadKey: 'd',
+  quickDownloadModifier: KEYBIND_MODIFIERS.ALT,
   quickDownloadShift: false,
   quickClearKey: 'c',
+  quickClearModifier: KEYBIND_MODIFIERS.ALT,
   quickClearShift: false,
   quickSettingsKey: 's',
+  quickSettingsModifier: KEYBIND_MODIFIERS.ALT,
   quickSettingsShift: false,
   quickDisconnectKey: 'x',
+  quickDisconnectModifier: KEYBIND_MODIFIERS.ALT,
   quickDisconnectShift: false,
   allowUncommonBaudrates: false,
   allowArbitraryBaudrates: false,

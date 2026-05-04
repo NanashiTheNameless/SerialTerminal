@@ -1,5 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import { useHotkeys } from 'react-hotkeys-hook'
 
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -24,6 +25,7 @@ import TerminalIcon from '@mui/icons-material/Terminal'
 
 import { parseANSI, stripANSI } from '../../utils/ansiParser'
 import { DEFAULT_SETTINGS } from '../../constants'
+import { matchesKeybind } from '../../utils/keybinds'
 import './TerminalOutput.css'
 import { quickHotkeysPropType } from './propTypes'
 
@@ -143,61 +145,50 @@ const TerminalOutput = React.memo((props) => {
     el.scrollTop = el.scrollHeight
   }, [props.history.length])
 
+  const hotkeys = quickHotkeys || {}
+  const quickKeybinds = {
+    focus: { key: hotkeys.focus || DEFAULT_SETTINGS.quickFocusKey, modifier: hotkeys.focusModifier || DEFAULT_SETTINGS.quickFocusModifier, shift: hotkeys.focusShift === true },
+    history: { key: hotkeys.history || DEFAULT_SETTINGS.quickHistoryKey, modifier: hotkeys.historyModifier || DEFAULT_SETTINGS.quickHistoryModifier, shift: hotkeys.historyShift === true },
+    download: { key: hotkeys.download || DEFAULT_SETTINGS.quickDownloadKey, modifier: hotkeys.downloadModifier || DEFAULT_SETTINGS.quickDownloadModifier, shift: hotkeys.downloadShift === true },
+    clear: { key: hotkeys.clear || DEFAULT_SETTINGS.quickClearKey, modifier: hotkeys.clearModifier || DEFAULT_SETTINGS.quickClearModifier, shift: hotkeys.clearShift === true },
+    settings: { key: hotkeys.settings || DEFAULT_SETTINGS.quickSettingsKey, modifier: hotkeys.settingsModifier || DEFAULT_SETTINGS.quickSettingsModifier, shift: hotkeys.settingsShift === true },
+    disconnect: { key: hotkeys.disconnect || DEFAULT_SETTINGS.quickDisconnectKey, modifier: hotkeys.disconnectModifier || DEFAULT_SETTINGS.quickDisconnectModifier, shift: hotkeys.disconnectShift === true }
+  }
+
   // Keyboard shortcuts for accessibility inside the log
-  React.useEffect(() => {
-    const hotkeys = quickHotkeys || {}
-    if (hotkeys.enabled === false) return
-
-    const focusKey = (hotkeys.focus || DEFAULT_SETTINGS.quickFocusKey).toLowerCase()
-    const historyKey = (hotkeys.history || DEFAULT_SETTINGS.quickHistoryKey).toLowerCase()
-    const downloadKey = (hotkeys.download || DEFAULT_SETTINGS.quickDownloadKey).toLowerCase()
-    const clearKey = (hotkeys.clear || DEFAULT_SETTINGS.quickClearKey).toLowerCase()
-    const settingsKey = (hotkeys.settings || DEFAULT_SETTINGS.quickSettingsKey).toLowerCase()
-    const disconnectKey = (hotkeys.disconnect || DEFAULT_SETTINGS.quickDisconnectKey).toLowerCase()
-    const focusShift = hotkeys.focusShift === true || DEFAULT_SETTINGS.quickFocusShift === true
-    const historyShift = hotkeys.historyShift === true || DEFAULT_SETTINGS.quickHistoryShift === true
-    const downloadShift = hotkeys.downloadShift === true || DEFAULT_SETTINGS.quickDownloadShift === true
-    const clearShift = hotkeys.clearShift === true || DEFAULT_SETTINGS.quickClearShift === true
-    const settingsShift = hotkeys.settingsShift === true || DEFAULT_SETTINGS.quickSettingsShift === true
-    const disconnectShift = hotkeys.disconnectShift === true || DEFAULT_SETTINGS.quickDisconnectShift === true
-
-    const handler = (e) => {
-      if (e.altKey && !e.ctrlKey && !e.metaKey) {
-        const key = e.key?.toLowerCase()
-        if (key === focusKey && (!!focusShift === e.shiftKey)) {
-          e.preventDefault()
-          focusInput?.()
-          return
-        }
-        if (key === historyKey && (!!historyShift === e.shiftKey)) {
-          e.preventDefault()
-          setHistoryOpen(true)
-          return
-        }
-        if (key === downloadKey && (!!downloadShift === e.shiftKey)) {
-          e.preventDefault()
-          handleDownload()
-          return
-        }
-        if (key === clearKey && (!!clearShift === e.shiftKey)) {
-          e.preventDefault()
-          onClearRequest?.()
-          return
-        }
-        if (key === settingsKey && (!!settingsShift === e.shiftKey)) {
-          e.preventDefault()
-          handleOpenSettings?.()
-          return
-        }
-        if (key === disconnectKey && (!!disconnectShift === e.shiftKey)) {
-          e.preventDefault()
-          onDisconnect?.()
-        }
-      }
+  useHotkeys('*', (e) => {
+    if (matchesKeybind(e, quickKeybinds.focus)) {
+      e.preventDefault()
+      focusInput?.()
+      return
     }
-
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
+    if (matchesKeybind(e, quickKeybinds.history)) {
+      e.preventDefault()
+      setHistoryOpen(true)
+      return
+    }
+    if (matchesKeybind(e, quickKeybinds.download)) {
+      e.preventDefault()
+      handleDownload()
+      return
+    }
+    if (matchesKeybind(e, quickKeybinds.clear)) {
+      e.preventDefault()
+      onClearRequest?.()
+      return
+    }
+    if (matchesKeybind(e, quickKeybinds.settings)) {
+      e.preventDefault()
+      handleOpenSettings?.()
+      return
+    }
+    if (matchesKeybind(e, quickKeybinds.disconnect)) {
+      e.preventDefault()
+      onDisconnect?.()
+    }
+  }, {
+    enabled: hotkeys.enabled !== false,
+    enableOnFormTags: true
   }, [quickHotkeys, focusInput, onClearRequest, handleOpenSettings, onDisconnect, handleDownload])
 
   return (

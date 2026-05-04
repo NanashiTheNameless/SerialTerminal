@@ -25,6 +25,7 @@ import AddIcon from '@mui/icons-material/Add'
 
 import { themedScrollbarSx } from '../common/themedScrollbarSx'
 import { ALL_BAUD_RATES, COMMON_BAUD_RATES, LINE_ENDING_VALUES, LINE_ENDING_LABELS, DOWNLOAD_FORMATS, DOWNLOAD_FORMAT_LABELS, DEFAULT_SETTINGS, KEYBOARD_SHORTCUTS } from '../../constants'
+import { KEYBIND_MODIFIER_LABELS, KEYBIND_MODIFIER_VALUES, describeKeybind, findKeybindConflicts, normalizeModifier } from '../../utils/keybinds'
 
 const UNSET_CHAR = '�'
 
@@ -43,7 +44,7 @@ const getValidatedBaudRate = (rate, allowArbitrary, allowUncommon, fallback) => 
 }
 
 // Reusable KeybindDisplay component for showing Ctrl+Key combinations
-const KeybindDisplay = ({ ctrlKey, shift, label, modifierLabel = 'Ctrl' }) => (
+const KeybindDisplay = ({ ctrlKey, shift, label, modifier = KEYBIND_MODIFIER_VALUES.PRIMARY }) => (
   <Box sx={{
     display: 'inline-flex',
     alignItems: 'center',
@@ -59,9 +60,7 @@ const KeybindDisplay = ({ ctrlKey, shift, label, modifierLabel = 'Ctrl' }) => (
     color: '#fff'
   }}
   >
-    <span>{modifierLabel}</span>
-    {shift && <span>Shift</span>}
-    <span>{(ctrlKey || label || UNSET_CHAR).toUpperCase()}</span>
+    <span>{describeKeybind({ key: ctrlKey || label || UNSET_CHAR, shift, modifier })}</span>
   </Box>
 )
 
@@ -69,11 +68,33 @@ KeybindDisplay.propTypes = {
   ctrlKey: PropTypes.string,
   shift: PropTypes.bool,
   label: PropTypes.string,
-  modifierLabel: PropTypes.string
+  modifier: PropTypes.string
+}
+
+const ModifierSelect = ({ value, onChange }) => (
+  <FormControl sx={{ mt: 0.75, minWidth: 132 }}>
+    <InputLabel>Modifier</InputLabel>
+    <Select
+      value={normalizeModifier(value)}
+      label='Modifier'
+      onChange={(event) => onChange(normalizeModifier(event.target.value))}
+    >
+      {Object.values(KEYBIND_MODIFIER_VALUES).map((modifier) => (
+        <MenuItem key={modifier} value={modifier}>
+          {KEYBIND_MODIFIER_LABELS[modifier]}
+        </MenuItem>
+      ))}
+    </Select>
+  </FormControl>
+)
+
+ModifierSelect.propTypes = {
+  value: PropTypes.string,
+  onChange: PropTypes.func.isRequired
 }
 
 // Reusable KeyCapture component for capturing key presses
-const KeyCapture = ({ captureTarget, currentTarget, onClick, ctrlKey, shift, label, modifierLabel = 'Ctrl' }) => (
+const KeyCapture = ({ captureTarget, currentTarget, onClick, ctrlKey, shift, label, modifier = KEYBIND_MODIFIER_VALUES.PRIMARY }) => (
   <Box
     role='button'
     tabIndex={0}
@@ -115,9 +136,7 @@ const KeyCapture = ({ captureTarget, currentTarget, onClick, ctrlKey, shift, lab
       color: '#fff'
     }}
     >
-      <span>{modifierLabel}</span>
-      {shift && <span>Shift</span>}
-      <span>{ctrlKey ? ctrlKey.toUpperCase() : (label ? label.toUpperCase() : UNSET_CHAR)}</span>
+      <span>{describeKeybind({ key: ctrlKey || label || UNSET_CHAR, shift, modifier })}</span>
     </Box>
     <Typography variant='body2' sx={{ color: '#ffffffcc' }}>
       {captureTarget === currentTarget ? 'Press a key (Esc to cancel)' : 'Click then press a key'}
@@ -132,7 +151,33 @@ KeyCapture.propTypes = {
   ctrlKey: PropTypes.string,
   shift: PropTypes.bool,
   label: PropTypes.string,
-  modifierLabel: PropTypes.string
+  modifier: PropTypes.string
+}
+
+const KeybindCaptureRow = ({ captureTarget, currentTarget, onCaptureClick, ctrlKey, shift, modifier, onModifierChange, label }) => (
+  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'nowrap', width: '100%' }}>
+    <ModifierSelect value={modifier} onChange={onModifierChange} />
+    <KeyCapture
+      captureTarget={captureTarget}
+      currentTarget={currentTarget}
+      onClick={onCaptureClick}
+      ctrlKey={ctrlKey}
+      shift={shift}
+      modifier={modifier}
+      label={label}
+    />
+  </Box>
+)
+
+KeybindCaptureRow.propTypes = {
+  captureTarget: PropTypes.string,
+  currentTarget: PropTypes.string.isRequired,
+  onCaptureClick: PropTypes.func.isRequired,
+  ctrlKey: PropTypes.string,
+  shift: PropTypes.bool,
+  modifier: PropTypes.string,
+  onModifierChange: PropTypes.func.isRequired,
+  label: PropTypes.string
 }
 
 // Reusable KeybindListItem component for displaying keybind entries
@@ -157,7 +202,7 @@ const KeybindListItem = ({ entry, index, onClick, onDelete, isSelected, children
     }}
   >
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-      <KeybindDisplay ctrlKey={entry.key} shift={entry.shift} />
+      <KeybindDisplay ctrlKey={entry.key} shift={entry.shift} modifier={entry.modifier} />
       {children}
     </Box>
     <IconButton
@@ -187,14 +232,16 @@ KeybindListItem.propTypes = {
 }
 
 // Reusable KeybindInputForm component for adding/editing keybinds
-const KeybindInputForm = ({ captureTarget, currentTarget, onCaptureClick, ctrlKey, shift, textValue, onTextChange, textPlaceholder, textError, textHelperText, onSubmit, submitDisabled, submitLabel }) => (
+const KeybindInputForm = ({ captureTarget, currentTarget, onCaptureClick, ctrlKey, shift, modifier, onModifierChange, textValue, onTextChange, textPlaceholder, textError, textHelperText, onSubmit, submitDisabled, submitLabel }) => (
   <Box sx={{ display: 'flex', gap: 1, mt: 2, alignItems: 'center', flexWrap: 'nowrap', width: '100%' }}>
+    <ModifierSelect value={modifier} onChange={onModifierChange} />
     <KeyCapture
       captureTarget={captureTarget}
       currentTarget={currentTarget}
       onClick={onCaptureClick}
       ctrlKey={ctrlKey}
       shift={shift}
+      modifier={modifier}
     />
     <TextField
       placeholder={textPlaceholder}
@@ -237,6 +284,8 @@ KeybindInputForm.propTypes = {
   onCaptureClick: PropTypes.func.isRequired,
   ctrlKey: PropTypes.string,
   shift: PropTypes.bool,
+  modifier: PropTypes.string,
+  onModifierChange: PropTypes.func.isRequired,
   textValue: PropTypes.string.isRequired,
   onTextChange: PropTypes.func.isRequired,
   textPlaceholder: PropTypes.string.isRequired,
@@ -311,6 +360,9 @@ const Settings = React.memo((props) => {
   const [settingsShortcutKey, setSettingsShortcutKey] = React.useState((props.settings.settingsShortcutKey || KEYBOARD_SHORTCUTS.OPEN_SETTINGS.key).toLowerCase())
   const [clearShortcutKey, setClearShortcutKey] = React.useState((props.settings.clearShortcutKey || KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.key).toLowerCase())
   const [disconnectShortcutKey, setDisconnectShortcutKey] = React.useState((props.settings.disconnectShortcutKey || KEYBOARD_SHORTCUTS.DISCONNECT.key).toLowerCase())
+  const [settingsShortcutModifier, setSettingsShortcutModifier] = React.useState(normalizeModifier(props.settings.settingsShortcutModifier, DEFAULT_SETTINGS.settingsShortcutModifier))
+  const [clearShortcutModifier, setClearShortcutModifier] = React.useState(normalizeModifier(props.settings.clearShortcutModifier, DEFAULT_SETTINGS.clearShortcutModifier))
+  const [disconnectShortcutModifier, setDisconnectShortcutModifier] = React.useState(normalizeModifier(props.settings.disconnectShortcutModifier, DEFAULT_SETTINGS.disconnectShortcutModifier))
   const [settingsShortcutShift, setSettingsShortcutShift] = React.useState(props.settings.settingsShortcutShift === true)
   const [clearShortcutShift, setClearShortcutShift] = React.useState(props.settings.clearShortcutShift === true)
   const [disconnectShortcutShift, setDisconnectShortcutShift] = React.useState(props.settings.disconnectShortcutShift === true)
@@ -326,12 +378,14 @@ const Settings = React.memo((props) => {
   const [controlAliases, setControlAliases] = React.useState(props.settings.customControlAliases || [])
   const [aliasKey, setAliasKey] = React.useState('')
   const [aliasShift, setAliasShift] = React.useState(false)
+  const [aliasModifier, setAliasModifier] = React.useState(DEFAULT_SETTINGS.settingsShortcutModifier)
   const [aliasCode, setAliasCode] = React.useState('')
   const [aliasEditIndex, setAliasEditIndex] = React.useState(null)
   const [keybindEditIndex, setKeybindEditIndex] = React.useState(null)
   const [commandKeybinds, setCommandKeybinds] = React.useState(props.settings.commandKeybinds || [])
   const [keybindKey, setKeybindKey] = React.useState('')
   const [keybindShift, setKeybindShift] = React.useState(false)
+  const [keybindModifier, setKeybindModifier] = React.useState(DEFAULT_SETTINGS.settingsShortcutModifier)
   const [keybindText, setKeybindText] = React.useState('')
   const [quickFocusKey, setQuickFocusKey] = React.useState((props.settings.quickFocusKey || 'i').toLowerCase())
   const [quickHistoryKey, setQuickHistoryKey] = React.useState((props.settings.quickHistoryKey || 'h').toLowerCase())
@@ -345,15 +399,15 @@ const Settings = React.memo((props) => {
   const [quickClearShift, setQuickClearShift] = React.useState(props.settings.quickClearShift === true)
   const [quickSettingsShift, setQuickSettingsShift] = React.useState(props.settings.quickSettingsShift === true)
   const [quickDisconnectShift, setQuickDisconnectShift] = React.useState(props.settings.quickDisconnectShift === true)
+  const [quickFocusModifier, setQuickFocusModifier] = React.useState(normalizeModifier(props.settings.quickFocusModifier, DEFAULT_SETTINGS.quickFocusModifier))
+  const [quickHistoryModifier, setQuickHistoryModifier] = React.useState(normalizeModifier(props.settings.quickHistoryModifier, DEFAULT_SETTINGS.quickHistoryModifier))
+  const [quickDownloadModifier, setQuickDownloadModifier] = React.useState(normalizeModifier(props.settings.quickDownloadModifier, DEFAULT_SETTINGS.quickDownloadModifier))
+  const [quickClearModifier, setQuickClearModifier] = React.useState(normalizeModifier(props.settings.quickClearModifier, DEFAULT_SETTINGS.quickClearModifier))
+  const [quickSettingsModifier, setQuickSettingsModifier] = React.useState(normalizeModifier(props.settings.quickSettingsModifier, DEFAULT_SETTINGS.quickSettingsModifier))
+  const [quickDisconnectModifier, setQuickDisconnectModifier] = React.useState(normalizeModifier(props.settings.quickDisconnectModifier, DEFAULT_SETTINGS.quickDisconnectModifier))
 
-  const formatLabel = (key, shift, fallbackKey) => {
-    const finalKey = (key || fallbackKey || '').toUpperCase()
-    return `Ctrl${shift ? '+Shift' : ''}+${finalKey}`
-  }
-
-  const formatAltLabel = (key, shift) => {
-    const finalKey = (key || UNSET_CHAR).toUpperCase()
-    return `Alt${shift ? '+Shift' : ''}+${finalKey}`
+  const formatLabel = (key, shift, fallbackKey, modifier = DEFAULT_SETTINGS.settingsShortcutModifier) => {
+    return describeKeybind({ key: key || fallbackKey, shift, modifier })
   }
 
   // Parse escape sequences like \x04, \n, etc.
@@ -418,15 +472,16 @@ const Settings = React.memo((props) => {
 
       const key = normalizeHotkey(entry.key)
       if (!hotkeyValid(key)) return null
+      const modifier = normalizeModifier(entry.modifier, DEFAULT_SETTINGS.settingsShortcutModifier)
 
       if (entry.type === 'code') {
         const value = Number(entry.value)
         if (!Number.isInteger(value) || value < 0 || value > 255) return null
-        return { key, shift: entry.shift === true, type: 'code', value }
+        return { key, shift: entry.shift === true, modifier, type: 'code', value }
       }
 
       if (entry.type === 'text' && typeof entry.value === 'string') {
-        return { key, shift: entry.shift === true, type: 'text', value: entry.value }
+        return { key, shift: entry.shift === true, modifier, type: 'text', value: entry.value }
       }
 
       return null
@@ -441,7 +496,7 @@ const Settings = React.memo((props) => {
       const key = normalizeHotkey(entry.key)
       if (!hotkeyValid(key) || typeof entry.text !== 'string' || entry.text.length === 0) return null
 
-      return { key, shift: entry.shift === true, text: entry.text }
+      return { key, shift: entry.shift === true, modifier: normalizeModifier(entry.modifier, DEFAULT_SETTINGS.settingsShortcutModifier), text: entry.text }
     }).filter(Boolean)
   }
   const buildSettingsPayload = () => {
@@ -465,12 +520,15 @@ const Settings = React.memo((props) => {
       settingsShortcutKey: normalizedSettingsKey,
       clearShortcutKey: normalizedClearKey,
       disconnectShortcutKey: normalizedDisconnectKey,
+      settingsShortcutModifier: normalizeModifier(settingsShortcutModifier, DEFAULT_SETTINGS.settingsShortcutModifier),
+      clearShortcutModifier: normalizeModifier(clearShortcutModifier, DEFAULT_SETTINGS.clearShortcutModifier),
+      disconnectShortcutModifier: normalizeModifier(disconnectShortcutModifier, DEFAULT_SETTINGS.disconnectShortcutModifier),
       settingsShortcutShift,
       clearShortcutShift,
       disconnectShortcutShift,
       downloadFormat,
-      customControlAliases: controlAliases,
-      commandKeybinds,
+      customControlAliases: normalizeControlAliases(controlAliases),
+      commandKeybinds: normalizeCommandKeybinds(commandKeybinds),
       parseANSIOutput,
       advanced,
       allowUncommonBaudrates,
@@ -484,6 +542,12 @@ const Settings = React.memo((props) => {
       quickClearKey: normalizeHotkey(quickClearKey || 'c'),
       quickSettingsKey: normalizeHotkey(quickSettingsKey || 's'),
       quickDisconnectKey: normalizeHotkey(quickDisconnectKey || 'x'),
+      quickFocusModifier: normalizeModifier(quickFocusModifier, DEFAULT_SETTINGS.quickFocusModifier),
+      quickHistoryModifier: normalizeModifier(quickHistoryModifier, DEFAULT_SETTINGS.quickHistoryModifier),
+      quickDownloadModifier: normalizeModifier(quickDownloadModifier, DEFAULT_SETTINGS.quickDownloadModifier),
+      quickClearModifier: normalizeModifier(quickClearModifier, DEFAULT_SETTINGS.quickClearModifier),
+      quickSettingsModifier: normalizeModifier(quickSettingsModifier, DEFAULT_SETTINGS.quickSettingsModifier),
+      quickDisconnectModifier: normalizeModifier(quickDisconnectModifier, DEFAULT_SETTINGS.quickDisconnectModifier),
       quickFocusShift,
       quickHistoryShift,
       quickDownloadShift,
@@ -529,6 +593,9 @@ const Settings = React.memo((props) => {
     setSettingsShortcutKey(normalizeHotkey(source.settingsShortcutKey || KEYBOARD_SHORTCUTS.OPEN_SETTINGS.key) || KEYBOARD_SHORTCUTS.OPEN_SETTINGS.key)
     setClearShortcutKey(normalizeHotkey(source.clearShortcutKey || KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.key) || KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.key)
     setDisconnectShortcutKey(normalizeHotkey(source.disconnectShortcutKey || KEYBOARD_SHORTCUTS.DISCONNECT.key) || KEYBOARD_SHORTCUTS.DISCONNECT.key)
+    setSettingsShortcutModifier(normalizeModifier(source.settingsShortcutModifier, DEFAULT_SETTINGS.settingsShortcutModifier))
+    setClearShortcutModifier(normalizeModifier(source.clearShortcutModifier, DEFAULT_SETTINGS.clearShortcutModifier))
+    setDisconnectShortcutModifier(normalizeModifier(source.disconnectShortcutModifier, DEFAULT_SETTINGS.disconnectShortcutModifier))
     setSettingsShortcutShift(normalizeBoolean(source.settingsShortcutShift, DEFAULT_SETTINGS.settingsShortcutShift))
     setClearShortcutShift(normalizeBoolean(source.clearShortcutShift, DEFAULT_SETTINGS.clearShortcutShift))
     setDisconnectShortcutShift(normalizeBoolean(source.disconnectShortcutShift, DEFAULT_SETTINGS.disconnectShortcutShift))
@@ -544,11 +611,13 @@ const Settings = React.memo((props) => {
     setCommandKeybinds(normalizeCommandKeybinds(source.commandKeybinds))
     setAliasKey('')
     setAliasShift(false)
+    setAliasModifier(DEFAULT_SETTINGS.settingsShortcutModifier)
     setAliasCode('')
     setAliasEditIndex(null)
     setKeybindEditIndex(null)
     setKeybindKey('')
     setKeybindShift(false)
+    setKeybindModifier(DEFAULT_SETTINGS.settingsShortcutModifier)
     setKeybindText('')
     setQuickFocusKey(normalizeHotkey(source.quickFocusKey || DEFAULT_SETTINGS.quickFocusKey) || DEFAULT_SETTINGS.quickFocusKey)
     setQuickHistoryKey(normalizeHotkey(source.quickHistoryKey || DEFAULT_SETTINGS.quickHistoryKey) || DEFAULT_SETTINGS.quickHistoryKey)
@@ -556,6 +625,12 @@ const Settings = React.memo((props) => {
     setQuickClearKey(normalizeHotkey(source.quickClearKey || DEFAULT_SETTINGS.quickClearKey) || DEFAULT_SETTINGS.quickClearKey)
     setQuickSettingsKey(normalizeHotkey(source.quickSettingsKey || DEFAULT_SETTINGS.quickSettingsKey) || DEFAULT_SETTINGS.quickSettingsKey)
     setQuickDisconnectKey(normalizeHotkey(source.quickDisconnectKey || DEFAULT_SETTINGS.quickDisconnectKey) || DEFAULT_SETTINGS.quickDisconnectKey)
+    setQuickFocusModifier(normalizeModifier(source.quickFocusModifier, DEFAULT_SETTINGS.quickFocusModifier))
+    setQuickHistoryModifier(normalizeModifier(source.quickHistoryModifier, DEFAULT_SETTINGS.quickHistoryModifier))
+    setQuickDownloadModifier(normalizeModifier(source.quickDownloadModifier, DEFAULT_SETTINGS.quickDownloadModifier))
+    setQuickClearModifier(normalizeModifier(source.quickClearModifier, DEFAULT_SETTINGS.quickClearModifier))
+    setQuickSettingsModifier(normalizeModifier(source.quickSettingsModifier, DEFAULT_SETTINGS.quickSettingsModifier))
+    setQuickDisconnectModifier(normalizeModifier(source.quickDisconnectModifier, DEFAULT_SETTINGS.quickDisconnectModifier))
     setQuickFocusShift(normalizeBoolean(source.quickFocusShift, DEFAULT_SETTINGS.quickFocusShift))
     setQuickHistoryShift(normalizeBoolean(source.quickHistoryShift, DEFAULT_SETTINGS.quickHistoryShift))
     setQuickDownloadShift(normalizeBoolean(source.quickDownloadShift, DEFAULT_SETTINGS.quickDownloadShift))
@@ -605,23 +680,24 @@ const Settings = React.memo((props) => {
       // Update existing alias
       setControlAliases((prev) => {
         const updated = [...prev]
-        updated[aliasEditIndex] = { key: normalizedKey, shift: aliasShift, ...aliasCodeParsed }
+        updated[aliasEditIndex] = { key: normalizedKey, shift: aliasShift, modifier: normalizeModifier(aliasModifier), ...aliasCodeParsed }
         return updated
       })
       setAliasEditIndex(null)
     } else {
       // Add new alias
-      const exists = controlAliases.some((entry) => entry.key === normalizedKey && entry.shift === aliasShift)
+      const normalizedModifier = normalizeModifier(aliasModifier)
+      const exists = controlAliases.some((entry) => entry.key === normalizedKey && entry.shift === aliasShift && normalizeModifier(entry.modifier) === normalizedModifier)
       if (exists) {
-        const shiftLabel = aliasShift ? 'Ctrl+Shift+' : 'Ctrl+'
-        window.alert(`${shiftLabel}${normalizedKey.toUpperCase()} is already mapped. Delete the existing alias first.`)
+        window.alert(`${formatLabel(normalizedKey, aliasShift, normalizedKey, normalizedModifier)} is already mapped. Delete the existing alias first.`)
         return
       }
       // Store the parsed result (either code or text)
-      setControlAliases((prev) => [...prev, { key: normalizedKey, shift: aliasShift, ...aliasCodeParsed }])
+      setControlAliases((prev) => [...prev, { key: normalizedKey, shift: aliasShift, modifier: normalizedModifier, ...aliasCodeParsed }])
     }
     setAliasKey('')
     setAliasShift(false)
+    setAliasModifier(DEFAULT_SETTINGS.settingsShortcutModifier)
     setAliasCode('')
   }
 
@@ -631,6 +707,7 @@ const Settings = React.memo((props) => {
       setAliasEditIndex(null)
       setAliasKey('')
       setAliasShift(false)
+      setAliasModifier(DEFAULT_SETTINGS.settingsShortcutModifier)
       setAliasCode('')
     }
   }
@@ -641,21 +718,22 @@ const Settings = React.memo((props) => {
     if (keybindEditIndex !== null) {
       // Update mode
       setCommandKeybinds((prev) =>
-        prev.map((entry, i) => (i === keybindEditIndex ? { key: normalizedKey, shift: keybindShift, text: keybindText.trim() } : entry))
+        prev.map((entry, i) => (i === keybindEditIndex ? { key: normalizedKey, shift: keybindShift, modifier: normalizeModifier(keybindModifier), text: keybindText.trim() } : entry))
       )
       setKeybindEditIndex(null)
     } else {
       // Add mode
-      const exists = commandKeybinds.some((entry) => entry.key === normalizedKey && entry.shift === keybindShift)
+      const normalizedModifier = normalizeModifier(keybindModifier)
+      const exists = commandKeybinds.some((entry) => entry.key === normalizedKey && entry.shift === keybindShift && normalizeModifier(entry.modifier) === normalizedModifier)
       if (exists) {
-        const shiftLabel = keybindShift ? 'Ctrl+Shift+' : 'Ctrl+'
-        window.alert(`${shiftLabel}${normalizedKey.toUpperCase()} is already mapped. Delete the existing keybind first.`)
+        window.alert(`${formatLabel(normalizedKey, keybindShift, normalizedKey, normalizedModifier)} is already mapped. Delete the existing keybind first.`)
         return
       }
-      setCommandKeybinds((prev) => [...prev, { key: normalizedKey, shift: keybindShift, text: keybindText.trim() }])
+      setCommandKeybinds((prev) => [...prev, { key: normalizedKey, shift: keybindShift, modifier: normalizedModifier, text: keybindText.trim() }])
     }
     setKeybindKey('')
     setKeybindShift(false)
+    setKeybindModifier(DEFAULT_SETTINGS.settingsShortcutModifier)
     setKeybindText('')
   }
 
@@ -665,6 +743,7 @@ const Settings = React.memo((props) => {
       setKeybindEditIndex(null)
       setKeybindKey('')
       setKeybindShift(false)
+      setKeybindModifier(DEFAULT_SETTINGS.settingsShortcutModifier)
       setKeybindText('')
     }
   }
@@ -691,6 +770,9 @@ const Settings = React.memo((props) => {
     setSettingsShortcutKey((props.settings.settingsShortcutKey || KEYBOARD_SHORTCUTS.OPEN_SETTINGS.key).toLowerCase())
     setClearShortcutKey((props.settings.clearShortcutKey || KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.key).toLowerCase())
     setDisconnectShortcutKey((props.settings.disconnectShortcutKey || KEYBOARD_SHORTCUTS.DISCONNECT.key).toLowerCase())
+    setSettingsShortcutModifier(normalizeModifier(props.settings.settingsShortcutModifier, DEFAULT_SETTINGS.settingsShortcutModifier))
+    setClearShortcutModifier(normalizeModifier(props.settings.clearShortcutModifier, DEFAULT_SETTINGS.clearShortcutModifier))
+    setDisconnectShortcutModifier(normalizeModifier(props.settings.disconnectShortcutModifier, DEFAULT_SETTINGS.disconnectShortcutModifier))
     setSettingsShortcutShift(props.settings.settingsShortcutShift === true)
     setClearShortcutShift(props.settings.clearShortcutShift === true)
     setDisconnectShortcutShift(props.settings.disconnectShortcutShift === true)
@@ -702,13 +784,15 @@ const Settings = React.memo((props) => {
     setSplitFirmwareFiles(props.settings.splitFirmwareFiles === true)
     setAllowAnyFileFormat(props.settings.allowAnyFileFormat === true)
     setEnableQuickHotkeys(props.settings.enableQuickHotkeys !== false)
-    setControlAliases(props.settings.customControlAliases || [])
+    setControlAliases(normalizeControlAliases(props.settings.customControlAliases || []))
     setAliasKey('')
     setAliasShift(false)
+    setAliasModifier(DEFAULT_SETTINGS.settingsShortcutModifier)
     setAliasCode('')
-    setCommandKeybinds(props.settings.commandKeybinds || [])
+    setCommandKeybinds(normalizeCommandKeybinds(props.settings.commandKeybinds || []))
     setKeybindKey('')
     setKeybindShift(false)
+    setKeybindModifier(DEFAULT_SETTINGS.settingsShortcutModifier)
     setKeybindText('')
     setQuickFocusKey(normalizeHotkey(props.settings.quickFocusKey || 'i'))
     setQuickHistoryKey(normalizeHotkey(props.settings.quickHistoryKey || 'h'))
@@ -716,6 +800,12 @@ const Settings = React.memo((props) => {
     setQuickClearKey(normalizeHotkey(props.settings.quickClearKey || 'c'))
     setQuickSettingsKey(normalizeHotkey(props.settings.quickSettingsKey || 's'))
     setQuickDisconnectKey(normalizeHotkey(props.settings.quickDisconnectKey || 'x'))
+    setQuickFocusModifier(normalizeModifier(props.settings.quickFocusModifier, DEFAULT_SETTINGS.quickFocusModifier))
+    setQuickHistoryModifier(normalizeModifier(props.settings.quickHistoryModifier, DEFAULT_SETTINGS.quickHistoryModifier))
+    setQuickDownloadModifier(normalizeModifier(props.settings.quickDownloadModifier, DEFAULT_SETTINGS.quickDownloadModifier))
+    setQuickClearModifier(normalizeModifier(props.settings.quickClearModifier, DEFAULT_SETTINGS.quickClearModifier))
+    setQuickSettingsModifier(normalizeModifier(props.settings.quickSettingsModifier, DEFAULT_SETTINGS.quickSettingsModifier))
+    setQuickDisconnectModifier(normalizeModifier(props.settings.quickDisconnectModifier, DEFAULT_SETTINGS.quickDisconnectModifier))
     setQuickFocusShift(props.settings.quickFocusShift === true)
     setQuickHistoryShift(props.settings.quickHistoryShift === true)
     setQuickDownloadShift(props.settings.quickDownloadShift === true)
@@ -797,11 +887,11 @@ const Settings = React.memo((props) => {
   }, [captureTarget])
 
   React.useEffect(() => {
-    setControlAliases(props.settings.customControlAliases || [])
+    setControlAliases(normalizeControlAliases(props.settings.customControlAliases || []))
   }, [props.settings.customControlAliases])
 
   React.useEffect(() => {
-    setCommandKeybinds(props.settings.commandKeybinds || [])
+    setCommandKeybinds(normalizeCommandKeybinds(props.settings.commandKeybinds || []))
   }, [props.settings.commandKeybinds])
 
   // Validate baudrate against current allowed rates
@@ -839,6 +929,9 @@ const Settings = React.memo((props) => {
     setSettingsShortcutKey(DEFAULT_SETTINGS.settingsShortcutKey)
     setClearShortcutKey(DEFAULT_SETTINGS.clearShortcutKey)
     setDisconnectShortcutKey(DEFAULT_SETTINGS.disconnectShortcutKey)
+    setSettingsShortcutModifier(DEFAULT_SETTINGS.settingsShortcutModifier)
+    setClearShortcutModifier(DEFAULT_SETTINGS.clearShortcutModifier)
+    setDisconnectShortcutModifier(DEFAULT_SETTINGS.disconnectShortcutModifier)
     setSettingsShortcutShift(DEFAULT_SETTINGS.settingsShortcutShift)
     setClearShortcutShift(DEFAULT_SETTINGS.clearShortcutShift)
     setDisconnectShortcutShift(DEFAULT_SETTINGS.disconnectShortcutShift)
@@ -853,10 +946,12 @@ const Settings = React.memo((props) => {
     setControlAliases(DEFAULT_SETTINGS.customControlAliases)
     setAliasKey('')
     setAliasShift(false)
+    setAliasModifier(DEFAULT_SETTINGS.settingsShortcutModifier)
     setAliasCode('')
     setCommandKeybinds(DEFAULT_SETTINGS.commandKeybinds || [])
     setKeybindKey('')
     setKeybindShift(false)
+    setKeybindModifier(DEFAULT_SETTINGS.settingsShortcutModifier)
     setKeybindText('')
     setQuickFocusKey(DEFAULT_SETTINGS.quickFocusKey)
     setQuickHistoryKey(DEFAULT_SETTINGS.quickHistoryKey)
@@ -864,6 +959,12 @@ const Settings = React.memo((props) => {
     setQuickClearKey(DEFAULT_SETTINGS.quickClearKey)
     setQuickSettingsKey(DEFAULT_SETTINGS.quickSettingsKey)
     setQuickDisconnectKey(DEFAULT_SETTINGS.quickDisconnectKey)
+    setQuickFocusModifier(DEFAULT_SETTINGS.quickFocusModifier)
+    setQuickHistoryModifier(DEFAULT_SETTINGS.quickHistoryModifier)
+    setQuickDownloadModifier(DEFAULT_SETTINGS.quickDownloadModifier)
+    setQuickClearModifier(DEFAULT_SETTINGS.quickClearModifier)
+    setQuickSettingsModifier(DEFAULT_SETTINGS.quickSettingsModifier)
+    setQuickDisconnectModifier(DEFAULT_SETTINGS.quickDisconnectModifier)
     setQuickFocusShift(DEFAULT_SETTINGS.quickFocusShift)
     setQuickHistoryShift(DEFAULT_SETTINGS.quickHistoryShift)
     setQuickDownloadShift(DEFAULT_SETTINGS.quickDownloadShift)
@@ -872,37 +973,100 @@ const Settings = React.memo((props) => {
     setQuickDisconnectShift(DEFAULT_SETTINGS.quickDisconnectShift)
   }
 
+  const buildKeybindConflictCandidates = () => {
+    return [
+      settingsShortcut && {
+        label: KEYBOARD_SHORTCUTS.OPEN_SETTINGS.description,
+        key: settingsShortcutKey,
+        shift: settingsShortcutShift,
+        modifier: settingsShortcutModifier
+      },
+      clearShortcut && {
+        label: KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.description,
+        key: clearShortcutKey,
+        shift: clearShortcutShift,
+        modifier: clearShortcutModifier
+      },
+      disconnectShortcut && {
+        label: KEYBOARD_SHORTCUTS.DISCONNECT.description,
+        key: disconnectShortcutKey,
+        shift: disconnectShortcutShift,
+        modifier: disconnectShortcutModifier
+      },
+      detectCtrlC && {
+        label: 'Send Ctrl+C',
+        key: 'c',
+        modifier: DEFAULT_SETTINGS.settingsShortcutModifier
+      },
+      detectCtrlD && {
+        label: 'Send Ctrl+D',
+        key: 'd',
+        modifier: DEFAULT_SETTINGS.settingsShortcutModifier
+      },
+      ...controlAliases.map((entry) => ({
+        label: `Control alias ${formatLabel(entry.key, entry.shift, entry.key, entry.modifier)}`,
+        key: entry.key,
+        shift: entry.shift === true,
+        modifier: normalizeModifier(entry.modifier)
+      })),
+      ...commandKeybinds.map((entry) => ({
+        label: `Command keybind ${formatLabel(entry.key, entry.shift, entry.key, entry.modifier)}`,
+        key: entry.key,
+        shift: entry.shift === true,
+        modifier: normalizeModifier(entry.modifier)
+      })),
+      enableQuickHotkeys && {
+        label: 'Focus Input',
+        key: quickFocusKey,
+        shift: quickFocusShift,
+        modifier: quickFocusModifier
+      },
+      enableQuickHotkeys && {
+        label: 'Show History',
+        key: quickHistoryKey,
+        shift: quickHistoryShift,
+        modifier: quickHistoryModifier
+      },
+      enableQuickHotkeys && {
+        label: 'Download Output',
+        key: quickDownloadKey,
+        shift: quickDownloadShift,
+        modifier: quickDownloadModifier
+      },
+      enableQuickHotkeys && {
+        label: 'Clear Terminal hotkey',
+        key: quickClearKey,
+        shift: quickClearShift,
+        modifier: quickClearModifier
+      },
+      enableQuickHotkeys && {
+        label: 'Open Settings hotkey',
+        key: quickSettingsKey,
+        shift: quickSettingsShift,
+        modifier: quickSettingsModifier
+      },
+      enableQuickHotkeys && {
+        label: 'Disconnect hotkey',
+        key: quickDisconnectKey,
+        shift: quickDisconnectShift,
+        modifier: quickDisconnectModifier
+      }
+    ]
+  }
+
   const save = () => {
-    // Check for conflicts between Settings and Clear shortcuts
-    if (settingsShortcut && clearShortcut &&
-        settingsShortcutKey === clearShortcutKey &&
-        settingsShortcutShift === clearShortcutShift) {
-      window.alert('Open Settings and Clear Terminal cannot use the same keybind!')
-      return
-    }
-
-    // Check for conflicts between Settings and Disconnect shortcuts
-    if (settingsShortcut && disconnectShortcut &&
-        settingsShortcutKey === disconnectShortcutKey &&
-        settingsShortcutShift === disconnectShortcutShift) {
-      window.alert('Open Settings and Disconnect cannot use the same keybind!')
-      return
-    }
-
-    // Check for conflicts between Clear and Disconnect shortcuts
-    if (clearShortcut && disconnectShortcut &&
-        clearShortcutKey === disconnectShortcutKey &&
-        clearShortcutShift === disconnectShortcutShift) {
-      window.alert('Clear Terminal and Disconnect cannot use the same keybind!')
-      return
-    }
-
     if (enableQuickHotkeys) {
       const hotkeys = [quickFocusKey, quickHistoryKey, quickDownloadKey, quickClearKey, quickSettingsKey, quickDisconnectKey]
       if (hotkeys.some(k => !hotkeyValid(k))) {
         window.alert('All terminal hotkeys must be a single character (letters or symbols).')
         return
       }
+    }
+
+    const conflict = findKeybindConflicts(buildKeybindConflictCandidates())
+    if (conflict) {
+      window.alert(`${conflict[0].label} and ${conflict[1].label} both use ${describeKeybind(conflict[0])}.`)
+      return
     }
 
     props.save(buildSettingsPayload())
@@ -1140,7 +1304,7 @@ const Settings = React.memo((props) => {
                   onChange={(e) => setEnableQuickHotkeys(e.target.checked)}
                   sx={{ color: '#ffffffb3', '&.Mui-checked': { color: '#fff' } }}
                 />
-              } label='Enable terminal quick hotkeys (Alt + key)'
+              } label='Enable terminal quick hotkeys'
             />
             <a href='https://github.com/NanashiTheNameless/SerialTerminal?tab=readme-ov-file#quick-hotkeys-customizable-in-settings' target='_blank' rel='noopener noreferrer' style={{ color: '#4a90e2', textDecoration: 'underline', fontSize: '0.85rem', cursor: 'pointer' }}>
               (RTFM)
@@ -1180,7 +1344,7 @@ const Settings = React.memo((props) => {
                 onChange={(e) => setSettingsShortcut(e.target.checked)}
                 sx={{ color: '#ffffffb3', '&.Mui-checked': { color: '#fff' } }}
               />
-            } label={`${KEYBOARD_SHORTCUTS.OPEN_SETTINGS.description} (${formatLabel(settingsShortcutKey, settingsShortcutShift, KEYBOARD_SHORTCUTS.OPEN_SETTINGS.key)})`}
+            } label={`${KEYBOARD_SHORTCUTS.OPEN_SETTINGS.description} (${formatLabel(settingsShortcutKey, settingsShortcutShift, KEYBOARD_SHORTCUTS.OPEN_SETTINGS.key, settingsShortcutModifier)})`}
           />
         </FormGroup>
 
@@ -1192,7 +1356,7 @@ const Settings = React.memo((props) => {
                 onChange={(e) => setClearShortcut(e.target.checked)}
                 sx={{ color: '#ffffffb3', '&.Mui-checked': { color: '#fff' } }}
               />
-            } label={`${KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.description} (${formatLabel(clearShortcutKey, clearShortcutShift, KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.key)})`}
+            } label={`${KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.description} (${formatLabel(clearShortcutKey, clearShortcutShift, KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.key, clearShortcutModifier)})`}
           />
         </FormGroup>
 
@@ -1204,7 +1368,7 @@ const Settings = React.memo((props) => {
                 onChange={(e) => setDisconnectShortcut(e.target.checked)}
                 sx={{ color: '#ffffffb3', '&.Mui-checked': { color: '#fff' } }}
               />
-            } label={`${KEYBOARD_SHORTCUTS.DISCONNECT.description} (${formatLabel(disconnectShortcutKey, disconnectShortcutShift, KEYBOARD_SHORTCUTS.DISCONNECT.key)})`}
+            } label={`${KEYBOARD_SHORTCUTS.DISCONNECT.description} (${formatLabel(disconnectShortcutKey, disconnectShortcutShift, KEYBOARD_SHORTCUTS.DISCONNECT.key, disconnectShortcutModifier)})`}
           />
         </FormGroup>
 
@@ -1276,7 +1440,7 @@ const Settings = React.memo((props) => {
           {enableQuickHotkeys && (
             <>
               <DialogContentText sx={{ mt: 2 }}>
-                Terminal Hotkeys (Alt + key)
+                Terminal Hotkeys
               </DialogContentText>
 
               <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 2, mt: 1 }}>
@@ -1284,84 +1448,84 @@ const Settings = React.memo((props) => {
                   <Typography variant='body2' sx={{ color: '#ffffffcc', mb: 1, fontWeight: 600 }}>
                     Focus Input
                   </Typography>
-                  <KeyCapture
+                  <KeybindCaptureRow
                     captureTarget={captureTarget}
                     currentTarget='quickFocus'
-                    onClick={() => setCaptureTarget('quickFocus')}
+                    onCaptureClick={() => setCaptureTarget('quickFocus')}
                     ctrlKey={quickFocusKey}
                     shift={quickFocusShift}
-                    label={formatAltLabel(quickFocusKey, quickFocusShift)}
-                    modifierLabel='Alt'
+                    modifier={quickFocusModifier}
+                    onModifierChange={setQuickFocusModifier}
                   />
                 </Box>
                 <Box>
                   <Typography variant='body2' sx={{ color: '#ffffffcc', mb: 1, fontWeight: 600 }}>
                     Show History
                   </Typography>
-                  <KeyCapture
+                  <KeybindCaptureRow
                     captureTarget={captureTarget}
                     currentTarget='quickHistory'
-                    onClick={() => setCaptureTarget('quickHistory')}
+                    onCaptureClick={() => setCaptureTarget('quickHistory')}
                     ctrlKey={quickHistoryKey}
                     shift={quickHistoryShift}
-                    label={formatAltLabel(quickHistoryKey, quickHistoryShift)}
-                    modifierLabel='Alt'
+                    modifier={quickHistoryModifier}
+                    onModifierChange={setQuickHistoryModifier}
                   />
                 </Box>
                 <Box>
                   <Typography variant='body2' sx={{ color: '#ffffffcc', mb: 1, fontWeight: 600 }}>
                     Download Output
                   </Typography>
-                  <KeyCapture
+                  <KeybindCaptureRow
                     captureTarget={captureTarget}
                     currentTarget='quickDownload'
-                    onClick={() => setCaptureTarget('quickDownload')}
+                    onCaptureClick={() => setCaptureTarget('quickDownload')}
                     ctrlKey={quickDownloadKey}
                     shift={quickDownloadShift}
-                    label={formatAltLabel(quickDownloadKey, quickDownloadShift)}
-                    modifierLabel='Alt'
+                    modifier={quickDownloadModifier}
+                    onModifierChange={setQuickDownloadModifier}
                   />
                 </Box>
                 <Box>
                   <Typography variant='body2' sx={{ color: '#ffffffcc', mb: 1, fontWeight: 600 }}>
                     Clear Terminal
                   </Typography>
-                  <KeyCapture
+                  <KeybindCaptureRow
                     captureTarget={captureTarget}
                     currentTarget='quickClear'
-                    onClick={() => setCaptureTarget('quickClear')}
+                    onCaptureClick={() => setCaptureTarget('quickClear')}
                     ctrlKey={quickClearKey}
                     shift={quickClearShift}
-                    label={formatAltLabel(quickClearKey, quickClearShift)}
-                    modifierLabel='Alt'
+                    modifier={quickClearModifier}
+                    onModifierChange={setQuickClearModifier}
                   />
                 </Box>
                 <Box>
                   <Typography variant='body2' sx={{ color: '#ffffffcc', mb: 1, fontWeight: 600 }}>
                     Open Settings
                   </Typography>
-                  <KeyCapture
+                  <KeybindCaptureRow
                     captureTarget={captureTarget}
                     currentTarget='quickSettings'
-                    onClick={() => setCaptureTarget('quickSettings')}
+                    onCaptureClick={() => setCaptureTarget('quickSettings')}
                     ctrlKey={quickSettingsKey}
                     shift={quickSettingsShift}
-                    label={formatAltLabel(quickSettingsKey, quickSettingsShift)}
-                    modifierLabel='Alt'
+                    modifier={quickSettingsModifier}
+                    onModifierChange={setQuickSettingsModifier}
                   />
                 </Box>
                 <Box>
                   <Typography variant='body2' sx={{ color: '#ffffffcc', mb: 1, fontWeight: 600 }}>
                     Disconnect
                   </Typography>
-                  <KeyCapture
+                  <KeybindCaptureRow
                     captureTarget={captureTarget}
                     currentTarget='quickDisconnect'
-                    onClick={() => setCaptureTarget('quickDisconnect')}
+                    onCaptureClick={() => setCaptureTarget('quickDisconnect')}
                     ctrlKey={quickDisconnectKey}
                     shift={quickDisconnectShift}
-                    label={formatAltLabel(quickDisconnectKey, quickDisconnectShift)}
-                    modifierLabel='Alt'
+                    modifier={quickDisconnectModifier}
+                    onModifierChange={setQuickDisconnectModifier}
                   />
                 </Box>
               </Box>
@@ -1379,12 +1543,14 @@ const Settings = React.memo((props) => {
                   <Typography variant='subtitle1' sx={{ color: '#ffffffcc', mt: 2, fontWeight: 700 }}>
                     Open Settings
                   </Typography>
-                  <KeyCapture
+                  <KeybindCaptureRow
                     captureTarget={captureTarget}
                     currentTarget='settings'
-                    onClick={() => setCaptureTarget('settings')}
+                    onCaptureClick={() => setCaptureTarget('settings')}
                     ctrlKey={settingsShortcutKey}
                     shift={settingsShortcutShift}
+                    modifier={settingsShortcutModifier}
+                    onModifierChange={setSettingsShortcutModifier}
                     label={KEYBOARD_SHORTCUTS.OPEN_SETTINGS.key}
                   />
                 </>
@@ -1395,12 +1561,14 @@ const Settings = React.memo((props) => {
                   <Typography variant='subtitle1' sx={{ color: '#ffffffcc', mt: 2, fontWeight: 700 }}>
                     Clear Terminal
                   </Typography>
-                  <KeyCapture
+                  <KeybindCaptureRow
                     captureTarget={captureTarget}
                     currentTarget='clear'
-                    onClick={() => setCaptureTarget('clear')}
+                    onCaptureClick={() => setCaptureTarget('clear')}
                     ctrlKey={clearShortcutKey}
                     shift={clearShortcutShift}
+                    modifier={clearShortcutModifier}
+                    onModifierChange={setClearShortcutModifier}
                     label={KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.key}
                   />
                 </>
@@ -1411,12 +1579,14 @@ const Settings = React.memo((props) => {
                   <Typography variant='subtitle1' sx={{ color: '#ffffffcc', mt: 2, fontWeight: 700 }}>
                     Disconnect
                   </Typography>
-                  <KeyCapture
+                  <KeybindCaptureRow
                     captureTarget={captureTarget}
                     currentTarget='disconnect'
-                    onClick={() => setCaptureTarget('disconnect')}
+                    onCaptureClick={() => setCaptureTarget('disconnect')}
                     ctrlKey={disconnectShortcutKey}
                     shift={disconnectShortcutShift}
+                    modifier={disconnectShortcutModifier}
+                    onModifierChange={setDisconnectShortcutModifier}
                     label={KEYBOARD_SHORTCUTS.DISCONNECT.key}
                   />
                 </>
@@ -1430,7 +1600,7 @@ const Settings = React.memo((props) => {
             Control Aliases
           </Typography>
           <Typography variant='body2' sx={{ color: '#ffffff99', mt: 0.5 }}>
-            Map Ctrl/⌘ + key to send a control code or ANSI sequence.
+            Map a keyboard shortcut to send a control code or ANSI sequence.
           </Typography>
           <Typography variant='body2' sx={{ color: '#ffffff77', mt: 1, fontSize: '0.85rem' }}>
             <strong>Formats:</strong> Hex (\x04), decimal (4), escapes (\n, \r, \t, \0), or ANSI ([97m, ESC[2J)
@@ -1444,6 +1614,7 @@ const Settings = React.memo((props) => {
               setAliasEditIndex(index)
               setAliasKey(entry.key)
               setAliasShift(entry.shift)
+              setAliasModifier(normalizeModifier(entry.modifier))
               setAliasCode(entry.type === 'code' ? String(entry.value) : (entry.type === 'text' ? entry.value : ''))
               setCaptureTarget(null)
             }}
@@ -1463,6 +1634,8 @@ const Settings = React.memo((props) => {
             onCaptureClick={() => setCaptureTarget('alias')}
             ctrlKey={aliasKey}
             shift={aliasShift}
+            modifier={aliasModifier}
+            onModifierChange={setAliasModifier}
             textValue={aliasCode}
             onTextChange={(e) => setAliasCode(e.target.value)}
             textPlaceholder='Control Code'
@@ -1479,7 +1652,7 @@ const Settings = React.memo((props) => {
             Command Keybinds
           </Typography>
           <Typography variant='body2' sx={{ color: '#ffffff99', mt: 0.5 }}>
-            Map Ctrl/⌘ + key to send any text string.
+            Map a keyboard shortcut to send any text string.
           </Typography>
 
           <KeybindList
@@ -1490,6 +1663,7 @@ const Settings = React.memo((props) => {
               setKeybindEditIndex(index)
               setKeybindKey(entry.key)
               setKeybindShift(entry.shift)
+              setKeybindModifier(normalizeModifier(entry.modifier))
               setKeybindText(entry.text)
             }}
             onItemDelete={removeKeybind}
@@ -1506,6 +1680,8 @@ const Settings = React.memo((props) => {
             onCaptureClick={() => setCaptureTarget('keybind')}
             ctrlKey={keybindKey}
             shift={keybindShift}
+            modifier={keybindModifier}
+            onModifierChange={setKeybindModifier}
             textValue={keybindText}
             onTextChange={(e) => setKeybindText(e.target.value)}
             textPlaceholder='Text'

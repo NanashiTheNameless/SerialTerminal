@@ -76,6 +76,9 @@ function App () {
   const settingsShortcutKey = (settings.settingsShortcutKey || KEYBOARD_SHORTCUTS.OPEN_SETTINGS.key).toLowerCase()
   const clearShortcutKey = (settings.clearShortcutKey || KEYBOARD_SHORTCUTS.CLEAR_TERMINAL.key).toLowerCase()
   const disconnectShortcutKey = (settings.disconnectShortcutKey || KEYBOARD_SHORTCUTS.DISCONNECT.key).toLowerCase()
+  const settingsShortcutModifier = settings.settingsShortcutModifier || DEFAULT_SETTINGS.settingsShortcutModifier
+  const clearShortcutModifier = settings.clearShortcutModifier || DEFAULT_SETTINGS.clearShortcutModifier
+  const disconnectShortcutModifier = settings.disconnectShortcutModifier || DEFAULT_SETTINGS.disconnectShortcutModifier
   const settingsShortcutShift = settings.settingsShortcutShift === true
   const clearShortcutShift = settings.clearShortcutShift === true
   const disconnectShortcutShift = settings.disconnectShortcutShift === true
@@ -91,18 +94,26 @@ function App () {
     download: settings.quickDownloadKey || DEFAULT_SETTINGS.quickDownloadKey,
     clear: settings.quickClearKey || DEFAULT_SETTINGS.quickClearKey,
     settings: settings.quickSettingsKey || DEFAULT_SETTINGS.quickSettingsKey,
+    disconnect: settings.quickDisconnectKey || DEFAULT_SETTINGS.quickDisconnectKey,
+    focusModifier: settings.quickFocusModifier || DEFAULT_SETTINGS.quickFocusModifier,
+    historyModifier: settings.quickHistoryModifier || DEFAULT_SETTINGS.quickHistoryModifier,
+    downloadModifier: settings.quickDownloadModifier || DEFAULT_SETTINGS.quickDownloadModifier,
+    clearModifier: settings.quickClearModifier || DEFAULT_SETTINGS.quickClearModifier,
+    settingsModifier: settings.quickSettingsModifier || DEFAULT_SETTINGS.quickSettingsModifier,
+    disconnectModifier: settings.quickDisconnectModifier || DEFAULT_SETTINGS.quickDisconnectModifier,
     focusShift: settings.quickFocusShift === true,
     historyShift: settings.quickHistoryShift === true,
     downloadShift: settings.quickDownloadShift === true,
     clearShift: settings.quickClearShift === true,
-    settingsShift: settings.quickSettingsShift === true
+    settingsShift: settings.quickSettingsShift === true,
+    disconnectShift: settings.quickDisconnectShift === true
   }
 
   // Keyboard shortcuts
   useKeyboardShortcuts([
     {
       key: settingsShortcutKey,
-      ctrl: true,
+      modifier: settingsShortcutModifier,
       shift: settingsShortcutShift,
       callback: () => {
         if (settings.settingsShortcut !== false) {
@@ -112,7 +123,7 @@ function App () {
     },
     {
       key: clearShortcutKey,
-      ctrl: true,
+      modifier: clearShortcutModifier,
       shift: clearShortcutShift,
       callback: () => {
         if (settings.clearShortcut === true) {
@@ -132,7 +143,7 @@ function App () {
     },
     {
       key: disconnectShortcutKey,
-      ctrl: true,
+      modifier: disconnectShortcutModifier,
       shift: disconnectShortcutShift,
       callback: () => {
         if (disconnectShortcut && connected) {
@@ -271,7 +282,6 @@ function App () {
                 time={settings.timestamp !== false}
                 ctrlC={detectCtrlC}
                 ctrlD={detectCtrlD}
-                disconnectShortcut={disconnectShortcut}
                 controlAliases={customControlAliases}
                 commandKeybinds={commandKeybinds}
                 parseANSIOutput={settings.parseANSIOutput !== false}

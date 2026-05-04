@@ -1,4 +1,5 @@
-import { useEffect } from 'react'
+import { useHotkeys } from 'react-hotkeys-hook'
+import { keybind, matchesKeybind } from '../utils/keybinds'
 
 /**
  * Custom hook for handling global keyboard shortcuts
@@ -8,36 +9,24 @@ import { useEffect } from 'react'
  * Shortcut format:
  * {
  *   key: string,
- *   ctrl: boolean,
+ *   modifier: 'primary' | 'ctrl' | 'super' | 'alt',
  *   shift: boolean,
- *   alt: boolean,
  *   callback: function
  * }
  */
 export function useKeyboardShortcuts (shortcuts, enabled = true) {
-  useEffect(() => {
-    if (!enabled || !shortcuts || shortcuts.length === 0) {
-      return
-    }
-
-    const handleKeyDown = (event) => {
-      shortcuts.forEach((shortcut) => {
-        const matchesKey = event.key.toLowerCase() === shortcut.key.toLowerCase()
-        const matchesCtrl = shortcut.ctrl ? event.ctrlKey : !event.ctrlKey
-        const matchesShift = shortcut.shift ? event.shiftKey : !event.shiftKey
-        const matchesAlt = shortcut.alt ? event.altKey : !event.altKey
-
-        if (matchesKey && matchesCtrl && matchesShift && matchesAlt) {
-          event.preventDefault()
-          shortcut.callback(event)
-        }
-      })
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown)
-    }
+  useHotkeys('*', (event) => {
+    shortcuts?.forEach((shortcut) => {
+      const binding = shortcut.modifier
+        ? keybind(shortcut)
+        : { ...shortcut, primary: shortcut.ctrl === true }
+      if (matchesKeybind(event, binding)) {
+        event.preventDefault()
+        shortcut.callback(event)
+      }
+    })
+  }, {
+    enabled: enabled && Array.isArray(shortcuts) && shortcuts.length > 0,
+    enableOnFormTags: true
   }, [shortcuts, enabled])
 }
