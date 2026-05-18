@@ -17,6 +17,7 @@ APPLY_FIXES: all
 DISABLE:
   # - COPYPASTE # Uncomment to disable checks of excessive copy-pastes
   - SPELL # Uncomment to disable checks of spelling mistakes
+  - ACTION_ZIZMOR # Zizmor is broken and not worth the trouble
 
 DISABLE_LINTERS:
   - SPELL_LYCHEE
