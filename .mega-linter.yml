@@ -17,13 +17,13 @@ APPLY_FIXES: all
 DISABLE:
   # - COPYPASTE # Uncomment to disable checks of excessive copy-pastes
   - SPELL # Uncomment to disable checks of spelling mistakes
-  - ACTION_ZIZMOR # Zizmor is broken and not worth the trouble
 
 DISABLE_LINTERS:
   - SPELL_LYCHEE
   - REPOSITORY_CHECKOV
   - JAVASCRIPT_ES # Disable ESLint; project linting uses Biome via yarn scripts
   - JSX_ESLINT # Disable ESLint; project linting uses Biome via yarn scripts
+  - ACTION_ZIZMOR # Zizmor is broken and not worth the trouble
 
 SHOW_ELAPSED_TIME: true
 # Uncomment if you want MegaLinter to detect errors but not block CI to pass
