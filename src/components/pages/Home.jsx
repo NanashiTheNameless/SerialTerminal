@@ -89,6 +89,10 @@ const Home = (props) => {
               <a href='https://www.opera.com/' target='_blank' rel='noopener noreferrer'>
                 <OperaIcon fontSize='inherit' /> <b>Opera</b>
               </a>.
+              , or&nbsp;
+              <a href='https://www.mozilla.org/firefox/new/' target='_blank' rel='noopener noreferrer'>
+                Firefox 151+
+              </a>.
               <br />
               Learn more about&nbsp;
               <a href='https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API#browser_compatibility' target='_blank' rel='noopener noreferrer'>

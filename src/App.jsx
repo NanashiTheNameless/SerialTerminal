@@ -241,12 +241,12 @@ function App () {
                 </Box>
                 <Box component='div' sx={{ mb: 0.5 }}>
                   This is a technical limitation of the{' '}
-                  <a href='https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API' target='_blank' rel='noopener noreferrer'>
+                  <a href='https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API#browser_compatibility' target='_blank' rel='noopener noreferrer'>
                     WebSerial API
                   </a>.
                 </Box>
                 <Box component='div' sx={{ mb: 0.5 }}>
-                  Please use a desktop browser that supports the WebSerial API.
+                  Please use a desktop browser that supports the WebSerial API (Ungoogled Chromium, Chrome, Edge, Opera, or Firefox 151+).
                 </Box>
                 <Box component='div'>
                   Learn more about{' '}
