@@ -16,7 +16,7 @@ Static Offline Builds are available under [Releases](<https://github.com/Nanashi
 - Clean, modern Material-UI interface
 - Customizable keyboard shortcuts (Ctrl+L to clear, Ctrl+K for settings)
 - Desktop browser support (Chrome, Edge, Opera, Ungoogled Chromium)
- - Desktop browser support (Chrome, Edge, Opera, Ungoogled Chromium, Firefox 151+)
+- Desktop browser support (Chrome, Edge, Opera, Ungoogled Chromium, Firefox 151+)
 - Control character support (Ctrl+C, Ctrl+D)
 - Persistent settings via localStorage
 - Accessibility features with ARIA labels
@@ -36,7 +36,7 @@ This tool requires the [Web Serial API](<https://developer.mozilla.org/en-US/doc
 - Safari (not supported)
 - Mobile browsers (not supported due to API limitations)
 
-Note: Firefox added support for the Web Serial API in version 151 and later. See the MDN compatibility table for details: https://developer.mozilla.org/en-US/docs/Web/API/Serial#browser_compatibility
+Note: Firefox added support for the Web Serial API in version 151 and later. See the MDN compatibility table for details: <https://developer.mozilla.org/en-US/docs/Web/API/Serial#browser_compatibility>
 
 ## Keyboard Shortcuts
 
