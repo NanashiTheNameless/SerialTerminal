@@ -88,7 +88,7 @@ const Home = (props) => {
               , or&nbsp;
               <a href='https://www.opera.com/' target='_blank' rel='noopener noreferrer'>
                 <OperaIcon fontSize='inherit' /> <b>Opera</b>
-              </a>.
+              </a>
               , or&nbsp;
               <a href='https://www.mozilla.org/firefox/new/' target='_blank' rel='noopener noreferrer'>
                 Firefox 151+
