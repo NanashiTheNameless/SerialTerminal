@@ -16,10 +16,14 @@ export default defineConfig({
     modulePreload: false,
     target: 'es2015',
     chunkSizeWarningLimit: 1024,
-    rollupOptions: {
+    rolldownOptions: {
+      transform: {
+        // IIFE output has no module metadata; Vite removes its module-only preload path.
+        define: { 'import.meta': '{}' }
+      },
       output: {
         format: 'iife',
-        inlineDynamicImports: true,
+        codeSplitting: false,
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]'
