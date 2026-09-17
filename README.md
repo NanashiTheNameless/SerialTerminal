@@ -30,6 +30,7 @@ This tool requires the [Web Serial API](<https://developer.mozilla.org/en-US/doc
 - Chrome/Chromium 89+
 - Edge 89+
 - Opera 75+
+- Firefox 151+
 
 ### Not supported on
 
