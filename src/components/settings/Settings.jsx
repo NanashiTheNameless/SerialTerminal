@@ -154,8 +154,8 @@ KeyCapture.propTypes = {
   modifier: PropTypes.string
 }
 
-const KeybindCaptureRow = ({ captureTarget, currentTarget, onCaptureClick, ctrlKey, shift, modifier, onModifierChange, label }) => (
-  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'nowrap', width: '100%' }}>
+const KeybindCaptureRow = ({ captureTarget, currentTarget, onCaptureClick, ctrlKey, shift, modifier, onModifierChange, label, children, sx }) => (
+  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'nowrap', width: '100%', ...sx }}>
     <ModifierSelect value={modifier} onChange={onModifierChange} />
     <KeyCapture
       captureTarget={captureTarget}
@@ -166,10 +166,11 @@ const KeybindCaptureRow = ({ captureTarget, currentTarget, onCaptureClick, ctrlK
       modifier={modifier}
       label={label}
     />
+    {children}
   </Box>
 )
 
-KeybindCaptureRow.propTypes = {
+const keybindCapturePropTypes = {
   captureTarget: PropTypes.string,
   currentTarget: PropTypes.string.isRequired,
   onCaptureClick: PropTypes.func.isRequired,
@@ -178,6 +179,12 @@ KeybindCaptureRow.propTypes = {
   modifier: PropTypes.string,
   onModifierChange: PropTypes.func.isRequired,
   label: PropTypes.string
+}
+
+KeybindCaptureRow.propTypes = {
+  ...keybindCapturePropTypes,
+  children: PropTypes.node,
+  sx: PropTypes.object
 }
 
 // Reusable KeybindListItem component for displaying keybind entries
@@ -232,17 +239,8 @@ KeybindListItem.propTypes = {
 }
 
 // Reusable KeybindInputForm component for adding/editing keybinds
-const KeybindInputForm = ({ captureTarget, currentTarget, onCaptureClick, ctrlKey, shift, modifier, onModifierChange, textValue, onTextChange, textPlaceholder, textError, textHelperText, onSubmit, submitDisabled, submitLabel }) => (
-  <Box sx={{ display: 'flex', gap: 1, mt: 2, alignItems: 'center', flexWrap: 'nowrap', width: '100%' }}>
-    <ModifierSelect value={modifier} onChange={onModifierChange} />
-    <KeyCapture
-      captureTarget={captureTarget}
-      currentTarget={currentTarget}
-      onClick={onCaptureClick}
-      ctrlKey={ctrlKey}
-      shift={shift}
-      modifier={modifier}
-    />
+const KeybindInputForm = ({ textValue, onTextChange, textPlaceholder, textError, textHelperText, onSubmit, submitDisabled, submitLabel, ...captureProps }) => (
+  <KeybindCaptureRow {...captureProps} sx={{ mt: 2 }}>
     <TextField
       placeholder={textPlaceholder}
       variant='outlined'
@@ -275,17 +273,11 @@ const KeybindInputForm = ({ captureTarget, currentTarget, onCaptureClick, ctrlKe
     >
       {submitLabel}
     </Button>
-  </Box>
+  </KeybindCaptureRow>
 )
 
 KeybindInputForm.propTypes = {
-  captureTarget: PropTypes.string,
-  currentTarget: PropTypes.string.isRequired,
-  onCaptureClick: PropTypes.func.isRequired,
-  ctrlKey: PropTypes.string,
-  shift: PropTypes.bool,
-  modifier: PropTypes.string,
-  onModifierChange: PropTypes.func.isRequired,
+  ...keybindCapturePropTypes,
   textValue: PropTypes.string.isRequired,
   onTextChange: PropTypes.func.isRequired,
   textPlaceholder: PropTypes.string.isRequired,
