@@ -166,17 +166,6 @@ const parseAddress = (value) => {
   return parsed
 }
 
-const uint8ArrayToBinaryString = (bytes) => {
-  const chunkSize = 0x8000
-  const chunks = []
-
-  for (let index = 0; index < bytes.length; index += chunkSize) {
-    chunks.push(String.fromCharCode(...bytes.subarray(index, index + chunkSize)))
-  }
-
-  return chunks.join('')
-}
-
 const ESPToolFlasherDialog = ({ open, close, settings, updateSettings, onSuccess, onError }) => {
   const [firmwareEntries, setFirmwareEntries] = React.useState(() => [createFirmwareEntry(settings.flashAddress || DEFAULT_ADDRESS)])
   const [flashBaudRate, setFlashBaudRate] = React.useState(settings.flashBaudRate || DEFAULT_FLASH_BAUD)
@@ -446,13 +435,13 @@ const ESPToolFlasherDialog = ({ open, close, settings, updateSettings, onSuccess
         if (entry.file) {
           const bytes = new Uint8Array(await entry.file.arrayBuffer())
           throwIfCancelled()
-          data = uint8ArrayToBinaryString(bytes)
+          data = bytes
           byteLength = bytes.length
           sourceLabel = entry.file.name
         } else if (url.length > 0) {
           const download = await downloadFirmwareFromUrl(url, runId)
           throwIfCancelled()
-          data = uint8ArrayToBinaryString(download.bytes)
+          data = download.bytes
           byteLength = download.bytes.length
           sourceLabel = download.sourceLabel
         } else {
