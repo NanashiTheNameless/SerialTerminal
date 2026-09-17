@@ -64,8 +64,15 @@ Note: Quick hotkeys can be toggled and configured in the advanced settings panel
 
 ### Prerequisites
 
-- Node.js 25+ and Yarn 4+
+- Node.js 26+ (see `.nvmrc` for the pinned version) and Yarn 4+
 - A browser with WebSerial support
+
+After selecting the Node.js version in `.nvmrc`, install and enable Corepack to use the project's pinned Yarn version:
+
+```sh
+npm install --global corepack
+corepack enable
+```
 
 ### Local testing/running
 
