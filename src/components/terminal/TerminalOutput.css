@@ -2,6 +2,8 @@
   --header-bg: #202124;
   --terminal-bg: #202124;
   --terminal-fg: #fff;
+  --terminal-selection-bg: #8ab4f8;
+  --terminal-selection-fg: #202124;
   --terminal-muted: #555;
   --terminal-time: #aaa;
   --terminal-user-history: #fbbc05;
@@ -72,6 +74,14 @@
     overflow-wrap: anywhere;
     hyphens: auto;
     line-height: 1.4;
+}
+
+/* Keep selected text readable even when ANSI spans set their own colors. */
+.codeContainer::selection,
+.codeContainer *::selection {
+    background-color: var(--terminal-selection-bg);
+    color: var(--terminal-selection-fg);
+    text-shadow: none;
 }
 
 .codeContainer::-webkit-scrollbar {
